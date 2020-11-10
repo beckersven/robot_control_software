@@ -1,0 +1,12 @@
+<launch>
+
+  <node name="object_position" pkg="trajectory_planning" type="object_position" respawn="false" output="screen">
+  </node>
+  <node name="zivid_camera" pkg="trajectory_planning" type="zivid_camera_temp" respawn="false" output="screen">
+  </node>
+  <node name="trajectory_path" pkg="trajectory_planning" type="trajectory_path" respawn="false" output="screen">
+  </node>
+  <node name="moveit_execution" pkg="trajectory_planning" type="moveit_execution" respawn="false" output="screen">
+  </node>
+
+</launch>
