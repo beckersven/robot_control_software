@@ -27,9 +27,9 @@
   <arg name="tool_device_name" default="/tmp/ttyUR" doc="Local device name used for tool communication. Only used, when `use_tool_communication` is set to true."/>
   <arg name="tool_tcp_port" default="54321" doc="Port on which the robot controller publishes the tool comm interface. Only used, when `use_tool_communication` is set to true."/>
   <arg name="headless_mode" default="false" doc="Automatically send URScript to robot to execute. On e-Series this does require the robot to be in 'remote-control' mode. With this, the URCap is not needed on the robot."/>
-
+  <arg name="coppelia_sim" default="true" doc="Specifies whether the program connects ro a real robot or a CoppeliaSim (V-REP) simulation"/>
   <!-- Load hardware interface -->
-  <node name="ur_hardware_interface" pkg="ur_robot_driver" type="ur_robot_driver_node" output="screen" launch-prefix="$(arg launch_prefix)" required="true">
+  <node unless="$(arg coppelia_sim)" name="ur_hardware_interface" pkg="ur_robot_driver" type="ur_robot_driver_node" output="screen" launch-prefix="$(arg launch_prefix)" required="true">
     <param name="robot_ip" type="str" value="$(arg robot_ip)"/>
     <param name="reverse_port" type="int" value="$(arg reverse_port)"/>
     <param name="script_sender_port" type="int" value="$(arg script_sender_port)"/>
@@ -49,6 +49,11 @@
     <param name="tool_tx_idle_chars" value="$(arg tool_tx_idle_chars)"/>
   </node>
 
+  <node if="$(arg coppelia_sim)" name="hardware_interface_node" pkg="coppeliasim_interface" type="hardware_interface_node" output="screen" launch-prefix="$(arg launch_prefix)" required="true">
+    <param name="coppeliasim_ip" type="str" value="127.0.0.1"/>
+    <param name="coppeliasim_port" type="int" value="19997"/>
+  </node>
+
   <!-- Starts socat to bridge the robot's tool communication interface to a local tty device -->
   <node if="$(arg use_tool_communication)" name="ur_tool_communication_bridge" pkg="ur_robot_driver" type="tool_communication" respawn="false" output="screen">
     <param name="robot_ip" value="$(arg robot_ip)"/>
@@ -65,12 +70,14 @@
   <node name="ros_control_controller_spawner" pkg="controller_manager" type="spawner" respawn="false"
     output="screen" args="$(arg controllers)" />
 
+
+
   <!-- load other controller -->
   <node name="ros_control_stopped_spawner" pkg="controller_manager" type="spawner" respawn="false"
     output="screen" args="--stopped $(arg stopped_controllers)" />
 
 
-  <node name="controller_stopper" pkg="controller_stopper" type="node" respawn="false" output="screen">
+  <node unless="$(arg coppelia_sim)"  name="controller_stopper" pkg="controller_stopper" type="node" respawn="false" output="screen">
     <remap from="robot_running" to="ur_hardware_interface/robot_program_running"/>
     <rosparam param="consistent_controllers">
        - "joint_state_controller"
@@ -80,8 +87,16 @@
     </rosparam>
   </node>
 
+  <node if="$(arg coppelia_sim)"  name="controller_stopper" pkg="controller_stopper" type="node" respawn="false" output="screen">
+    <remap from="robot_running" to="coppeliasim_interface/robot_program_running"/>
+    <rosparam param="consistent_controllers">
+       - "joint_state_controller"
+       - "speed_scaling_state_controller"
+    </rosparam>
+  </node>
+
   <!-- Make sure to start this in the namespace of the hardware interface -->
-  <node ns="ur_hardware_interface" name="ur_robot_state_helper" pkg="ur_robot_driver" type="robot_state_helper" respawn="false" output="screen">
+  <node unless="$(arg coppelia_sim)"  ns="ur_hardware_interface" name="ur_robot_state_helper" pkg="ur_robot_driver" type="robot_state_helper" respawn="false" output="screen">
   </node>
 
 </launch>

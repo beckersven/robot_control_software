@@ -541,7 +541,7 @@ void HardwareInterface::write(const ros::Time& time, const ros::Duration& period
       ur_driver_->writeJointCommand(joint_position_command_, comm::ControlMode::MODE_SERVOJ);
     }
     else if (velocity_controller_running_)
-    {
+    {// do some initialization here
       ur_driver_->writeJointCommand(joint_velocity_command_, comm::ControlMode::MODE_SPEEDJ);
     }
     else
