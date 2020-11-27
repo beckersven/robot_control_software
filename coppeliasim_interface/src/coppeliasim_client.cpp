@@ -230,10 +230,10 @@ void CoppeliaSimInterface::doSwitch(const std::list<hardware_interface::Controll
     }
   }
   if(velocity_controller_running_){
-      for(size_t i = 0; i < n_joints; i++) simxSetObjectFloatParameter(client_id_, joint_handles_[i], 2001, 1, simx_opmode_oneshot);
+      for(size_t i = 0; i < n_joints; i++) simxSetObjectIntParameter(client_id_, joint_handles_[i], 2001, 0, simx_opmode_oneshot);
   }
   else if(position_controller_running_){
-      for(size_t i = 0; i < n_joints; i++) simxSetObjectFloatParameter(client_id_, joint_handles_[i], 2001, 0, simx_opmode_oneshot);
+      for(size_t i = 0; i < n_joints; i++) simxSetObjectIntParameter(client_id_, joint_handles_[i], 2001, 1, simx_opmode_oneshot);
   }
   else{
       ROS_WARN_STREAM("Controller switch stopped velocity- and position-control!");
