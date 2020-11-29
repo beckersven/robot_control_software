@@ -80,7 +80,7 @@ int main(int argc, char** argv)
   stopwatch_last = stopwatch_now;
 
   double expected_cycle_time = 1.0 / 40.0;
-  ros::Rate rate(40);
+  ros::Rate rate(20);
   // Run as fast as possible
   while (ros::ok())
   {
@@ -90,13 +90,18 @@ int main(int argc, char** argv)
     // Get current time and elapsed time since last read
     timestamp = ros::Time::now();
     stopwatch_now = std::chrono::steady_clock::now();
-    period.fromSec(std::chrono::duration_cast<std::chrono::duration<double>>(stopwatch_now - stopwatch_last).count());
+    // period.fromSec(std::chrono::duration_cast<std::chrono::duration<double>>(stopwatch_now - stopwatch_last).count());
+    period.fromSec(2e-3);
     stopwatch_last = stopwatch_now;
 
     cm.update(timestamp, period);
 
     hw_interface->write(timestamp, period);
+    ROS_INFO("START SIM");
     hw_interface->advanceCoppeliaSim();
+    ROS_INFO("STOP SIM");
+
+    rate.sleep();
     // if (!control_rate.sleep())
     if (period.toSec() > expected_cycle_time)
     {

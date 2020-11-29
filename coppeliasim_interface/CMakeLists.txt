@@ -171,10 +171,18 @@ add_definitions (-DDO_NOT_USE_SHARED_MEMORY)
 add_library(coppeliasim_client src/coppeliasim_client.cpp remoteApi/extApi.c remoteApi/extApiPlatform.c)
 target_link_libraries(coppeliasim_client ${Boost_LIBRARIES})
 target_link_libraries(coppeliasim_client ${catkin_LIBRARIES})
+add_library(simulation_synchronizer src/simulation_synchronizer.cpp remoteApi/extApi.c remoteApi/extApiPlatform.c)
+target_link_libraries(simulation_synchronizer ${Boost_LIBRARIES})
+target_link_libraries(simulation_synchronizer ${catkin_LIBRARIES})
+
 
 add_executable(hardware_interface_node src/hardware_interface_node.cpp)
 target_link_libraries(hardware_interface_node coppeliasim_client)
 target_link_libraries(hardware_interface_node ${catkin_LIBRARIES})
+
+add_executable(simulation_synchronizer_node src/simulation_synchronizer_node.cpp)
+target_link_libraries(simulation_synchronizer_node simulation_synchronizer)
+target_link_libraries(simulation_synchronizer_node ${catkin_LIBRARIES})
 ## Rename C++ executable without prefix
 ## The above recommended prefix causes long target names, the following renames the
 ## target back to the shorter version for ease of user use

@@ -146,7 +146,11 @@ bool CoppeliaSimInterface::init(ros::NodeHandle& root_nh, ros::NodeHandle& robot
 }
 
 bool CoppeliaSimInterface::advanceCoppeliaSim(){
-    return simxSynchronousTrigger(client_id_) == simx_return_ok;
+    simxSynchronousTrigger(client_id_);
+    simxInt dummy;
+    simxGetPingTime(client_id_, &dummy);
+    return true;
+
 }
 
 bool CoppeliaSimInterface::prepareSwitch(const std::list<hardware_interface::ControllerInfo>& start_list,
