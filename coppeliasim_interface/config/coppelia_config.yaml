@@ -1,0 +1,7 @@
+sim_dt: 0.02
+PORT_simulation_synchronizer: 19997
+PORT_hardware_interface: 19998
+connection_timeout_ms: 5000
+
+explicit_sync_list:
+  - "/update_hw_interface"

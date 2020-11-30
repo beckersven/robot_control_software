@@ -27,90 +27,49 @@
 
 #include <controller_manager/controller_manager.h>
 #include <csignal>
-#include <../include/coppeliasim_client.h>
+#include <../include/hardware_interface.h>
 #include <ros/ros.h>
 #include <iostream>
 
-std::unique_ptr<CoppeliaSimInterface> hw_interface;
+std::unique_ptr<coppeliasim_interface::HardwareInterface> hw_interface;
 
-void signalHandler(int signum)
-{
-  std::cout << "Interrupt signal (" << signum << ") received.\n";
 
-  hw_interface.reset();
-  // cleanup and close up stuff here
-  // terminate program
-
-  exit(signum);
-}
 
 int main(int argc, char** argv)
 {
-  // Set up ROS.
-  ros::init(argc, argv, "coppeliasim_interface");
-  ros::AsyncSpinner spinner(2);
+  ros::init(argc, argv, "hardware_interface");
+  ros::AsyncSpinner spinner(4);
+  ros::NodeHandle nh1, nh2, nh3("~");
   spinner.start();
-
-  ros::NodeHandle nh;
-  ros::NodeHandle nh_priv("~");
-
-  // register signal SIGINT and signal handler
-  signal(SIGINT, signalHandler);
-
-  // Set up timers
-  ros::Time timestamp;
-  ros::Duration period;
-  auto stopwatch_last = std::chrono::steady_clock::now();
-  auto stopwatch_now = stopwatch_last;
-
-  hw_interface.reset(new CoppeliaSimInterface);
-
-  if (!hw_interface->init(nh, nh_priv))
-  {
-    ROS_ERROR_STREAM("Could not correctly virtual robot. Exiting");
+  double sim_dt;
+  if(!nh1.getParam("/coppelia_config/sim_dt", sim_dt)){
+    ROS_ERROR_STREAM("Can not resolve " << nh1.resolveName("/coppelia_config/sim_dt"));
     exit(1);
   }
-  ROS_DEBUG_STREAM("initialized hw interface");
-  controller_manager::ControllerManager cm(hw_interface.get(), nh);
-
-  // Get current time and elapsed time since last read
-  timestamp = ros::Time::now();
-  stopwatch_now = std::chrono::steady_clock::now();
-  period.fromSec(std::chrono::duration_cast<std::chrono::duration<double>>(stopwatch_now - stopwatch_last).count());
-  stopwatch_last = stopwatch_now;
-
-  double expected_cycle_time = 1.0 / 40.0;
-  ros::Rate rate(20);
-  // Run as fast as possible
-  while (ros::ok())
-  {
-    // Receive current state from robot
-    hw_interface->read(timestamp, period);
-
-    // Get current time and elapsed time since last read
-    timestamp = ros::Time::now();
-    stopwatch_now = std::chrono::steady_clock::now();
-    // period.fromSec(std::chrono::duration_cast<std::chrono::duration<double>>(stopwatch_now - stopwatch_last).count());
-    period.fromSec(2e-3);
-    stopwatch_last = stopwatch_now;
-
-    cm.update(timestamp, period);
-
-    hw_interface->write(timestamp, period);
-    ROS_INFO("START SIM");
-    hw_interface->advanceCoppeliaSim();
-    ROS_INFO("STOP SIM");
-
-    rate.sleep();
-    // if (!control_rate.sleep())
-    if (period.toSec() > expected_cycle_time)
-    {
-      // ROS_WARN_STREAM("Could not keep cycle rate of " << expected_cycle_time * 1000 << "ms");
-      // ROS_WARN_STREAM("Actual cycle time:" << period.toNSec() / 1000000.0 << "ms");
-    }
+  ros::Duration dt(sim_dt);
+  hw_interface.reset(new coppeliasim_interface::HardwareInterface);
+  if(!hw_interface->init(nh2, nh3)){
+    ROS_ERROR_STREAM("Could not initialize hardware-interface!");
+    exit(1);
   }
+  controller_manager::ControllerManager cm(hw_interface.get(), nh1);
 
-  spinner.stop();
+  ros::ServiceServer srv = nh1.advertiseService<std_srvs::TriggerRequest, std_srvs::TriggerResponse>("/update_hw_interface", 
+    [&](std_srvs::TriggerRequest& req, std_srvs::TriggerResponse& res)mutable{
+      ros::Time current_time(ros::Time::now());
+      ROS_INFO_STREAM("dt " << dt);
+      hw_interface->read(current_time, dt);
+      cm.update(current_time, dt);
+      hw_interface->write(current_time, dt);
+      res.message = "Updated controllers";
+      res.success = true;
+      return true;
+  });
+    
+  ROS_DEBUG_STREAM("Hardware interface node ready");
+  ros::Rate rate(1);
+  while(ros::ok()) rate.sleep();
   ROS_INFO_STREAM_NAMED("hardware_interface", "Shutting down.");
+  spinner.stop();
   return 0;
 }

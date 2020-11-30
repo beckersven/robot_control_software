@@ -23,10 +23,12 @@ namespace coppeliasim_interface{
 
     SimulationSynchronizer::~SimulationSynchronizer(){
         if(simulation_running){
-            simxStopSimulation(client_id, simx_opmode_blocking);
+            simxStopSimulation(client_id, simx_opmode_oneshot);
+            ROS_DEBUG_STREAM("Stopped CoppeliaSim simulation");
         }
         if(client_id != -1){
             simxFinish(client_id);
+            ROS_DEBUG_STREAM("Disconnected from CoppeliaSim");
         }
         return;
         
@@ -57,8 +59,8 @@ namespace coppeliasim_interface{
         }
 
         // Configure the simulation to match the parameter-specification
-        simxStopSimulation(client_id, simx_opmode_blocking);
-        if(!assertSimxCall(simxSetFloatingParameter(client_id, sim_floatparam_simulation_time_step, sim_dt * 1e3, simx_opmode_blocking), "Can not set 'dt' (must be set 'custom' in CoppeliaSim)!")
+        // simxStopSimulation(client_id, simx_opmode_blocking);
+        if(!assertSimxCall(simxSetFloatingParameter(client_id, sim_floatparam_simulation_time_step, sim_dt, simx_opmode_blocking), "Can not set 'dt' (must be set 'custom' in CoppeliaSim)!")
             || !assertSimxCall(simxSynchronous(client_id, true), "Can not set CoppeliaSim to synchronous-mode!")) 
                 return false;
         ROS_DEBUG_STREAM("Simulation-synchronizer is connected to CoppeliaSim!");
@@ -71,7 +73,7 @@ namespace coppeliasim_interface{
         // when the related code is fully initialized, e.g. as the last step of the 'init()'-method. This works
         // as a guarantee to ensure that these nodes are ready when this loop finishes (i.e. that the simulation can start).
         std::vector<std::string> explicit_sync_list_names;
-        if(nh_.getParam("explicit_sync_list", explicit_sync_list_names)){
+        if(nh_.getParam("/coppelia_config/explicit_sync_list", explicit_sync_list_names)){
             for(size_t i = 0; i < explicit_sync_list_names.size(); i++){
                 if(!ros::service::waitForService(explicit_sync_list_names[i], ros::Duration(3))){
                     ROS_ERROR_STREAM("Could not find service " << explicit_sync_list_names[i]);
@@ -97,7 +99,8 @@ namespace coppeliasim_interface{
         ROS_DEBUG_STREAM("/clock-Publisher available - ROS-time and CoppeliaSim's simulation-time will be synchronized!");
 
         // Last step is to start the simulation
-        if(! assertSimxCall(simxStartSimulation(client_id, simx_opmode_oneshot), "Could not start simulation")) return false;
+        if(! assertSimxCall(simxStartSimulation(client_id, simx_opmode_blocking), "Could not start simulation")) return false;
+        simulation_running = true;
         return true;
 
     }
@@ -111,28 +114,20 @@ namespace coppeliasim_interface{
 
     bool SimulationSynchronizer::synchronizeROS(){
         // First, update ROS-time by publishing to '/clock'
-        simxInt coppelia_time;
-        assertSimxCall(simxGetIntegerParameter(client_id, sim_uint64param_simulation_time_ns, &coppelia_time, simx_opmode_blocking));
         current_time.clock = current_time.clock + ros::Duration(sim_dt);
-        ROS_INFO_STREAM("delta t: " << std::fabs(current_time.clock.toSec() - coppelia_time * 1e9));
         clock_pub.publish(current_time);
         ROS_DEBUG_STREAM("Updated ROS-/clock");
 
         // Handle explicit_sync-services via parallel threads to improve performance
         ROS_DEBUG_STREAM("Calling explicit_sync-services");
-        std::vector<std::thread> running_calls;
-        std::vector<std_srvs::Trigger> srv_values(6);
         // Start the threads
-        for(size_t i = 0; i < explicit_sync_list.size(); i++){
-            // Nicer ways to handle this are probably possible
-            running_calls.push_back(std::thread([&srv_values, i, this]()mutable{this->explicit_sync_list[i].call(srv_values[i]); return;}));
-        }
         bool success_flag = true;
         // Wait for thread-termination and evaluate result
         for(size_t i = 0; i < explicit_sync_list.size(); i++){
-            running_calls[i].join();
-            if(srv_values[i].response.success == false){
-                ROS_ERROR_STREAM("Received message during service handling: " + srv_values[i].response.message);
+            std_srvs::Trigger tr;
+            explicit_sync_list[i].call(tr);
+            if(tr.response.success == false){
+                ROS_ERROR_STREAM("Received message during service handling: " + tr.response.message);
                 success_flag = false;
             }
         }
