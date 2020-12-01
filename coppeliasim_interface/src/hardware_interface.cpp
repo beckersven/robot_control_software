@@ -25,9 +25,6 @@ namespace coppeliasim_interface{
       robot_status_resource_.motion_possible = industrial_robot_status_interface::TriState::FALSE;
       client_id_ = -1;
       speed_scaling_combined_ = 1;
-      tcp_position_.resize(3, 0);
-      tcp_orientation_.resize(4, 0);
-      tcp_orientation_[3] = 1;  // Make valid quaternion default
   }
   HardwareInterface::~HardwareInterface(){
       if(client_id_ != -1){
@@ -54,11 +51,7 @@ namespace coppeliasim_interface{
           ROS_ERROR_STREAM("Connection to CoppeliaSim failed using 127.0.0.1:" << coppelia_port);
           return false;
       }
-
-      tcp_transform_.header.frame_id = tf_prefix_ + "base";
-      tcp_transform_.child_frame_id = tf_prefix_ + "tool0_controller";
       
-      robot_nh.param<std::string>("wrench_frame_id", wrench_frame_id, "wrench");
       if(!this->root_nh.getParam("hardware_interface/joints", joint_names_)){
           ROS_ERROR_STREAM("Could not find joint-names in " << this->root_nh.resolveName("hardware_interface/joints"));
           return false;
@@ -98,20 +91,7 @@ namespace coppeliasim_interface{
       speedsc_interface_.registerHandle(
           ur_controllers::SpeedScalingHandle("speed_scaling_factor", &speed_scaling_combined_));
 
-      if(simxGetObjectHandle(client_id_, "tool0", &ft_sensor_hande_, simx_opmode_blocking) != simx_return_ok
-        || simxGetObjectHandle(client_id_, "TCP", &tcp_handle_, simx_opmode_blocking) != simx_return_ok
-        || simxGetObjectHandle(client_id_, "base", &base_handle_, simx_opmode_blocking) != simx_return_ok){
-          ROS_ERROR_STREAM("Could not resolve names for fts-interface or TCP-handling");
-          return false;
-        }
-      simxGetObjectPosition(client_id_, tcp_handle_, base_handle_, &dummy[0], simx_opmode_streaming);
-      simxGetObjectQuaternion(client_id_, tcp_handle_, base_handle_, &dummy[0], simx_opmode_streaming);
-      simxReadForceSensor(client_id_, ft_sensor_hande_, NULL, &dummy[0], &dummy[0], simx_opmode_streaming);
-      
-      fts_interface_.registerHandle(hardware_interface::ForceTorqueSensorHandle(
-            wrench_frame_id, tf_prefix_ + "tool0_controller", &fts_measurements_[0], &fts_measurements_[3]));
-          registerInterface(&fts_interface_);
-          ROS_DEBUG_STREAM("Initialized tool-handling (force-torque-interface and TCP-pose)");
+  
 
       robot_status_interface_.registerHandle(industrial_robot_status_interface::IndustrialRobotStatusHandle(
           "industrial_robot_status_handle", robot_status_resource_));
@@ -123,8 +103,6 @@ namespace coppeliasim_interface{
       registerInterface(&svj_interface_);
       registerInterface(&speedsc_interface_);
       registerInterface(&robot_status_interface_);
-      tare_sensor_srv_ = robot_nh.advertiseService("zero_ftsensor", &HardwareInterface::zeroFTSensor, this);
-      tcp_pose_pub_.reset(new realtime_tools::RealtimePublisher<tf2_msgs::TFMessage>(root_nh, "/tf", 100));
       set_speed_slider_srv_ = robot_nh.advertiseService("set_speed_slider", &HardwareInterface::setSpeedSlider, this);
       pause_button_srv_ = robot_nh.advertiseService("pause", &HardwareInterface::setPause, this);
       ROS_DEBUG_STREAM("CoppeliaSim hardware-interface has been initialized successfully!");
@@ -154,28 +132,7 @@ namespace coppeliasim_interface{
     return ret_val;
   }
 
-  void HardwareInterface::extractToolPose(const ros::Time& timestamp)
-  {
-    tcp_transform_.header.stamp = timestamp;
-    tf2::Quaternion rotation = tf2::Quaternion(tcp_orientation_[0], tcp_orientation_[1], tcp_orientation_[2], tcp_orientation_[3]);
-    tcp_transform_.transform.translation.x = tcp_position_[0];
-    tcp_transform_.transform.translation.y = tcp_position_[1];
-    tcp_transform_.transform.translation.z = tcp_position_[2];
-    tcp_transform_.transform.rotation = tf2::toMsg(rotation);
-  }
 
-  void HardwareInterface::publishPose()
-  {
-    if (tcp_pose_pub_)
-    {
-      if (tcp_pose_pub_->trylock())
-      {
-        tcp_pose_pub_->msg_.transforms.clear();
-        tcp_pose_pub_->msg_.transforms.push_back(tcp_transform_);
-        tcp_pose_pub_->unlockAndPublish();
-      }
-    }
-  }
 
   void HardwareInterface::read(const ros::Time& time, const ros::Duration& period){
       // Read in the joint data
@@ -196,31 +153,6 @@ namespace coppeliasim_interface{
           }
       
       }
-      // Process TCP-pose
-      if(simxGetObjectPosition(client_id_, tcp_handle_, base_handle_, &tcp_position_[0], simx_opmode_buffer) == simx_return_ok
-          && simxGetObjectQuaternion(client_id_, tcp_handle_, base_handle_, &tcp_orientation_[0], simx_opmode_buffer) == simx_return_ok){
-            extractToolPose(time);
-            publishPose();
-            // Only when TCP-pose is handled successfully, useful force-torque-sensor evaluation is possible
-            std::vector<simxFloat> force_torque(6);
-            if(simxReadForceSensor(client_id_, ft_sensor_hande_, NULL, &force_torque[0], &force_torque[3], simx_opmode_buffer) == simx_return_ok)
-            {
-              fts_measurements_[0] = static_cast<double>(force_torque[0]);
-              fts_measurements_[1] = static_cast<double>(force_torque[1]);
-              fts_measurements_[2] = static_cast<double>(force_torque[2]);
-              fts_measurements_[3] = static_cast<double>(force_torque[3]);
-              fts_measurements_[4] = static_cast<double>(force_torque[4]);
-              fts_measurements_[5] = static_cast<double>(force_torque[5]);
-              transformForceTorque();
-            }
-            else{
-              ROS_WARN_STREAM_THROTTLE(1.0, "Can not read force-torque-sensor data (tool0). This might happen for a short time during start-up.");
-            } 
-          }
-      else
-      {
-        ROS_WARN_STREAM_THROTTLE(1.0, "Could not get TCP-pose and thus no force-torque-measurement. This might happen for a short time during start-up.");
-      }
 
       // Handle speed-scaling and pausing
       if(run_state_ == RunState::PAUSED){
@@ -235,19 +167,7 @@ namespace coppeliasim_interface{
       }
   }
 
-  void HardwareInterface::transformForceTorque()
-  {
-    tcp_force_.setValue(fts_measurements_[0], fts_measurements_[1], fts_measurements_[2]);
-    tcp_torque_.setValue(fts_measurements_[3], fts_measurements_[4], fts_measurements_[5]);
 
-    tf2::Quaternion rotation_quat;
-    tf2::fromMsg(tcp_transform_.transform.rotation, rotation_quat);
-    tcp_force_ = tf2::quatRotate(rotation_quat.inverse(), tcp_force_);
-    tcp_torque_ = tf2::quatRotate(rotation_quat.inverse(), tcp_torque_);
-
-    fts_measurements_ = { tcp_force_.x(),  tcp_force_.y(),  tcp_force_.z(),
-                          tcp_torque_.x(), tcp_torque_.y(), tcp_torque_.z() };
-  }
 
   void HardwareInterface::write(const ros::Time& time, const ros::Duration& period){
       if (position_controller_running_)

@@ -57,7 +57,6 @@ int main(int argc, char** argv)
   ros::ServiceServer srv = nh1.advertiseService<std_srvs::TriggerRequest, std_srvs::TriggerResponse>("/update_hw_interface", 
     [&](std_srvs::TriggerRequest& req, std_srvs::TriggerResponse& res)mutable{
       ros::Time current_time(ros::Time::now());
-      ROS_INFO_STREAM("dt " << dt);
       hw_interface->read(current_time, dt);
       cm.update(current_time, dt);
       hw_interface->write(current_time, dt);

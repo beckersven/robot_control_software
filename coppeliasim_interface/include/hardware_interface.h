@@ -55,13 +55,6 @@ namespace coppeliasim_interface{
             // (Obtained via inheritace)
             virtual void doSwitch(const std::list<hardware_interface::ControllerInfo>& start_list,
                         const std::list<hardware_interface::ControllerInfo>& stop_list) override;
-            // Gets the TCP-transform (tf2) from the measurement
-            void extractToolPose(const ros::Time& timestamp);
-            // Transform the measurement from the local sensor frame to the 'base'-frame
-            // using the TCP-pose-transform.
-            void transformForceTorque();
-            // Publishes the TCP-pose via a realtime-publisher directly to /tf
-            void publishPose();
 
             // Service callbacks
 
@@ -90,19 +83,6 @@ namespace coppeliasim_interface{
             
             // Force/torque handling
             std::vector<double> fts_measurements_;
-            tf2::Vector3 tcp_torque_;
-            tf2::Vector3 tcp_force_;
-            simxInt ft_sensor_hande_;
-            
-            // TCP (Tool Center Point) handling
-            // CAUTION: Very basic implementation right now
-            simxInt tcp_handle_;
-            simxInt base_handle_;
-            std::vector<simxFloat> tcp_position_;
-            std::vector<simxFloat> tcp_orientation_;
-            geometry_msgs::TransformStamped tcp_transform_;
-            std::unique_ptr<realtime_tools::RealtimePublisher<tf2_msgs::TFMessage>> tcp_pose_pub_;
-            std::string tf_prefix_;
 
             // Controller status information
             bool position_controller_running_;

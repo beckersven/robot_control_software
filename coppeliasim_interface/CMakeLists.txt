@@ -18,6 +18,7 @@ find_package(catkin REQUIRED COMPONENTS
   pluginlib
   roscpp
   sensor_msgs
+  tf2_ros
   std_srvs
   tf
   tf2_geometry_msgs
@@ -171,18 +172,32 @@ add_definitions (-DDO_NOT_USE_SHARED_MEMORY)
 add_library(hardware_interface src/hardware_interface.cpp remoteApi/extApi.c remoteApi/extApiPlatform.c)
 target_link_libraries(hardware_interface ${Boost_LIBRARIES})
 target_link_libraries(hardware_interface ${catkin_LIBRARIES})
-add_library(simulation_synchronizer src/simulation_synchronizer.cpp remoteApi/extApi.c remoteApi/extApiPlatform.c)
-target_link_libraries(simulation_synchronizer ${Boost_LIBRARIES})
-target_link_libraries(simulation_synchronizer ${catkin_LIBRARIES})
-
 
 add_executable(hardware_interface_node src/hardware_interface_node.cpp)
 target_link_libraries(hardware_interface_node hardware_interface)
 target_link_libraries(hardware_interface_node ${catkin_LIBRARIES})
 
+
+
+add_library(simulation_synchronizer src/simulation_synchronizer.cpp remoteApi/extApi.c remoteApi/extApiPlatform.c)
+target_link_libraries(simulation_synchronizer ${Boost_LIBRARIES})
+target_link_libraries(simulation_synchronizer ${catkin_LIBRARIES})
+
 add_executable(simulation_synchronizer_node src/simulation_synchronizer_node.cpp)
 target_link_libraries(simulation_synchronizer_node simulation_synchronizer)
 target_link_libraries(simulation_synchronizer_node ${catkin_LIBRARIES})
+
+
+
+add_library(laser_scanner src/laser_scanner.cpp remoteApi/extApi.c remoteApi/extApiPlatform.c)
+target_link_libraries(laser_scanner ${Boost_LIBRARIES})
+target_link_libraries(laser_scanner ${catkin_LIBRARIES})
+
+add_executable(laser_scanner_node src/laser_scanner_node.cpp)
+target_link_libraries(laser_scanner_node laser_scanner)
+target_link_libraries(laser_scanner_node ${catkin_LIBRARIES})
+
+
 ## Rename C++ executable without prefix
 ## The above recommended prefix causes long target names, the following renames the
 ## target back to the shorter version for ease of user use
