@@ -21,6 +21,9 @@ namespace coppeliasim_interface{
         private:
             // void applyNoise();
             simxFloat* measurements;
+            std::default_random_engine noise_generator;
+            std::normal_distribution<double> noise_distribution;
+            double noise_intensity;
             ros::Publisher measurement_pub;
             ros::NodeHandle nh;
             simxInt resolution;

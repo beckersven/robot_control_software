@@ -23,6 +23,8 @@
         <param name="world_frame_id" type="str" value="world"/>
         <param name="resolution" type="int" value="100"/>
         <param name="angle" type="double" value="45.0"/>
+        <param name="noise_intensity" type="double" value="0.1"/>
+        <param name="noise_std_deviation" type="double" value="0.01"/>
     </node>
     <node pkg="coppeliasim_interface" type="hardware_interface_node" name="hardware_interface_node" required="true" output="screen"/>
     <node name="ros_control_controller_spawner" pkg="controller_manager" type="spawner" respawn="false"

@@ -22,23 +22,29 @@ namespace coppeliasim_interface{
     bool LaserScanner::init(ros::NodeHandle& nh_){
         nh = nh_;
         simxInt coppelia_port, connection_timeout_ms;
+        double noise_std_deviation;
         if(!nh.getParam("/coppelia_config/PORT_laser_scanner", coppelia_port) 
             || !nh.getParam("/coppelia_config/connection_timeout_ms", connection_timeout_ms)
             || !nh.getParam("/coppelia_config/laser_scanner_focus_frame_id", scanner_focus_frame_id) 
             || !nh.getParam("world_frame_id", world_frame_id)
             || !nh.getParam("resolution", resolution)
             || !nh.getParam("angle", angle)
+            || !nh.getParam("noise_std_deviation", noise_std_deviation)
+            || !nh.getParam("noise_intensity", noise_intensity)
             ){
             ROS_ERROR_STREAM("Could not resolve parameter " << nh.resolveName("/coppelia_config/PORT_laser_scanner") << 
                 " or " <<  nh.resolveName("/coppelia_config/connection_timeout_ms") << 
                 " or " <<  nh.resolveName("/coppelia_config/laser_scanner_focus_frame_id") << 
                 " or " <<  nh.resolveName("world_frame_id") <<
                 " or " <<  nh.resolveName("resolution") << 
-                " or " <<  nh.resolveName("angle") << ". Laser scanner won't work."
+                " or " <<  nh.resolveName("angle") << 
+                " or " <<  nh.resolveName("noise_std_deviation") << 
+                " or " <<  nh.resolveName("noise_intensity") << ". Laser scanner won't work."
             );
             return false;
         }
-        measurements = new simxFloat[2 * resolution];
+        measurements = new simxFloat[resolution];
+        noise_distribution = std::normal_distribution<double>(0.0, noise_std_deviation);
         client_id = simxStart("127.0.0.1", coppelia_port, true, true, connection_timeout_ms, 5);
         if(client_id == -1){
             ROS_ERROR_STREAM("Could not connect to CoppeliaSim at 127.0.0.1:" << coppelia_port);
@@ -79,7 +85,6 @@ namespace coppeliasim_interface{
         tf_broad.sendTransform(tf);
         simxInt integer_params[1] = { resolution };
         simxFloat float_params[1] = {angle};
-        simxInt double_resolution = 2 * resolution;
         int result = simxCallScriptFunction(client_id, "laser_scanner", 1, "sense", 1, integer_params, 1, float_params, 0, NULL, 0, NULL, NULL, NULL, &resolution, &measurements, NULL, NULL, NULL, NULL, simx_opmode_blocking);
         if(!result == simx_return_ok) std::cout << "A" << result << std::endl;
         sensor_msgs::PointCloud measured_cloud;
@@ -90,6 +95,7 @@ namespace coppeliasim_interface{
         for(int i = 0; i < resolution; angle_current += angle / (resolution - 1) * M_PI / 180, i++){
             if(measurements[i] == -1) continue;
             geometry_msgs::Point32 to_add;
+            measurements[i] += noise_distribution(noise_generator) * noise_intensity;
             to_add.x = std::cos(angle_current) * measurements[i];
             to_add.y = std::sin(angle_current) * measurements[i];
             to_add.z = 0;
