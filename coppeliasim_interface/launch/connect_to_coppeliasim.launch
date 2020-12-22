@@ -11,6 +11,8 @@
     <param name="/use_sim_time" type="bool" value="true"/>
     <rosparam file="$(arg controller_config_file)" command="load"/>
     <rosparam ns="/coppelia_config" file="$(find coppeliasim_interface)/config/coppelia_config.yaml"/>
+    <rosparam ns="/laser_scanner_config" file="$(find coppeliasim_interface)/config/laser_scanner_config.yaml"/>
+
     <include file="$(arg robot_description_file)">
         <arg name="limited" value="$(arg limited)"/>
         <arg name="kinematics_config" value="$(arg kinematics_config)"/>
@@ -21,10 +23,6 @@
     </node>
     <node pkg="coppeliasim_interface" type="laser_scanner_node" name="laser_scanner_node" output="screen" required="true">
         <param name="world_frame_id" type="str" value="world"/>
-        <param name="resolution" type="int" value="100"/>
-        <param name="angle" type="double" value="45.0"/>
-        <param name="noise_intensity" type="double" value="0.1"/>
-        <param name="noise_std_deviation" type="double" value="0.01"/>
     </node>
     <node pkg="coppeliasim_interface" type="hardware_interface_node" name="hardware_interface_node" required="true" output="screen"/>
     <node name="ros_control_controller_spawner" pkg="controller_manager" type="spawner" respawn="false"
