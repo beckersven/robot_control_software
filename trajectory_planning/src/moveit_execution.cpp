@@ -166,15 +166,15 @@ int main(int argc, char** argv)
   primitive_4.type = primitive_4.BOX;
   primitive_4.dimensions.resize(3);
   primitive_4.dimensions[0] = 0.1;
-  primitive_4.dimensions[1] = 0.1;
-  primitive_4.dimensions[2] = 0.1;
+  primitive_4.dimensions[1] = 0.2;
+  primitive_4.dimensions[2] = 0.25;
 
   // Define a pose for the box (specified relative to frame_id)
   geometry_msgs::Pose box_pose_4;
   box_pose_4.orientation.w = 1.0;
   box_pose_4.position.x = 0.5;
-  box_pose_4.position.y = -0.7;
-  box_pose_4.position.z = 1.15;
+  box_pose_4.position.y = -0.5;
+  box_pose_4.position.z = 1.225;
  
 
   collision_object_4.primitives.push_back(primitive_4);
@@ -189,65 +189,35 @@ int main(int argc, char** argv)
     move_group.setGoalPositionTolerance(0.05);
     move_group.setGoalOrientationTolerance(0.05);
     move_group.setMaxVelocityScalingFactor(0.8);   // %
-    move_group.setEndEffectorLink("zivid_camera");
-  while (ros::ok())
-  {  
-
-    if (pose_state and ori_state) 
-    {  
-      ROS_INFO_STREAM(q_tf[0]);  // Print the quaternion components (0,0,0,1)
-      ROS_INFO_STREAM(q_tf[1]);
-      ROS_INFO_STREAM(q_tf[2]);
-      ROS_INFO_STREAM(q_tf[3]);
-      ros::Duration(5).sleep();
-      std::cout << "testing!" << std::endl;
-      geometry_msgs::Pose another_pose;
-  
-      another_pose.position.x = Vee_tf.x();
-      another_pose.position.y = Vee_tf.y();
-      another_pose.position.z = Vee_tf.z();
-      another_pose.orientation.x = q_tf[0];
-      another_pose.orientation.y = q_tf[1];
-      another_pose.orientation.z = q_tf[2];
-      another_pose.orientation.w = q_tf[3];
-
-      Eigen::Matrix3f mat3 = Eigen::Quaternionf(another_pose.orientation.w, another_pose.orientation.x, another_pose.orientation.y, another_pose.orientation.z).toRotationMatrix();
-//    std::cout << mat3;
-  
-      move_group.setPoseTarget(another_pose);
-  
-//  move_group.setRPYTarget(0, 0.785, 0);
-  
-      moveit::planning_interface::MoveGroupInterface::Plan my_plan1;
-
-      bool success1 = (move_group.plan(my_plan1) == moveit::planning_interface::MoveItErrorCode::SUCCESS);
-
-      move_group.move();
-      ros::Duration(1).sleep();  
-  
-      std_msgs::String msg_to_camera;
-
-      std::stringstream ss;
-      ss << "camera is ready to capture image" ;
-      msg_to_camera.data = ss.str();
-
-      fin_pos_pub.publish(msg_to_camera);
-      pose_state = false;
-      ori_state = false;    
-  
- //     ros::Duration(1).sleep();
-
-      geometry_msgs::PoseStamped current_pose_2 = move_group.getCurrentPose();
-  
- //   std::cout << "Current position "<< current_pose_2;
-      std::string current_ee = move_group.getEndEffectorLink();
- //   std::cout << current_ee <<std::endl;
-      std::cout << "finished" << std::endl;
-    }
+    move_group.setEndEffectorLink("scanner_focus");
+  geometry_msgs::Pose target_pose1;
+  target_pose1.orientation.x = 0.0;
+  target_pose1.orientation.y = 0.38268;
+  target_pose1.orientation.z = 0.0;
+  target_pose1.orientation.w = 0.92388;
+  target_pose1.position.x = 0.05;
+  target_pose1.position.y = -0.5;
+  target_pose1.position.z = 1.6;
+  move_group.setPoseTarget(target_pose1);
+  moveit::planning_interface::MoveGroupInterface::Plan my_plan;
+  ROS_ERROR_STREAM("PLANNING");
+  bool success = (move_group.plan(my_plan) == moveit::planning_interface::MoveItErrorCode::SUCCESS);
+  ROS_ERROR_STREAM("MOVING");
+  move_group.move();
+  std::vector<geometry_msgs::Pose> waypoints;
+  waypoints.push_back(target_pose1);
+  for(int i = 1; i <= 18; i++){
+    target_pose1.orientation.y = (i > 6) ? 0.86603 : 0.5;
+    target_pose1.orientation.w = ( i < 6) ? 0.5 : 0.86603;
+    target_pose1.position.x += 0.05;
+    waypoints.push_back(target_pose1);
+    ROS_ERROR("ADD");
   }
-
-
-
+ moveit_msgs::RobotTrajectory trajectory;
+  const double jump_threshold = 0.0;
+  const double eef_step = 0.01;
+  double fraction = move_group.computeCartesianPath(waypoints, eef_step, jump_threshold, trajectory);
+  move_group.execute(trajectory);
   ros::shutdown();
   return 0;
 }
