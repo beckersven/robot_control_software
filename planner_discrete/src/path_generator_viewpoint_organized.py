@@ -19,9 +19,10 @@ class TrajectoryManager:
         self.scene = moveit_commander.PlanningSceneInterface(synchronous=True)
         self.sensor_model = SensorModel()
         self.offset = offset
+        self.group.set_planner_id("PersistentPRM")
+        self.group.set_planning_time(0.05)
         self.collision_manager = trimesh.collision.CollisionManager()
-        self.group.set_max_velocity_scaling_factor(0.2)
-        self.group.set_planner_id("SemiPersistentLazyPRM")
+        self.group.set_max_velocity_scaling_factor(1)
         box_pose = geometry_msgs.msg.PoseStamped()
         box_pose.header.frame_id = "world"
         box_pose.pose.orientation.w = 1.0
@@ -41,7 +42,7 @@ class TrajectoryManager:
     def connect_views(self, views):
         left_views = list(views)
         ordered_views = []
-        self.group.set_planning_time(0.1)
+        self.group.set_planning_time(0.2)
 
         start_view = View(np.array([1,0,0]), np.array([1,0,0]), 0, 0)
         start_point = moveit_msgs.msg.RobotTrajectory()
@@ -104,7 +105,7 @@ class TrajectoryManager:
         
     
         safe_plan = self.group.plan()
-
+        print(safe_plan)
         if len(safe_plan.joint_trajectory.points) == 0:
             return False
     
@@ -544,7 +545,7 @@ if __name__ == "__main__":
     signal.signal(signal.SIGINT, signal_handler)
     tm = TrajectoryManager(OFFSET)
     while True:
-        tm.perform_all("/home/svenbecker/Desktop/test6.stl", 0.0005,4)
+        tm.perform_all("/home/svenbecker/Desktop/test6.stl", 0.0001,3)
         rospy.sleep(5)
     rospy.spin()
     
