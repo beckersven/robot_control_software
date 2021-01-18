@@ -13,16 +13,17 @@ OFFSET = np.array([600, -600, 1700])
 
 class TrajectoryManager:
     def __init__(self, offset):
+        # Initialization
         moveit_commander.roscpp_initialize(sys.argv)
         rospy.init_node("trajectory_manager")
+
+        # Configuring MoveIt
         self.group = moveit_commander.MoveGroupCommander("manipulator")
+        self.group.set_planner_id("PersistentPRM") # Enables multi-query-planning (see corresponding literature)
         self.scene = moveit_commander.PlanningSceneInterface(synchronous=True)
-        self.sensor_model = SensorModel()
-        self.offset = offset
-        self.group.set_planner_id("PersistentPRM")
-        self.group.set_planning_time(0.05)
-        self.collision_manager = trimesh.collision.CollisionManager()
         self.group.set_max_velocity_scaling_factor(1)
+
+        # Add collision obejcts representing the mirrors beside the robot at IFL to MoveIt
         box_pose = geometry_msgs.msg.PoseStamped()
         box_pose.header.frame_id = "world"
         box_pose.pose.orientation.w = 1.0
@@ -30,16 +31,18 @@ class TrajectoryManager:
         box_pose.pose.position.y = 0
         box_pose.pose.position.z = 1.5
         self.scene.add_box("mirror1", box_pose, (0.1, 1.9, 3))
-
         box_pose.pose.position.x = 1
         box_pose.pose.position.y = 1
         box_pose.pose.position.z = 1.5
         self.scene.add_box("mirror2", box_pose, size=(2, 0.1, 3))
 
+        # Create a sensor-model instance
+        self.sensor_model = SensorModel()
+        
+        self.target_mesh = trimesh.Trimesh()
+    
 
-
-
-    def connect_views(self, views):
+    def connect_views(self, views, return_to_initial_pose=False):
         left_views = list(views)
         ordered_views = []
         self.group.set_planning_time(0.2)
@@ -48,44 +51,44 @@ class TrajectoryManager:
         start_point = moveit_msgs.msg.RobotTrajectory()
         to_add = trajectory_msgs.msg.JointTrajectoryPoint()
         to_add.positions = self.group.get_current_joint_values()
-        start_point.joint_trajectory.joint_names  = left_views[0].get_robot_trajectory().joint_trajectory.joint_names
-        
+        start_point.joint_trajectory.joint_names  = left_views[0].get_trajectory_for_measurement().joint_trajectory.joint_names
+    
         start_point.joint_trajectory.points.append(to_add)
-        start_view.set_robot_trajectory(start_point)
-        
+        start_view.set_trajectory_for_measurement(start_point)       
         ordered_views.append(start_view)
-        
         while len(left_views) != 0:
             temporary_start_state = moveit_msgs.msg.RobotState()
-            temporary_start_state.joint_state.position = ordered_views[-1].get_robot_trajectory().joint_trajectory.points[-1].positions
-            temporary_start_state.joint_state.name = ordered_views[-1].get_robot_trajectory().joint_trajectory.joint_names
+            temporary_start_state.joint_state.position = ordered_views[-1].get_trajectory_for_measurement().joint_trajectory.points[-1].positions
+            temporary_start_state.joint_state.name = ordered_views[-1].get_trajectory_for_measurement().joint_trajectory.joint_names
             self.group.set_start_state(temporary_start_state)
             min_index = -1
             min_plan = moveit_msgs.msg.RobotTrajectory()
             to_add = trajectory_msgs.msg.JointTrajectoryPoint()
-            to_add.time_from_start = rospy.Duration(1e6)
+            to_add.time_from_start = rospy.Duration(1e9)
             min_plan.joint_trajectory.points.append(to_add)
             for index, view in enumerate(left_views):
 
-                self.group.set_joint_value_target(view.get_robot_trajectory().joint_trajectory.points[0].positions)
+                self.group.set_joint_value_target(view.get_trajectory_for_measurement().joint_trajectory.points[0].positions)
                 
-                plan = self.group.plan()
-                if len(plan.joint_trajectory.points) == 0:
+                plan_result = self.group.plan()
+                if not plan_result[0]:
                     continue
-                if min_plan.joint_trajectory.points[-1].time_from_start > plan.joint_trajectory.points[-1].time_from_start:
+                if min_plan.joint_trajectory.points[-1].time_from_start > plan_result[1].joint_trajectory.points[-1].time_from_start:
                     print("replaced")
                     min_index = index
-                    min_plan = plan
-            next_view = left_views.pop(min_index)
-            next_view.set_plan_to_view(min_plan)
-            ordered_views.append(next_view)
+                    min_plan = plan_result[1]
+            if not min_index == -1:
+                next_view = left_views.pop(min_index)
+                next_view.set_trajectory_to_view(min_plan)
+                ordered_views.append(next_view)
+        
         return ordered_views[1:]
 
             
         
-    def check_view_for_collision_and_reachability(self, view, sample_step_mm = 15):
+    def process_view_mechanically(self, view, sample_step_mm = 15):
         assert isinstance(view, View)
-        trajectory_origin = view.get_position() + self.offset
+        trajectory_origin = view.get_position()
         trajectory_direction = view.get_orientation_matrix().dot([1, 0, 0, 1])[0:3]
         trajectory = lambda  t: (trajectory_origin + trajectory_direction * t) / 1000
         q = trimesh.transformations.quaternion_from_matrix(view.get_orientation_matrix())
@@ -101,17 +104,14 @@ class TrajectoryManager:
         pose_1.pose.position.z = trajectory(0)[2]
         self.group.set_start_state_to_current_state()
         self.group.set_pose_target(pose_1)
-
         
     
-        safe_plan = self.group.plan()
-        print(safe_plan)
-        if len(safe_plan.joint_trajectory.points) == 0:
+        initial_plan = self.group.plan()
+        if not initial_plan[0]:
             return False
-    
         temporary_start_state = moveit_msgs.msg.RobotState()
-        temporary_start_state.joint_state.position = safe_plan.joint_trajectory.points[-1].positions
-        temporary_start_state.joint_state.name = safe_plan.joint_trajectory.joint_names
+        temporary_start_state.joint_state.position = initial_plan[1].joint_trajectory.points[-1].positions
+        temporary_start_state.joint_state.name = initial_plan[1].joint_trajectory.joint_names
         self.group.set_start_state(temporary_start_state)
         pose_2 = geometry_msgs.msg.PoseStamped()
         pose_2.header.frame_id = "world"
@@ -172,163 +172,87 @@ class TrajectoryManager:
         view.set_lengths(displacement_a - sample_step_mm, - displacement_b - sample_step_mm)
         if not any(view.get_lengths()):
             return False
-        view.set_robot_trajectory(final_trajectory)   
-        view.set_safe_plan(safe_plan)
+        view.set_trajectory_for_measurement(final_trajectory)   
         return True
-    """ 
-    POOR PERFORMANCE
-    def check_view_for_collision(self, view, sample_step_mm = 80):
-        assert isinstance(view, View)
 
-        trajectory_origin = view.get_position() + self.offset
-        trajectory_direction = view.get_orientation_matrix().dot([1, 0, 0, 1])[0:3]
-        trajectory = lambda  t: (trajectory_origin + trajectory_direction * t) / 1000
-        scanner_body = self.sensor_model.get_scanner_body()
+    def load_target_mesh(self, file_name, transform = np.eye(4)):
+        # Load mesh via trimesh to class member for further processing
+        try:
+            self.target_mesh = trimesh.load_mesh(file_name)
+        except:
+            rospy.logerr("Trimesh could not load mesh {}".format(file_name))
+            return False
+        # Move the mesh's origin (usually identically with the origin of the provided CAD-file)
+        # to where its mounted with respect to the "world"-frame of MoveIt
+        self.target_mesh.apply_transform(transform)
         
-        scanner_body.apply_transform(view.get_orientation_matrix())
-        scanner_body.apply_translation(view.get_position() + self.offset)
-
-        if self.collision_manager.in_collision_single(scanner_body):
-            return False
-        displacement = sample_step_mm
-        while displacement < view.get_lengths()[0]:
-            if self.collision_manager.in_collision_single(scanner_body, trimesh.transformations.translation_matrix(trajectory_direction * displacement)):
-                view.set_lengths(displacement - sample_step_mm, view.get_lengths()[1])
-                print("Yolo")
-                break
-            displacement += sample_step_mm
-                
-        displacement = -sample_step_mm
-        while displacement > -view.get_lengths()[1]:
-            if self.collision_manager.in_collision_single(scanner_body, trimesh.transformations.translation_matrix(trajectory_direction * displacement)):
-                view.set_lengths(view.get_lengths()[0],  -sample_step_mm - displacement)
-                break
-            displacement -= sample_step_mm
-        if not any(view.get_lengths()):
-            return False
-        return True       
-    """
-    def load_target_mesh_in_scene(self, file_name):
-        target_mesh_pose = geometry_msgs.msg.Pose()
-        target_mesh_pose.orientation.w = 1
-        target_mesh_pose.orientation.x = 0
-        target_mesh_pose.orientation.y = 0
-        target_mesh_pose.orientation.z = 0
-        target_mesh_pose.position.x = self.offset[0] / 1000.0
-        target_mesh_pose.position.y = self.offset[1] / 1000.0
-        target_mesh_pose.position.z = self.offset[2] / 1000.0
+        # Add mesh to MoveIt so that it will be considered as a collision object during planning
+        # (here, the given transform also needs to be applied)
         target_mesh_pose_stamped = geometry_msgs.msg.PoseStamped()
-        target_mesh_pose_stamped.pose = target_mesh_pose
-        target_mesh_pose_stamped.header.frame_id = "world"
-        self.scene.add_mesh("target_object", target_mesh_pose_stamped, file_name, size=(1e-3, 1e-3, 1e-3))
-        self.collision_manager.add_object("target_object", trimesh.load_mesh(file_name).apply_translation(self.offset))
-        self.collision_manager.add_object("table", trimesh.PointCloud(np.array([
-            [0, 0, 0],
-            [1, 0, 0],
-            [1, -1, 0],
-            [0, -1, 0],
-            [0, 0, 1.1],
-            [1, 0, 1.1],
-            [1, -1, 1.1],
-            [0, -1, 1.1]
-        ]) * 1000).convex_hull)
+        q = trimesh.transformations.quaternion_from_matrix(transform)
+        target_mesh_pose_stamped.pose.orientation.w = q[0]
+        target_mesh_pose_stamped.pose.orientation.x = q[1]
+        target_mesh_pose_stamped.pose.orientation.y = q[2]
+        target_mesh_pose_stamped.pose.orientation.z = q[3]
+        target_mesh_pose_stamped.pose.position = geometry_msgs.msg.Point(*(trimesh.transformations.translation_from_matrix(transform) / 1000))
+        target_mesh_pose_stamped.header.frame_id = "world"     
+        try:
+            # Reduce size as meshes used here a specified in millimeters whereas MoveIt interprets them as meters
+            self.scene.add_mesh("target", target_mesh_pose_stamped, file_name, size=(1e-3, 1e-3, 1e-3))
+        except:
+            # add_mesh hat troubles with "non-root" filenames (e.g. ~/cadfiles/target.stl)
+            rospy.logerr("Moveit could not load mesh {}.\nHave you tried specifying it with a file path starting at root /...?".format(file_name))
+            return False
+        return True
 
 
-    def execute_views(self, views, return_to_initial_pose=True):
-        
+
+    def execute_views(self, ordered_views, try_to_handle_errors=False):
         view_counter = 0
-        for view in views:
-            trajectory = view.get_plan_to_view()
-            """to_pop = []
-            for i in range(len(trajectory.joint_trajectory.points) - 1):
-                if trajectory.joint_trajectory.points[i].time_from_start == trajectory.joint_trajectory.points[i + 1].time_from_start:
-                    to_pop.append(i)
-            for pop_index in sorted(to_pop, reverse=True):
-                trajectory.joint_trajectory.points.pop(pop_index)"""
-            print("Steering to next measurement-trajectory...")
+        for view in ordered_views:
+
+            trajectory = view.get_trajectory_to_view()
+            print("Steering to next measurement-trajectory (time: {}s)...".format(trajectory.joint_trajectory.points[-1].time_from_start.to_sec()))
             self.group.execute(trajectory)
             self.group.stop()
-            trajectory = view.get_robot_trajectory()
-            """to_pop = []
-            for i in range(len(trajectory.joint_trajectory.points) - 1):
-                if trajectory.joint_trajectory.points[i].time_from_start == trajectory.joint_trajectory.points[i + 1].time_from_start:
-                    to_pop.append(i)
-            for pop_index in sorted(to_pop, reverse=True):
-                trajectory.joint_trajectory.points.pop(pop_index)
-            
-            """
+            trajectory = view.get_trajectory_for_measurement()
+            # Short break to ensure no parts are moving anymore
             rospy.sleep(0.5)
-            print("Executing cartesian path...")
+            print("Executing measurement-trajectory (time: {}s)...".format(trajectory.joint_trajectory.points[-1].time_from_start.to_sec()))
+            # if not self.group.execute(trajectory) and not try_to_handle_errors:
+            #     rospy.logerr("Execution of trajectory failed. Exiting...")
+            #     self.group.stop()
+            #     return False
+            # elif not self.group.execute(trajectory) and try_to_handle_errors:
+            #     rospy.logwarn("Execution of trajectory failed. Skipping this trajectory...")
             self.group.execute(trajectory)
             self.group.stop()
             view_counter += 1
-            print("Executed view {} of {}".format(view_counter, len(views)))
+            print("Executed view {} of {}".format(view_counter, len(ordered_views)))
 
-            """
-            self.group.set_start_state_to_current_state()
-            if view.get_robot_trajectory() == None:
-                print(view.get_robot_trajectory())
-                rospy.logerr("Tried to execute bad view. Terminating execution...")
-                return
-            if not self.group.go(view.get_robot_trajectory().joint_trajectory.points[0].positions, wait=True):
-                rospy.logwarn("FAILED at execution of movement to trajectory start point. Using safe_plan...")
-                if not self.group.go(start_joint_values):
-                    rospy.logerr("FAILED at fallback-execution (can not get back to initial pose)...")
-                    return
-                self.group.set_start_state_to_current_state()
-                if not self.group.execute(view.get_safe_plan()):
-                    rospy.logerr("FAILED at safe_plan-execution (something went terribly wrong)...")
-                    return
-                if not self.group.go(view.get_robot_trajectory().joint_trajectory.points[0].positions, wait=True):
-                    rospy.logerr("FAILED at safe_plan-execution (something went terribly wrong)...")
-                    return
-                
-            self.group.stop()
-            self.group.set_start_state_to_current_state()
-            trajectory = view.get_robot_trajectory()
-            to_pop = []
-            for i in range(len(trajectory.joint_trajectory.points) - 1):
-                if trajectory.joint_trajectory.points[i].time_from_start == trajectory.joint_trajectory.points[i + 1].time_from_start:
-                    to_pop.append(i)
-            for pop_index in sorted(to_pop, reverse=True):
-                trajectory.joint_trajectory.points.pop(pop_index)
-            self.group.execute(trajectory, wait=True)
-            self.group.stop()
-            view_counter += 1
-            print("Executed view {} of {}".format(view_counter, len(views)))
-        if return_to_initial_pose:
-            self.group.set_joint_value_target(start_joint_values)
-            plan = self.group.plan()
-            self.group.execute(plan, True)
-            self.group.stop()
-            print("Moved back to initial pose")
-        """
-
+            
 
     def perform_all(self, target_mesh_filename, density, N_angles_per_view):
-        self.load_target_mesh_in_scene(target_mesh_filename)
-        views = self.calculate_views(target_mesh_filename, density, N_angles_per_view)
-        # TODO: Intelligently connect views
+        self.load_target_mesh(target_mesh_filename, transform=trimesh.transformations.translation_matrix(OFFSET))
+        views = self.calculate_views(density, N_angles_per_view)
         views = self.connect_views(views)
         self.execute_views(views)
 
-    def calculate_views(self, target_mesh_filename, density, N_angles_per_view):
-        target_mesh = trimesh.load_mesh(target_mesh_filename)
-        surface_points, face_indices = trimesh.sample.sample_surface_even(target_mesh, int(target_mesh.area * density))
-        max_edge = max(target_mesh.bounding_box_oriented.edges_unique_length)
+    def calculate_views(self, density, N_angles_per_view):
+        surface_points, face_indices = trimesh.sample.sample_surface_even(self.target_mesh, int(self.target_mesh.area * density))
+        max_edge = max(self.target_mesh.bounding_box_oriented.edges_unique_length)
         possible_views = []
         measurability_matrix = []
         processed = 0
         for (surface_point, face_index) in zip(surface_points, face_indices):
             for angle in np.linspace(0, 360, N_angles_per_view + 1)[:-1]:
                 measurability_row = [False] * len(surface_points)
-                new_view = View(surface_point, target_mesh.face_normals[face_index], np.deg2rad(angle), self.sensor_model.get_OPTIMAL_STANDOFF())
+                new_view = View(surface_point, self.target_mesh.face_normals[face_index], np.deg2rad(angle), self.sensor_model.get_OPTIMAL_STANDOFF())
                 new_view.set_lengths(max_edge, max_edge)
-                if self.check_view_for_collision_and_reachability(new_view):
+                if self.process_view_mechanically(new_view):
                     
                     
-                    # TODO: Collision checking to automatically reject certain views
-                    self.sensor_model.evaluate(new_view, surface_points, target_mesh)
+                    self.sensor_model.process_view_metrologically(new_view, surface_points, self.target_mesh)
                     
                     for covered_surface_point_index in new_view.get_covered_surface_points():
                         measurability_row[covered_surface_point_index] = True
@@ -342,21 +266,7 @@ class TrajectoryManager:
                     len(possible_views)
                     ))
         selected_views = self.solve_scp(possible_views, set(range(len(surface_points))))
-        print("\n" + "*" * 20 + "\nPlan consists of {} views".format(len(selected_views)))
-        if False:
-            scene = []
-            surface_points_v = trimesh.PointCloud(surface_points)
-            surface_points_v.visual.vertex_colors = [255, 0, 0, 255]
-            target_mesh.visual.face_colors = [120, 120, 120, 180]
-            scene.append(surface_points_v)
-            scene.append(target_mesh)
-            for view in selected_views:
-                frustum = self.sensor_model.get_scanning_frustum(*view.get_lengths())
-                frustum.apply_transform(view.get_orientation_matrix())
-                frustum.apply_transform(view.get_projected_position(True))
-                scene.append(frustum)
-            trimesh.Scene(scene).show(viewer='notebook')
-            
+        print("\n" + "*" * 20 + "\nPlan consists of {} measurement-trajectory/-ies".format(len(selected_views)))
         
         return selected_views
     
@@ -403,7 +313,7 @@ class SensorModel:
     def get_OPTIMAL_STANDOFF(self):
         return self.OPTIMAL_STANDOFF
 
-    def evaluate(self, view, surface_points, target_mesh):
+    def process_view_metrologically(self, view, surface_points, target_mesh):
         assert isinstance(view, View)
         scan_frustum = self.get_scanning_frustum(*view.get_lengths())
         scan_frustum.apply_transform(view.get_orientation_matrix())
@@ -487,15 +397,15 @@ class View:
         self.covered_surface_points = []
         
         
-        self.trajectory = None
-        self.safe_plan = None
-        self.plan_to_view = None
+        self.trajectory_for_measurement = moveit_msgs.msg.RobotTrajectory()
+        self.trajectory_to_view = moveit_msgs.msg.RobotTrajectory()
     
-    def get_plan_to_view(self):
-        return self.plan_to_view
+    def get_trajectory_to_view(self):
+        return self.trajectory_to_view
 
-    def set_plan_to_view(self, plan_to_view):
-        self.plan_to_view = plan_to_view
+    def set_trajectory_to_view(self, trajectory_to_view):
+        assert isinstance(trajectory_to_view, moveit_msgs.msg.RobotTrajectory)
+        self.trajectory_to_view = trajectory_to_view
 
 
     def get_projected_position(self, as_matrix=False):
@@ -504,18 +414,13 @@ class View:
         else:
             return self.position
 
-    def set_safe_plan(self, safe_plan):
-        self.safe_plan = safe_plan
 
-    def get_safe_plan(self):
-        return self.safe_plan
+    def set_trajectory_for_measurement(self, trajectory_for_measurement):
+        assert isinstance(trajectory_for_measurement, moveit_msgs.msg.RobotTrajectory)
+        self.trajectory_for_measurement = trajectory_for_measurement
 
-    def set_robot_trajectory(self, trajectory):
-
-        self.trajectory = trajectory
-
-    def get_robot_trajectory(self):
-        return self.trajectory
+    def get_trajectory_for_measurement(self):
+        return self.trajectory_for_measurement
 
     def get_orientation_matrix(self):
         return self.orientation_matrix
@@ -527,6 +432,7 @@ class View:
             return self.position
     
     def set_covered_surface_points(self, point_indices):
+        assert isinstance(point_indices, list)
         self.covered_surface_points = point_indices
     
     def get_covered_surface_points(self):
@@ -545,7 +451,7 @@ if __name__ == "__main__":
     signal.signal(signal.SIGINT, signal_handler)
     tm = TrajectoryManager(OFFSET)
     while True:
-        tm.perform_all("/home/svenbecker/Desktop/test6.stl", 0.0001,3)
+        tm.perform_all("/home/svenbecker/Desktop/test6.stl", 0.001,6)
         rospy.sleep(5)
     rospy.spin()
     
