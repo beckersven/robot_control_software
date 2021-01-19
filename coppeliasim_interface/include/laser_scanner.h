@@ -1,16 +1,13 @@
 extern "C" {
    #include "extApi.h"
 }
-
 #include "sensor_msgs/PointCloud.h"
 #include <vector>
 #include <random>
-//#include <tf2_ros/transform_broadcaster.h>
+#include <tf2_ros/transform_broadcaster.h>
 #include "std_srvs/Trigger.h"
-#include <ros>
+#include <ros/ros.h>
 #include <string>
-#include <map>
-
 namespace coppeliasim_interface{
     class LaserScanner{
         public:
@@ -20,18 +17,20 @@ namespace coppeliasim_interface{
             // bool set(simxInt resolution, simxFloat angle);
             bool sense(std_srvs::TriggerRequest& req, std_srvs::TriggerResponse& res);
         private:
-            double calculateUncertainty(simxFloat z, simxFloat gamma);
-            std::map<std::string, double> laser_scanner_parameters;
-
+            // void applyNoise();
             simxFloat* measurements;
+            std::default_random_engine noise_generator;
+            std::normal_distribution<double> noise_distribution;
+            double noise_intensity;
             ros::Publisher measurement_pub;
             ros::NodeHandle nh;
-
+            simxInt resolution;
+            simxFloat angle;
             std::vector<double> distances;
             tf2_ros::TransformBroadcaster tf_broad;
             simxInt client_id;
             simxInt scanner_focus_handle;
-            std::string world_frame, scanner_focus_frame;
+            std::string world_frame_id, scanner_focus_frame_id;
             ros::ServiceServer sense_srv;
     };
 }

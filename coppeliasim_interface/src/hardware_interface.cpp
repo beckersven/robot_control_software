@@ -1,6 +1,6 @@
 #include "../include/hardware_interface.h"
 #include <pluginlib/class_list_macros.hpp>
-
+#include <cmath>
 
 namespace coppeliasim_interface{
   HardwareInterface::HardwareInterface(){
@@ -8,6 +8,7 @@ namespace coppeliasim_interface{
       joint_efforts_.resize(6, 0);
       joint_handles_.resize(6, -1);
       joint_position_command_.resize(6, 0);
+      previous_joint_position_command_.resize(6,0);
       joint_positions_.resize(6, 0);
       joint_velocities_.resize(6, 0);
       joint_velocity_command_.resize(6, 0);
@@ -172,9 +173,9 @@ namespace coppeliasim_interface{
   void HardwareInterface::write(const ros::Time& time, const ros::Duration& period){
       if (position_controller_running_)
       {
-        
           for(size_t i = 0; i < joint_names_.size(); i++){
-              simxSetJointTargetPosition(client_id_, joint_handles_[i], static_cast<simxFloat>(joint_position_command_[i]), simx_opmode_oneshot);
+
+            simxSetJointTargetPosition(client_id_, joint_handles_[i], static_cast<simxFloat>(joint_position_command_[i]), simx_opmode_oneshot);
           }
       }
       else if (velocity_controller_running_)

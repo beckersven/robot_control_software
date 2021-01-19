@@ -28,8 +28,8 @@
   <material name="white">
     <color rgba="1 1 1 1"/>
   </material>
-  <material name="wbk_green">
-    <color rgba="0.0 0.59 0.51 1"/>
+  <material name="dark_green">
+    <color rgba="0.26 0.62 0.58 1"/>
   </material>
   
   <link name="table">
@@ -39,12 +39,6 @@
       </geometry>
       <material name="white"/>
     </visual>
-    <collision>
-      <origin rpy="0 0 0" xyz="0.0 0.0 0.0"/>
-      <geometry>
-        <box size="1 1 1.1"/>
-      </geometry>
-    </collision>
   </link>
 
   <joint name="table_base" type="fixed">
@@ -56,15 +50,15 @@
   <link name="laser_scanner">
     <visual>
       <geometry>
-        <box size="0.15 0.3 0.17"/>
+        <box size="0.18 0.18 0.18"/>
       </geometry>
-      <material name="wbk_green"/>
-      <origin rpy="0 0 0" xyz="0.00 0.075 0.086"/>  <!--tiny offset to ensure friction-absence -->
+      <material name="dark_green"/>
+      <origin rpy="0 0 0" xyz="0.00 0.0 0.09"/>  <!--"0 0 0" xyz="0.08 0 -0.075" -->
     </visual>
     <collision>
-      <origin rpy="0 0 0" xyz="0.0 0.08 0.095"/>
+      <origin rpy="0 0 0" xyz="0.0 0.0 0.095"/>
       <geometry>
-        <box size="0.17 0.32 0.19"/>     <!--size="0.23 0.09 0.15" -->
+        <box size="0.20 0.20 0.19"/>     <!--size="0.23 0.09 0.15" -->
       </geometry>
     </collision>
   </link>
@@ -73,12 +67,6 @@
     <parent link="tool0"/>
     <child link="laser_scanner"/>
     <origin xyz="0 0 0" rpy="0.0 0.0 0.0" />
-  </joint>
-  <link name="scanner_focus" ></link>
-  <joint name="scanner_internal" type="fixed">
-    <parent link="tool0"/>
-    <child link="scanner_focus"/>
-    <origin xyz="0 1.2500e-01 1.4714e-01" rpy="0 0 1.5707963"/>
   </joint>
 
  <!--added: END       <origin xyz="${-(0.125/2)-(0.11/2)} -0.01 0" rpy="0 0 ${pi/2}" /> -->

@@ -16,13 +16,12 @@ class TrajectoryManager:
         # Initialization
         moveit_commander.roscpp_initialize(sys.argv)
         rospy.init_node("trajectory_manager")
-
+        
         # Configuring MoveIt
         self.group = moveit_commander.MoveGroupCommander("manipulator")
         self.group.set_planner_id("PersistentPRM") # Enables multi-query-planning (see corresponding literature)
         self.scene = moveit_commander.PlanningSceneInterface(synchronous=True)
         self.group.set_max_velocity_scaling_factor(1)
-
         # Add collision obejcts representing the mirrors beside the robot at IFL to MoveIt
         box_pose = geometry_msgs.msg.PoseStamped()
         box_pose.header.frame_id = "world"
@@ -126,7 +125,7 @@ class TrajectoryManager:
             pose_2.pose.position.x = trajectory(displacement_a)[0]
             pose_2.pose.position.y = trajectory(displacement_a)[1]
             pose_2.pose.position.z = trajectory(displacement_a)[2]
-            (temp_trajectory, fraction) = self.group.compute_cartesian_path([pose_1.pose, pose_2.pose], 0.01, 0.0)
+            (temp_trajectory, fraction) = self.group.compute_cartesian_path([pose_1.pose, pose_2.pose], 0.01, 1.5)
             if fraction != 1.0:
                 break
             for point in temp_trajectory.joint_trajectory.points:
@@ -153,7 +152,7 @@ class TrajectoryManager:
             pose_1.pose.position.x = trajectory(displacement_b)[0]
             pose_1.pose.position.y = trajectory(displacement_b)[1]
             pose_1.pose.position.z = trajectory(displacement_b)[2]
-            (temp_trajectory, fraction) = self.group.compute_cartesian_path([pose_2.pose, pose_1.pose], 0.01, 0.0)
+            (temp_trajectory, fraction) = self.group.compute_cartesian_path([pose_2.pose, pose_1.pose], 0.01, 1.5)
             if fraction != 1.0:
                 break
             for point in temp_trajectory.joint_trajectory.points:
@@ -451,7 +450,7 @@ if __name__ == "__main__":
     signal.signal(signal.SIGINT, signal_handler)
     tm = TrajectoryManager(OFFSET)
     while True:
-        tm.perform_all("/home/svenbecker/Desktop/test6.stl", 0.001,6)
+        tm.perform_all("/home/svenbecker/Desktop/test6.stl", 0.0005,8)
         rospy.sleep(5)
     rospy.spin()
     

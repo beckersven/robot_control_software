@@ -76,6 +76,7 @@ namespace coppeliasim_interface{
             std::vector<simxInt> joint_handles_;
             std::vector<double> joint_velocity_command_;
             std::vector<double> joint_position_command_;
+            std::vector<double> previous_joint_position_command_;
             std::vector<double> joint_positions_;
             std::vector<double> joint_efforts_;
             std::vector<double> joint_velocities_;

@@ -188,7 +188,6 @@ target_link_libraries(simulation_synchronizer_node simulation_synchronizer)
 target_link_libraries(simulation_synchronizer_node ${catkin_LIBRARIES})
 
 
-
 add_library(laser_scanner src/laser_scanner.cpp remoteApi/extApi.c remoteApi/extApiPlatform.c)
 target_link_libraries(laser_scanner ${Boost_LIBRARIES})
 target_link_libraries(laser_scanner ${catkin_LIBRARIES})
