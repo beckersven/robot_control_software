@@ -122,14 +122,14 @@ planner_configs:
     max_failures: 5000  # maximum consecutive failure limit. default: 5000
   TrajOptDefault:
     type: geometric::TrajOpt
-  PersistentPRM: # reuses roadmap during lifetime of node but doesn't save/load roadmap to/from disk
-    type: geometric::PRM
+  PersistentPRMstar: # reuses roadmap during lifetime of node but doesn't save/load roadmap to/from disk
+    type: geometric::PRMstar
     multi_query_planning_enabled: true
 
 manipulator:
   default_planner_config: RRTConnectkConfigDefault
   planner_configs:
-    - PersistentPRM
+    - PersistentPRMstar
     - SBLkConfigDefault
     - ESTkConfigDefault
     - LBKPIECEkConfigDefault
