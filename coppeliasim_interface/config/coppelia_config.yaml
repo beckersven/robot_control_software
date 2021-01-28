@@ -7,5 +7,5 @@ connection_timeout_ms: 5000
 laser_scanner_focus_frame_id: "laser_scanner_focus_frame"
 explicit_sync_list:
   - "/update_hw_interface"
-  - "/update_hw_interface"
-  - "/laser_scanner_sense" 
+#  - "/laser_scanner_sense"
+  - "/perform_laser_scan"

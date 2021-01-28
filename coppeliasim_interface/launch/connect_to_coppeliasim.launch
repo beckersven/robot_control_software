@@ -18,13 +18,14 @@
     <node name="robot_state_publisher" pkg="robot_state_publisher" type="robot_state_publisher"/>
     <node pkg="coppeliasim_interface" type="simulation_synchronizer_node" name="simulation_synchronizer_node" required="true" output="screen">
     </node>
+    <!--
     <node pkg="coppeliasim_interface" type="laser_scanner_node" name="laser_scanner_node" output="screen" required="true">
         <param name="world_frame_id" type="str" value="world"/>
         <param name="resolution" type="int" value="100"/>
         <param name="angle" type="double" value="45.0"/>
         <param name="noise_intensity" type="double" value="0.1"/>
         <param name="noise_std_deviation" type="double" value="0.01"/>
-    </node>
+    </node>-->
     <node pkg="coppeliasim_interface" type="hardware_interface_node" name="hardware_interface_node" required="true" output="screen"/>
     <node name="ros_control_controller_spawner" pkg="controller_manager" type="spawner" respawn="false"
         output="screen" args="$(arg controllers)" />

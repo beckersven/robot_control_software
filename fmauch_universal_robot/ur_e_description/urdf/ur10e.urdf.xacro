@@ -20,7 +20,7 @@
   </xacro:macro>
 
   <xacro:macro name="ur10e_robot" params="prefix joint_limited
-    shoulder_pan_lower_limit:=-3    shoulder_pan_upper_limit:=3
+    shoulder_pan_lower_limit:=-3.14    shoulder_pan_upper_limit:=3.14
     shoulder_lift_lower_limit:=-3    shoulder_lift_upper_limit:=0.52
     elbow_joint_lower_limit:=-2.9    elbow_joint_upper_limit:=0.1
     wrist_1_lower_limit:=${-pi}    wrist_1_upper_limit:=${pi}

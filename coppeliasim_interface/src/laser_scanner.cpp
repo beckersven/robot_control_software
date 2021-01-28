@@ -84,7 +84,7 @@ namespace coppeliasim_interface{
         tf.transform.rotation.w = quaternion[3];
         tf_broad.sendTransform(tf);
         simxInt integer_params[1] = { resolution };
-        simxFloat float_params[1] = {angle};
+        simxFloat float_params[1] = { angle };
         simxInt double_resolution = 2 * resolution;
         int result = simxCallScriptFunction(client_id, "laser_scanner", 1, "sense", 1, integer_params, 1, float_params, 0, NULL, 0, NULL, NULL, NULL, &resolution, &measurements, NULL, NULL, NULL, NULL, simx_opmode_blocking);
         if(!result == simx_return_ok) std::cout << "A" << result << std::endl;

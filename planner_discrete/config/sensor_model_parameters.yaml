@@ -1,0 +1,8 @@
+optimal_standoff_mm: 150
+maximum_deviations:
+  z_mm: 50
+  theta_rad: 0.78   # Is roughly 45deg
+  gamma_rad: 0.78
+beam_taille_diameter_mm: 0.1
+alpha_rad: 0.524    # Is roughly 30deg
+fan_angle_rad: 1.571 # Is roughly 90deg

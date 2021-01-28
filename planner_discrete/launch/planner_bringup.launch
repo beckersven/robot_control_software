@@ -1,0 +1,15 @@
+<launch>
+    <rosparam  file="$(find planner_discrete)/config/sensor_model_parameters.yaml" command="load" ns="sensor_model_parameters"/>
+    
+    
+    <include file="$(find coppeliasim_interface)/launch/connect_to_coppeliasim.launch">
+        <arg name="limited" value="true"/>
+    </include>
+    <include file="$(find trajectory_planning)/launch/planning_execution_rviz.launch">
+        <arg name="limited" value="true"/>
+        <arg name="sim" value="true"/>
+    </include>
+    <node type="point_cloud_manager.py" name="point_cloud_manager" pkg="planner_discrete"></node>
+    <!--<node type="path_generator_viewpoint_organized.py" name="trajectory_manager" pkg="planner_discrete">
+    </node>-->
+</launch>

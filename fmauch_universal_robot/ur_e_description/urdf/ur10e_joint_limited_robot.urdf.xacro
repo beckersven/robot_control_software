@@ -78,7 +78,7 @@
   <joint name="scanner_internal" type="fixed">
     <parent link="tool0"/>
     <child link="scanner_focus"/>
-    <origin xyz="0 1.2500e-01 1.4714e-01" rpy="0 0 1.5707963"/>
+    <origin xyz="0 0.15 0.171" rpy="0 0 1.5707963"/>
   </joint>
 
  <!--added: END       <origin xyz="${-(0.125/2)-(0.11/2)} -0.01 0" rpy="0 0 ${pi/2}" /> -->

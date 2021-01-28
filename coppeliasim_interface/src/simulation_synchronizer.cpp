@@ -65,24 +65,7 @@ namespace coppeliasim_interface{
                 return false;
         ROS_DEBUG_STREAM("Simulation-synchronizer is connected to CoppeliaSim!");
 
-        // Register the explicit_sync-services
-        // ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
-        // These services get called every simulation step. The simulation will not
-        // advance until every service call responded (sucessfully). 
-        // Note, that the services should only be advertised
-        // when the related code is fully initialized, e.g. as the last step of the 'init()'-method. This works
-        // as a guarantee to ensure that these nodes are ready when this loop finishes (i.e. that the simulation can start).
-        std::vector<std::string> explicit_sync_list_names;
-        if(nh_.getParam("/coppelia_config/explicit_sync_list", explicit_sync_list_names)){
-            for(size_t i = 0; i < explicit_sync_list_names.size(); i++){
-                if(!ros::service::waitForService(explicit_sync_list_names[i], ros::Duration(3))){
-                    ROS_ERROR_STREAM("Could not find service " << explicit_sync_list_names[i]);
-                    return false;
-                }
-                explicit_sync_list.push_back(nh_.serviceClient<std_srvs::Trigger>(explicit_sync_list_names[i], true));
-            } 
-        }
-        ROS_DEBUG_STREAM("Connected to " << explicit_sync_list_names.size() << " explicit sync services!");
+
 
         // Synchronize the ROS-time "/clock"
         // ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
@@ -101,6 +84,28 @@ namespace coppeliasim_interface{
         // Last step is to start the simulation
         if(! assertSimxCall(simxStartSimulation(client_id, simx_opmode_blocking), "Could not start simulation")) return false;
         simulation_running = true;
+        
+        this->advanceSimulation();
+        this->synchronizeROS();
+
+        // Register the explicit_sync-services
+        // ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+        // These services get called every simulation step. The simulation will not
+        // advance until every service call responded (sucessfully). 
+        // Note, that the services should only be advertised
+        // when the related code is fully initialized, e.g. as the last step of the 'init()'-method. This works
+        // as a guarantee to ensure that these nodes are ready when this loop finishes (i.e. that the simulation can start).
+        std::vector<std::string> explicit_sync_list_names;
+        if(nh_.getParam("/coppelia_config/explicit_sync_list", explicit_sync_list_names)){
+            for(size_t i = 0; i < explicit_sync_list_names.size(); i++){
+                if(!ros::service::waitForService(explicit_sync_list_names[i], ros::Duration(3))){
+                    ROS_ERROR_STREAM("Could not find service " << explicit_sync_list_names[i]);
+                    return false;
+                }
+                explicit_sync_list.push_back(nh_.serviceClient<std_srvs::Trigger>(explicit_sync_list_names[i], true));
+            } 
+        }
+        ROS_DEBUG_STREAM("Connected to " << explicit_sync_list_names.size() << " explicit sync services!");
         return true;
 
     }

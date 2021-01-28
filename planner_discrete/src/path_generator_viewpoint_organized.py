@@ -1,3 +1,5 @@
+#! /usr/bin/python
+
 import trimesh
 import numpy as np
 import rospy
@@ -10,6 +12,7 @@ from geometry_msgs.msg import Quaternion
 import trajectory_msgs.msg
 import time
 import sensor_msgs.msg
+from std_srvs.srv import SetBoolRequest, SetBool
 
 
 OFFSET = np.array([600, -600, 1700])
@@ -130,7 +133,7 @@ class TrajectoryManager:
 
             
         
-    def process_view(self, view, surface_points, sample_step_mm = 1, joint_jump_threshold = 1.5, minimum_trajectory_length_mm = 50):
+    def process_view(self, view, surface_points, face_indices, minimum_required_overmeasure_mm = 10, sample_step_mm = 1, joint_jump_threshold = 1.5, minimum_trajectory_length_mm = 10):
         assert isinstance(view, View)
         
         trajectory_origin = view.get_position()
@@ -165,13 +168,12 @@ class TrajectoryManager:
         
         
 
-        measurement_evaluation = self.sensor_model.process_view_metrologically(surface_points, self.target_mesh, view, self.max_edge)
+        measurement_evaluation = self.sensor_model.process_view_metrologically(surface_points, face_indices, self.target_mesh, view, self.max_edge)
         if len(measurement_evaluation) == 0:
             return False
-        max_deflection = max(measurement_evaluation, key=lambda x: x[1])[1] + 10
-        min_deflection = min(measurement_evaluation, key=lambda x: x[1])[1] - 10
+        max_deflection = max(measurement_evaluation, key=lambda x: x[1])[1] + minimum_required_overmeasure_mm
+        min_deflection = min(measurement_evaluation, key=lambda x: x[1])[1] - minimum_required_overmeasure_mm
         if max_deflection - min_deflection < minimum_trajectory_length_mm:
-            print(max_deflection, min_deflection)
             return False
         
         view_deflection_pose_a = geometry_msgs.msg.Pose()
@@ -236,7 +238,8 @@ class TrajectoryManager:
     def execute_views(self, ordered_views, surface_points=None, try_to_handle_errors=True):
         view_counter = 0
         trajectory = moveit_msgs.msg.RobotTrajectory()
-
+        rospy.wait_for_service("/switch_stitch_mode", 5.0)
+        stitch_service = rospy.ServiceProxy("/switch_stitch_mode", SetBool)
         if surface_points is not None:
             measurement_pub = rospy.Publisher("/currently_measured_points", sensor_msgs.msg.PointCloud, queue_size=1, latch=True)
             point_message = sensor_msgs.msg.PointCloud()
@@ -245,10 +248,11 @@ class TrajectoryManager:
         for view in ordered_views:
             trajectory = view.get_trajectory_to_view()
             print("Steering to next measurement-trajectory (time: {}s)...".format(trajectory.joint_trajectory.points[-1].time_from_start.to_sec()))
-            
+            stitch_service.call(SetBoolRequest(data=False))
             self.group.execute(trajectory)
 
             self.group.stop()
+            
             trajectory = view.get_trajectory_for_measurement()
             # Short break to ensure no parts are moving anymore
             rospy.sleep(0.1)
@@ -257,9 +261,8 @@ class TrajectoryManager:
                 for point_index in view.get_covered_surface_points():
                     point_message.points.append(geometry_msgs.msg.Point(*(surface_points[point_index] / 1000)))
                 measurement_pub.publish(point_message)
-                raw_input()
             print("Executing measurement-trajectory (time: {}s)...".format(trajectory.joint_trajectory.points[-1].time_from_start.to_sec()))
-
+            stitch_service.call(SetBoolRequest(data=True))
             self.group.execute(trajectory)
             
             self.group.stop()
@@ -268,7 +271,7 @@ class TrajectoryManager:
             print("Executed view {} of {}".format(view_counter, len(ordered_views)))
             # Short break to ensure no parts are moving anymore
             rospy.sleep(0.1)  
-
+        stitch_service.call(SetBoolRequest(data=False))
             # if not self.group.execute(trajectory) and not try_to_handle_errors:
             #     rospy.logerr("Execution of trajectory failed. Exiting...")
             #     self.group.stop()
@@ -296,6 +299,7 @@ class TrajectoryManager:
         surface_pts, views  = self.generate_samples_and_views(density, N_angles_per_view)
         scp_views = self.solve_scp(surface_pts, views)
         views = self.connect_views(scp_views)
+        raw_input()
         self.execute_views(views, surface_pts)
 
     def generate_samples_and_views(self, density, N_angles_per_view):
@@ -310,10 +314,12 @@ class TrajectoryManager:
         self.group.set_planning_time(0.05)
         valid_views = []
         processed = 0
+        # Estimated as circle radius according to density + safety offset
+        minimum_required_overmeasure = np.sqrt(1 / (np.pi * density)) + 5
         for (surface_point, face_index) in zip(surface_points, face_indices):
             for angle in np.linspace(0, 360, N_angles_per_view + 1)[:-1]:
-                new_view = View(surface_point, self.target_mesh.face_normals[face_index], np.deg2rad(angle), self.sensor_model.get_OPTIMAL_STANDOFF())
-                if self.process_view(new_view, surface_points):
+                new_view = View(surface_point, self.target_mesh.face_normals[face_index], np.deg2rad(angle), self.sensor_model.get_optimal_standoff())
+                if self.process_view(new_view, surface_points, face_indices, minimum_required_overmeasure):
                     valid_views.append(new_view)
                 processed += 1
                 print("Processed view {} of {} ({} %, {} of them are usable for measurement)".format(
@@ -349,9 +355,22 @@ class TrajectoryManager:
 
 class SensorModel:
     def __init__(self):
-        self.OPTIMAL_STANDOFF = 150
-        self.DELTA_Z = 50
-        self.FAN_ANGLE = np.deg2rad(20)
+        # Get sensor specifications from parameter server
+        parameters = rospy.get_param("/sensor_model_parameters")
+        self.optimal_standoff = parameters["optimal_standoff_mm"]
+        self.maximum_deviation_z = parameters["maximum_deviations"]["z_mm"]
+        self.maximum_deviation_theta = parameters["maximum_deviations"]["theta_rad"]
+        self.maximum_deviation_gamma = parameters["maximum_deviations"]["gamma_rad"]
+        self.beam_taille_diameter = parameters["beam_taille_diameter_mm"]
+        self.alpha = parameters["alpha_rad"]
+        self.fan_angle = parameters["fan_angle_rad"]
+
+        # Calculate useful sensor features from the specifics (so that they must be calculated every time)
+        self.u_0 = np.sin(self.alpha) * self.optimal_standoff
+        self.laser_emission_perception_distance = np.tan(self.alpha) * self.optimal_standoff
+        self.m_L = np.tan(self.alpha)
+
+        # Might be useful later
         self.scanner_body = trimesh.PointCloud(np.array([
             [0.05, 0.085, 0.0],
             [0.05, -0.085, 0.0],
@@ -364,14 +383,18 @@ class SensorModel:
             [-0.315, 0.085, -0.19],
         ]) * 1000).convex_hull
 
+    def evaluate_uncertainty(self, z, gamma):
+        beta = np.arcsin((self.u_0 * np.sin(np.pi/2 - self.alpha)) / np.sqrt((z + np.sqrt(self.u_0**2 + (self.u_0/self.m_L)**2))**2+self.u_0**2-2*(z + np.sqrt(self.u_0**2 + (self.u_0/self.m_L)**2))*self.u_0*np.cos(np.pi/2 - self.alpha)))
+        d_z = np.sin(beta+gamma) / (np.sin(beta) * np.sin(gamma)) * (z + np.sqrt(self.u_0**2 + (self.u_0/self.m_L)**2)) * self.beam_taille_diameter / np.sqrt(self.u_0**2 + (self.u_0/self.m_L)**2)
+        return  d_z / np.cos(gamma + beta - np.pi/2) 
 
     def get_scanner_body(self):
         return self.scanner_body.copy()
 
-    def get_OPTIMAL_STANDOFF(self):
-        return self.OPTIMAL_STANDOFF
+    def get_optimal_standoff(self):
+        return self.optimal_standoff
 
-    def process_view_metrologically(self, surface_points, target_mesh, view, frustum_half_length_mm = 5e2):
+    def process_view_metrologically(self, surface_points, faces, target_mesh, view, frustum_half_length_mm = 5e2):
         assert isinstance(view, View)
         scan_frustum = self.get_scanning_frustum(frustum_half_length_mm)
         scan_frustum.apply_transform(view.get_orientation_matrix())
@@ -382,38 +405,65 @@ class SensorModel:
         for i in range(len(inliers)):
             if inliers[i]:
                 inlier_indices.append(i)
+
         trajectory_direction = view.get_orientation_matrix().dot(np.array([1, 0, 0, 1]))[0:3]
+        sensor_direction = view.get_orientation_matrix().dot(np.array([0, 0, 1, 1]))[0:3]
+        lateral_direction = view.get_orientation_matrix().dot(np.array([0, 1, 0, 1]))[0:3]
         measurable_surface_points = []
         for inlier_index in inlier_indices:
             t_0 = (surface_points[inlier_index] - view.get_position()).dot(trajectory_direction)
-            ray_origin = t_0 * trajectory_direction + view.get_position()
-            ray_direction = surface_points[inlier_index] - (t_0 * trajectory_direction + view.get_position())
-            locations, _, faces = target_mesh.ray.intersects_location(
-                    ray_origins=[ray_origin],
-                    ray_directions=[ray_direction]
+            first_ray_origin = t_0 * trajectory_direction + view.get_position()
+            first_ray_direction = surface_points[inlier_index] - first_ray_origin
+            first_locations, _, first_faces = target_mesh.ray.intersects_location(
+                    ray_origins=[first_ray_origin],
+                    ray_directions=[first_ray_direction]
                 )
-            valid_dimension = list(filter(lambda x:abs(ray_direction[x])>1e-6, range(3)))[0]
+            valid_dimension = list(filter(lambda x:abs(first_ray_direction[x])>1e-6, range(3)))[0]
             add_inlier = True
-            for hit_index in range(len(locations)):
-                hit_ray_argument = (locations[hit_index][valid_dimension] - ray_origin[valid_dimension]) / ray_direction[valid_dimension]
-                if hit_ray_argument < 0.999 and hit_ray_argument > 0:
-                    add_inlier = False
+            for hit_index_of_first_ray in range(len(first_locations)):
+                if faces[inlier_index] == first_faces[hit_index_of_first_ray]:
+                    gamma = np.pi / 2 + np.arctan2(trajectory_direction.dot(target_mesh.face_normals[first_faces[hit_index_of_first_ray]]), -1 * sensor_direction.dot(target_mesh.face_normals[first_faces[hit_index_of_first_ray]]))
+                    theta = np.arctan2(lateral_direction.dot(target_mesh.face_normals[first_faces[hit_index_of_first_ray]]), -1 * sensor_direction.dot(target_mesh.face_normals[first_faces[hit_index_of_first_ray]]))
+                    z = sensor_direction.dot(first_locations[hit_index_of_first_ray] - first_ray_origin)
+                    if abs(gamma - np.pi/2) > self.maximum_deviation_gamma or abs(theta) > self.maximum_deviation_theta or abs(z - self.optimal_standoff) > self.maximum_deviation_z:
+                        add_inlier = False
+                        break
+                    t_1 = t_0 - self.laser_emission_perception_distance
+                    second_ray_origin = t_1 * trajectory_direction + view.get_position()
+                    second_ray_direction = surface_points[inlier_index] - second_ray_origin
+                    second_locations, _, second_faces = target_mesh.ray.intersects_location(
+                            ray_origins=[second_ray_origin],
+                            ray_directions=[second_ray_direction]
+                        )
+
+                    for hit_index_of_second_ray in range(len(second_locations)):
+                        if faces[inlier_index] == second_faces[hit_index_of_second_ray]:
+                            continue
+                        hit_ray_argument = (second_locations[hit_index_of_second_ray][valid_dimension] - second_ray_origin[valid_dimension]) / second_ray_direction[valid_dimension]
+                        if hit_ray_argument < 1 and hit_ray_argument > 0:
+                            add_inlier = False
+                            break
+                else:
+                    hit_ray_argument = (first_locations[hit_index_of_first_ray][valid_dimension] - first_ray_origin[valid_dimension]) / first_ray_direction[valid_dimension]
+                    if hit_ray_argument < 1 and hit_ray_argument > 0:
+                        add_inlier = False 
+                if not add_inlier:
                     break  
             if add_inlier:
-                measurable_surface_points.append((inlier_index, t_0, None))
+                measurable_surface_points.append((inlier_index, t_0, self.evaluate_uncertainty(z, gamma)))
         return measurable_surface_points
         
 
     def get_scanning_frustum(self, half_length):
         scanner_frustum_vertices = [
-            [half_length, (self.OPTIMAL_STANDOFF - self.DELTA_Z) * np.tan(self.FAN_ANGLE), - self.DELTA_Z],
-            [- half_length, (self.OPTIMAL_STANDOFF - self.DELTA_Z) * np.tan(self.FAN_ANGLE), - self.DELTA_Z],
-            [- half_length, - (self.OPTIMAL_STANDOFF - self.DELTA_Z) * np.tan(self.FAN_ANGLE), - self.DELTA_Z],
-            [half_length, - (self.OPTIMAL_STANDOFF - self.DELTA_Z) * np.tan(self.FAN_ANGLE), - self.DELTA_Z],
-            [half_length, (self.OPTIMAL_STANDOFF + self.DELTA_Z) * np.tan(self.FAN_ANGLE), self.DELTA_Z],
-            [- half_length, (self.OPTIMAL_STANDOFF + self.DELTA_Z) * np.tan(self.FAN_ANGLE), self.DELTA_Z],
-            [- half_length, - (self.OPTIMAL_STANDOFF + self.DELTA_Z) * np.tan(self.FAN_ANGLE), self.DELTA_Z],
-            [half_length, - (self.OPTIMAL_STANDOFF + self.DELTA_Z) * np.tan(self.FAN_ANGLE), self.DELTA_Z],
+            [half_length, (self.optimal_standoff - self.maximum_deviation_z) * np.tan(self.fan_angle / 2), - self.maximum_deviation_z],
+            [- half_length, (self.optimal_standoff - self.maximum_deviation_z) * np.tan(self.fan_angle / 2), - self.maximum_deviation_z],
+            [- half_length, - (self.optimal_standoff - self.maximum_deviation_z) * np.tan(self.fan_angle / 2), - self.maximum_deviation_z],
+            [half_length, - (self.optimal_standoff - self.maximum_deviation_z) * np.tan(self.fan_angle / 2), - self.maximum_deviation_z],
+            [half_length, (self.optimal_standoff + self.maximum_deviation_z) * np.tan(self.fan_angle / 2), self.maximum_deviation_z],
+            [- half_length, (self.optimal_standoff + self.maximum_deviation_z) * np.tan(self.fan_angle / 2), self.maximum_deviation_z],
+            [- half_length, - (self.optimal_standoff + self.maximum_deviation_z) * np.tan(self.fan_angle / 2), self.maximum_deviation_z],
+            [half_length, - (self.optimal_standoff + self.maximum_deviation_z) * np.tan(self.fan_angle / 2), self.maximum_deviation_z],
         ]
         return trimesh.PointCloud(scanner_frustum_vertices).convex_hull
     
@@ -520,7 +570,7 @@ if __name__ == "__main__":
     signal.signal(signal.SIGINT, signal_handler)
     tm = TrajectoryManager(OFFSET)
     while True:
-        tm.perform_all("/home/svenbecker/Desktop/test6.stl", 0.001,8)
+        tm.perform_all("/home/svenbecker/Desktop/test6.stl", 0.0005,2)
         rospy.sleep(5)
     rospy.spin()
     
