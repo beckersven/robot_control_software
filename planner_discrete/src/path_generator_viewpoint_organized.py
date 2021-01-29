@@ -13,7 +13,8 @@ import trajectory_msgs.msg
 import time
 import sensor_msgs.msg
 from std_srvs.srv import SetBoolRequest, SetBool
-
+import pulp
+import itertools
 
 OFFSET = np.array([600, -600, 1700])
 
@@ -198,7 +199,7 @@ class TrajectoryManager:
         if (fraction_a * max_deflection - fraction_b * min_deflection) < minimum_trajectory_length_mm or not self.postprocess_trajectory(trajectory, view_deflection_state_a):
             return False
         view.set_trajectory_for_measurement(trajectory)
-        view.set_covered_surface_points([measurable_point[0] for measurable_point in list(filter(lambda x: (x[1] <= fraction_a * max_deflection and x[1] >= fraction_b * min_deflection), measurement_evaluation))])
+        view.set_measurable_surface_points([(measurable_point[0], measurable_point[2]) for measurable_point in list(filter(lambda x: (x[1] <= fraction_a * max_deflection and x[1] >= fraction_b * min_deflection), measurement_evaluation))])
 
         return True
 
@@ -258,7 +259,7 @@ class TrajectoryManager:
             rospy.sleep(0.1)
             if surface_points is not None:
                 point_message.points = []
-                for point_index in view.get_covered_surface_points():
+                for point_index in view.get_measurable_surface_points(get_only_indices=True):
                     point_message.points.append(geometry_msgs.msg.Point(*(surface_points[point_index] / 1000)))
                 measurement_pub.publish(point_message)
             print("Executing measurement-trajectory (time: {}s)...".format(trajectory.joint_trajectory.points[-1].time_from_start.to_sec()))
@@ -297,7 +298,7 @@ class TrajectoryManager:
     def perform_all(self, target_mesh_filename, density, N_angles_per_view):
         self.load_target_mesh(target_mesh_filename, transform=trimesh.transformations.translation_matrix(OFFSET))
         surface_pts, views  = self.generate_samples_and_views(density, N_angles_per_view)
-        scp_views = self.solve_scp(surface_pts, views)
+        scp_views = self.solve_scp(surface_pts, views, "IP_basic")
         views = self.connect_views(scp_views)
         raw_input()
         self.execute_views(views, surface_pts)
@@ -307,6 +308,7 @@ class TrajectoryManager:
         pub = rospy.Publisher("/sampled_surface_points", sensor_msgs.msg.PointCloud, latch=True, queue_size=1)
         surface_points_message = sensor_msgs.msg.PointCloud()
         surface_points_message.header.frame_id = "world"
+        
         for surface_point in surface_points:
             surface_points_message.points.append(geometry_msgs.msg.Point(*(surface_point / 1000)))
         pub.publish(surface_points_message)
@@ -334,23 +336,78 @@ class TrajectoryManager:
     
 
 
-    def solve_scp(self, surface_points, provided_views):
-        measured_surface_point_indices = set()
-        used_views = set()
-        while measured_surface_point_indices != set(range(len(surface_points))) and len(provided_views) > 0:
-            provided_views = sorted(provided_views, key = lambda view: len(measured_surface_point_indices | set(view.get_covered_surface_points())), reverse=True)
-            next_view = provided_views.pop(0)
-            # Only accept new view if it brings an advantage. If no advantage -> Algorithm has reached peak
-            if measured_surface_point_indices == (measured_surface_point_indices | set(next_view.get_covered_surface_points())):
-                print("Covered only {} of {} surface points. Continuing with this solution ...".format(len(measured_surface_point_indices), len(surface_points)))
-                return used_views
-            measured_surface_point_indices |= set(next_view.get_covered_surface_points())
-            used_views.add(next_view)
-        if measured_surface_point_indices != range(len(surface_points)):
-            print("Covered all {} surface points".format(len(surface_points)))
-        else:
-            print("Covered only {} of {} surface points. Continuing with this solution...".format(len(measured_surface_point_indices), len(surface_points)))
-        return used_views
+    def solve_scp(self, surface_points, provided_views, solver_type="greedy", solver_parameters=None):
+        """Possible solver_types are: 
+            -   "greedy": Fills return set at each step with the trajectory that delivers the most
+                additional coverage compared to the points already in the set. If this additional coverage is
+                identical in size for several new optimal viewpoint-candidates, the one with the lowest maximum
+                uncertainty will be added similarly to the improvement introduced in chapter 4.4 of 
+                "View and sensor planning for multi-sensor surface inspection" (Gronle et al., 2016)  (default)
+            -   "IP_basic": Solves the SCP-Problem with integer programming (IP) using the formulation in
+                "Model-based view planning" (Scott, 2009), i.e. the objective function is the number of all
+                selected viewpoints whereas the constraint is that every surface point must be covered at least by one viewpoint
+            -   "IP_uncertainty": Solves the SCP using IP with respect to the uncertainty. The formulas are similar to "IP_basic"
+                but in the objective, costs corresponding to the worst uncertainty are assigned to every viewpoint-trajectory.
+            -   "IP_time": Solves the SCP using IP with respect to the time of trajectory-execution. The formulas are similar to "IP_basic"
+                but in the objective, costs corresponding to the duration of the trajectory are assigned to every viewpoint.
+            -   "IP_time_plus": Solves the SCP using IP with respect to the total estimated execution time. The time is approximated incorporating
+                the known trajectory-durations from the views as well as calculated transition-times from one trajectory's endpoint to the
+                next trajectory's startpoint based on the joint-angle-differences and the maximum joint-velocities provided by the parameter server.
+                Keep in mind that this algorithm, for performance reasons, does not perform collision-checks, etc. so the transition-times may deviate
+                from real world applications considerably.
+            """
+        if solver_type == "greedy":
+            measured_surface_point_indices = set()
+            used_views = set()
+            while measured_surface_point_indices != set(range(len(surface_points))) and len(provided_views) > 0:
+                provided_views = sorted(provided_views, key = lambda view: len(measured_surface_point_indices | set(view.get_measurable_surface_points(get_only_indices=True))) + max(view.get_measurable_surface_points(get_only_uncertainties=True)) * 0.9, reverse=True)
+                next_view = provided_views.pop(0)
+                # Only accept new view if it brings an advantage. If no advantage -> Algorithm has reached peak
+                if measured_surface_point_indices == (measured_surface_point_indices | set(next_view.get_covered_surface_points())):
+                    print("Covered only {} of {} surface points. Continuing with this solution ...".format(len(measured_surface_point_indices), len(surface_points)))
+                    return used_views
+                measured_surface_point_indices |= set(next_view.get_covered_surface_points())
+                used_views.add(next_view)
+            if measured_surface_point_indices != range(len(surface_points)):
+                print("Covered only {} of {} surface points. Continuing with this solution...".format(len(measured_surface_point_indices), len(surface_points)))
+            else:
+                print("Covered all {} surface points".format(len(surface_points)))
+            return used_views
+
+        elif solver_type == "IP_basic":            
+            # Get indices of all measurable surface points in ascending order
+            # (required so that integer programming can find any solution)
+            measurable_surface_point_indices = sorted(
+                list(set(itertools.chain.from_iterable(
+                    [view.get_measurable_surface_points(get_only_indices=True) for view in provided_views]
+                ))))
+            provided_views = list(provided_views)
+            viewpoint_indices = range(len(provided_views))
+            print("Provided viewpoints can cover {} of total {} sampled surface points".format(len(measurable_surface_point_indices), len(surface_points)))
+            ip_problem = pulp.LpProblem(sense=pulp.const.LpMinimize)
+            viewpoint_variables = pulp.LpVariable.dicts(name="viewpoint_variables", indexs=viewpoint_indices, cat=pulp.const.LpInteger)
+            # Add objective function
+            ip_problem += pulp.lpSum([viewpoint_variables[i] for i in viewpoint_indices])
+            # Add constraints: Viewpoint_variable's elements are either 1 or 0
+            for i in viewpoint_indices:
+                ip_problem += viewpoint_variables[i] <= 1
+                ip_problem += viewpoint_variables[i] >= 0
+            
+            # Add constraints: Every surface point must be covered
+            for surface_point_index in measurable_surface_point_indices:
+                ip_problem += pulp.lpSum([(surface_point_index in provided_views[viewpoint_index].get_measurable_surface_points(get_only_indices=True)) * viewpoint_variables[viewpoint_index] for viewpoint_index in viewpoint_indices]) >= 1
+            print("Constructed integer programming problem. Start solving...")
+            ip_problem.solve()
+            if not ip_problem.status == pulp.const.LpSolutionOptimal:
+                raise Exception("Could not find optimal solution.")
+            print("Found optimal solution consisting of {} viewpoints".format(pulp.value(ip_problem.objective)))
+            output = set()
+            for solved_viewpoint_variable in ip_problem.variables():
+                if solved_viewpoint_variable.varValue == 1:  
+                    output.add(provided_views[int(solved_viewpoint_variable.name.split("_")[-1])])
+            return output
+
+
             
 
 class SensorModel:
@@ -382,6 +439,12 @@ class SensorModel:
             [-0.315, -0.085, -0.19],
             [-0.315, 0.085, -0.19],
         ]) * 1000).convex_hull
+    
+    def get_max_uncertainty(self):
+        return self.evaluate_uncertainty(self.optimal_standoff + self.maximum_deviation_z, self.maximum_deviation_gamma + np.pi)
+    
+    def get_min_uncertainty(self):
+        return self.evaluate_uncertainty(self.optimal_standoff - self.maximum_deviation_z, np.pi)
 
     def evaluate_uncertainty(self, z, gamma):
         beta = np.arcsin((self.u_0 * np.sin(np.pi/2 - self.alpha)) / np.sqrt((z + np.sqrt(self.u_0**2 + (self.u_0/self.m_L)**2))**2+self.u_0**2-2*(z + np.sqrt(self.u_0**2 + (self.u_0/self.m_L)**2))*self.u_0*np.cos(np.pi/2 - self.alpha)))
@@ -409,6 +472,8 @@ class SensorModel:
         trajectory_direction = view.get_orientation_matrix().dot(np.array([1, 0, 0, 1]))[0:3]
         sensor_direction = view.get_orientation_matrix().dot(np.array([0, 0, 1, 1]))[0:3]
         lateral_direction = view.get_orientation_matrix().dot(np.array([0, 1, 0, 1]))[0:3]
+        max_uncertainty = self.get_max_uncertainty()
+        delta_uncertainty = max_uncertainty - self.get_min_uncertainty()
         measurable_surface_points = []
         for inlier_index in inlier_indices:
             t_0 = (surface_points[inlier_index] - view.get_position()).dot(trajectory_direction)
@@ -450,7 +515,7 @@ class SensorModel:
                 if not add_inlier:
                     break  
             if add_inlier:
-                measurable_surface_points.append((inlier_index, t_0, self.evaluate_uncertainty(z, gamma)))
+                measurable_surface_points.append((inlier_index, t_0, (max_uncertainty - self.evaluate_uncertainty(z, gamma)) / delta_uncertainty))
         return measurable_surface_points
         
 
@@ -494,8 +559,8 @@ class View:
             ])
         )
         self.lengths = [0,0]
-        self.covered_surface_points = []
-        
+        self.measurable_surface_point_indices = []
+        self.measurable_surface_point_uncertainties = []
         
         self.trajectory_for_measurement = moveit_msgs.msg.RobotTrajectory()
         self.trajectory_to_view = moveit_msgs.msg.RobotTrajectory()
@@ -550,12 +615,20 @@ class View:
         else:
             return self.position
     
-    def set_covered_surface_points(self, point_indices):
-        assert isinstance(point_indices, list)
-        self.covered_surface_points = point_indices
+    def set_measurable_surface_points(self, point_indices_and_uncertainty_scores):
+
+        self.measurable_surface_point_indices = [point[0] for point in point_indices_and_uncertainty_scores]
+        self.measurable_surface_point_uncertainties = [point[1] for point in point_indices_and_uncertainty_scores]
     
-    def get_covered_surface_points(self):
-        return self.covered_surface_points
+    def get_measurable_surface_points(self, get_only_indices=False, get_only_uncertainties=False):
+        if get_only_indices and not get_only_uncertainties:
+            return self.measurable_surface_point_indices
+        elif not get_only_indices and get_only_uncertainties:
+            return self.measurable_surface_point_uncertainties
+        elif not get_only_uncertainties and not get_only_indices:
+            return list(zip(self.measurable_surface_point_indices, self.measurable_surface_point_uncertainties))
+        else:
+            raise ValueError("Only one argument may be true or both arguments false, but both can not be set true!")
     
     def set_lengths(self, lenght_pos_x, lenght_neg_x):
         self.lengths = [lenght_pos_x, lenght_neg_x]
@@ -566,11 +639,10 @@ class View:
 if __name__ == "__main__":
     def signal_handler(signum_a, signum_b):
         exit()
-    
     signal.signal(signal.SIGINT, signal_handler)
     tm = TrajectoryManager(OFFSET)
     while True:
-        tm.perform_all("/home/svenbecker/Desktop/test6.stl", 0.0005,2)
+        tm.perform_all("/home/svenbecker/Desktop/test6.stl", 0.006,7)
         rospy.sleep(5)
     rospy.spin()
     

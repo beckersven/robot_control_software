@@ -37,6 +37,7 @@ class PointCloudManager:
     def clear_stitched_point_cloud_callback(self, req):
         with self.process_mutex:
             self.stitched_point_cloud.points = []
+            self.stitched_point_cloud.channels[0].values = []
         return TriggerResponse(success=True, message="Cleared the stitched point cloud")
 
 
