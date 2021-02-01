@@ -17,8 +17,9 @@ from std_srvs.srv import SetBoolRequest, SetBool
 import pulp
 import itertools
 from moveit_msgs.srv import GetPositionIK, GetPositionIKRequest, GetPositionIKResponse
+import array
 
-OFFSET = np.array([500, -500, 1200])
+OFFSET = np.array([600, -600, 1700])
 
 class TrajectoryManager:
     def __init__(self, offset):
@@ -31,7 +32,7 @@ class TrajectoryManager:
         self.group.set_planner_id("PersistentPRMstar") # Enables multi-query-planning (see corresponding literature)
         self.scene = moveit_commander.PlanningSceneInterface(synchronous=True)
         self.group.set_max_velocity_scaling_factor(1)
-
+        
         # Add collision obejcts representing the mirrors beside the robot at IFL to MoveIt
         box_pose = geometry_msgs.msg.PoseStamped()
         box_pose.header.frame_id = "world"
@@ -52,7 +53,7 @@ class TrajectoryManager:
         self.target_mesh_transform = np.eye(4)
         self.max_edge = 1e6
 
-    def postprocess_trajectory(self, trajectory, start_state):
+    def postprocess_trajectory(self, trajectory):
         params = rospy.get_param("/robot_description_planning/joint_limits")
         point_indices_to_pop = []
         for i in range(len(trajectory.joint_trajectory.points)):
@@ -134,7 +135,7 @@ class TrajectoryManager:
 
             
         
-    def process_view(self, view, surface_points, face_indices, ik_service, minimum_required_overmeasure_mm = 10, sample_step_mm = 1, joint_jump_threshold = 1.5, minimum_trajectory_length_mm = 10):
+    def process_view(self, view, surface_points, face_indices, ik_service, face_normals, minimum_required_overmeasure_mm = 10, sample_step_mm = 1, joint_jump_threshold = 1.5, minimum_trajectory_length_mm = 10):
         assert isinstance(view, View)
         
         trajectory_origin = view.get_position()
@@ -155,7 +156,7 @@ class TrajectoryManager:
         view_center_pose.pose.position.x = trajectory_in_m(0)[0]
         view_center_pose.pose.position.y = trajectory_in_m(0)[1]
         view_center_pose.pose.position.z = trajectory_in_m(0)[2]
-        
+        """
         self.group.set_start_state_to_current_state()
         self.group.set_pose_target(view_center_pose)
         initial_plan = self.group.plan()
@@ -180,21 +181,21 @@ class TrajectoryManager:
                 break
         if not resp.error_code.val == GetPositionIKResponse().error_code.SUCCESS:
             print("Rejected viewpoint because no IK solution was found")
-            return False"""
-        self.group.set_start_state(view_center_state)
+            return False
+        self.group.set_start_state(resp.solution)
 
         print("POSE_FOUND\t", time.time() - start)
         start = time.time()
         
 
-        measurement_evaluation = self.sensor_model.process_view_metrologically(surface_points, face_indices, self.target_mesh, view, self.max_edge)
+        measurable_surface_points, uncertainty_scores, trajectory_line_arguments_selected = self.sensor_model.process_view_metrologically(surface_points, face_indices, self.target_mesh, view, face_normals, self.max_edge)
         print("SENSOR_EVAL\t", time.time() - start)
         start = time.time()
 
-        if len(measurement_evaluation) == 0:
+        if len(measurable_surface_points) == 0:
             return False
-        max_deflection = max(measurement_evaluation, key=lambda x: x[1])[1] + minimum_required_overmeasure_mm
-        min_deflection = min(measurement_evaluation, key=lambda x: x[1])[1] - minimum_required_overmeasure_mm
+        max_deflection = max(trajectory_line_arguments_selected) + minimum_required_overmeasure_mm
+        min_deflection = min(trajectory_line_arguments_selected) - minimum_required_overmeasure_mm
         if max_deflection - min_deflection < minimum_trajectory_length_mm:
             return False
         
@@ -217,10 +218,10 @@ class TrajectoryManager:
 
         (trajectory, fraction_total) = self.group.compute_cartesian_path([view_deflection_pose_a, view_deflection_pose_b], sample_step_mm * 1e-3, joint_jump_threshold)
         fraction_b = (fraction_total * (fraction_a * max_deflection - min_deflection) - fraction_a * max_deflection) / abs(min_deflection)
-        if (fraction_a * max_deflection - fraction_b * min_deflection) < minimum_trajectory_length_mm or not self.postprocess_trajectory(trajectory, view_deflection_state_a):
+        if (fraction_a * max_deflection - fraction_b * min_deflection) < minimum_trajectory_length_mm or not self.postprocess_trajectory(trajectory):
             return False
         view.set_trajectory_for_measurement(trajectory)
-        view.set_measurable_surface_points([(measurable_point[0], measurable_point[2]) for measurable_point in list(filter(lambda x: (x[1] <= fraction_a * max_deflection and x[1] >= fraction_b * min_deflection), measurement_evaluation))])
+        view.set_measurable_surface_points(measurable_surface_points, uncertainty_scores)
         print("CART_PTHS\t", time.time() - start)
         return True
 
@@ -231,6 +232,7 @@ class TrajectoryManager:
         except:
             rospy.logerr("Trimesh could not load mesh {}".format(file_name))
             return False
+        
         self.target_mesh_transform = transform
         # Move the mesh's origin (usually identically with the origin of the provided CAD-file)
         # to where its mounted with respect to the "world"-frame of MoveIt
@@ -245,14 +247,17 @@ class TrajectoryManager:
         target_mesh_pose_stamped.pose.orientation.y = q[2]
         target_mesh_pose_stamped.pose.orientation.z = q[3]
         target_mesh_pose_stamped.pose.position = geometry_msgs.msg.Point(*(trimesh.transformations.translation_from_matrix(self.target_mesh_transform) / 1000))
-        target_mesh_pose_stamped.header.frame_id = "world"     
+        target_mesh_pose_stamped.header.frame_id = "world"
+           
         try:
             # Reduce size as meshes used here a specified in millimeters whereas MoveIt interprets them as meters
             self.scene.add_mesh("target", target_mesh_pose_stamped, file_name, size=(1e-3, 1e-3, 1e-3))
+            pass
         except:
             # add_mesh hat troubles with "non-root" filenames (e.g. ~/cadfiles/target.stl)
             rospy.logerr("Moveit could not load mesh {}.\nHave you tried specifying it with a file path starting at root /...?".format(file_name))
             return False
+        
         return True
 
 
@@ -325,14 +330,17 @@ class TrajectoryManager:
         self.execute_views(self.connect_views(scp_views), surface_pts)
 
     def generate_samples_and_views(self, density, N_angles_per_view):
+        
         surface_points, face_indices = trimesh.sample.sample_surface_even(self.target_mesh, int(self.target_mesh.area * density))
+        print("OK")
+        """
         pub = rospy.Publisher("/sampled_surface_points", sensor_msgs.msg.PointCloud, latch=True, queue_size=1)
         surface_points_message = sensor_msgs.msg.PointCloud()
         surface_points_message.header.frame_id = "world"
         
         for surface_point in surface_points:
             surface_points_message.points.append(geometry_msgs.msg.Point(*(surface_point / 1000)))
-        pub.publish(surface_points_message)
+        pub.publish(surface_points_message)"""
         self.max_edge = max(self.target_mesh.bounding_box_oriented.edges_unique_length)
         self.group.set_planning_time(0.05)
         valid_views = []
@@ -341,11 +349,14 @@ class TrajectoryManager:
         minimum_required_overmeasure = np.sqrt(1 / (np.pi * density)) + 5
         ik_service = rospy.ServiceProxy("/compute_ik", GetPositionIK, persistent=True)
         START =time.time()
+        face_normals = np.ndarray((len(self.target_mesh.face_normals), 3), dtype=float)
+        for i, face_normal in enumerate(self.target_mesh.face_normals):
+            face_normals[i] = face_normal
         #ik_service = None
         for (surface_point, face_index) in zip(surface_points, face_indices):
             for angle in np.linspace(0, 360, N_angles_per_view + 1)[:-1]:
-                new_view = View(surface_point, self.target_mesh.face_normals[face_index], np.deg2rad(angle), self.sensor_model.get_optimal_standoff())
-                if self.process_view(new_view, surface_points, face_indices, ik_service, minimum_required_overmeasure):
+                new_view = View(surface_point, face_normals[face_index], np.deg2rad(angle), self.sensor_model.get_optimal_standoff())
+                if self.process_view(new_view, surface_points, face_indices, ik_service, face_normals, minimum_required_overmeasure):
                     valid_views.append(new_view)
                 processed += 1
                 print("Processed view {} of {} ({} %, {} of them are usable for measurement)".format(
@@ -385,7 +396,7 @@ class TrajectoryManager:
             measured_surface_point_indices = set()
             used_views = set()
             while measured_surface_point_indices != set(range(len(surface_points))) and len(provided_views) > 0:
-                provided_views = sorted(provided_views, key = lambda view: len(measured_surface_point_indices | set(view.get_measurable_surface_points(get_only_indices=True))) + max(view.get_measurable_surface_points(get_only_uncertainties=True)) * 0.9, reverse=True)
+                provided_views = sorted(provided_views, key = lambda view: len(measured_surface_point_indices | set(view.get_measurable_surface_points(get_only_indices=True))) + max(view.get_measurable_surface_points(get_only_scores=True)) * 0.9, reverse=True)
                 next_view = provided_views.pop(0)
                 # Only accept new view if it brings an advantage. If no advantage -> Algorithm has reached peak
                 if measured_surface_point_indices == (measured_surface_point_indices | set(next_view.get_measurable_surface_points())):
@@ -464,6 +475,8 @@ class SensorModel:
             [-0.315, -0.085, -0.19],
             [-0.315, 0.085, -0.19],
         ]) * 1000).convex_hull
+
+        self.ray_mesh_intersector = None
     
     def get_max_uncertainty(self):
         return self.evaluate_uncertainty(self.optimal_standoff + self.maximum_deviation_z, self.maximum_deviation_gamma + np.pi)
@@ -482,14 +495,18 @@ class SensorModel:
     def get_optimal_standoff(self):
         return self.optimal_standoff
 
-    def process_view_metrologically(self, surface_points, faces, target_mesh, view, frustum_half_length_mm = 5e2):
+    def process_view_metrologically(self, surface_points, faces, target_mesh, view, face_normals, frustum_half_length_mm = 5e2):
+        start = time.time()
         assert isinstance(view, View)
+        if self.ray_mesh_intersector is None:
+            self.ray_mesh_intersector = trimesh.ray.ray_pyembree.RayMeshIntersector(target_mesh, scale_to_box = False)
+
         scan_frustum = self.get_scanning_frustum(frustum_half_length_mm)
         scan_frustum.apply_transform(view.get_orientation_matrix())
         scan_frustum.apply_transform(view.get_projected_position(True))
-        inliers = scan_frustum.contains(surface_points)
-        inlier_indices = []
-
+        content_evaluator = trimesh.ray.ray_pyembree.RayMeshIntersector(scan_frustum, scale_to_box = False)
+        inliers = content_evaluator.contains_points(surface_points)
+        inlier_indices = array.array('i')
         for i in range(len(inliers)):
             if inliers[i]:
                 inlier_indices.append(i)
@@ -497,52 +514,46 @@ class SensorModel:
         trajectory_direction = view.get_orientation_matrix().dot(np.array([1, 0, 0, 1]))[0:3]
         sensor_direction = view.get_orientation_matrix().dot(np.array([0, 0, 1, 1]))[0:3]
         lateral_direction = view.get_orientation_matrix().dot(np.array([0, 1, 0, 1]))[0:3]
-        max_uncertainty = self.get_max_uncertainty()
-        delta_uncertainty = max_uncertainty - self.get_min_uncertainty()
-        measurable_surface_points = []
-        for inlier_index in inlier_indices:
-            t_0 = (surface_points[inlier_index] - view.get_position()).dot(trajectory_direction)
-            first_ray_origin = t_0 * trajectory_direction + view.get_position()
-            first_ray_direction = surface_points[inlier_index] - first_ray_origin
-            first_locations, _, first_faces = target_mesh.ray.intersects_location(
-                    ray_origins=[first_ray_origin],
-                    ray_directions=[first_ray_direction]
-                )
-            valid_dimension = list(filter(lambda x:abs(first_ray_direction[x])>1e-6, range(3)))[0]
-            add_inlier = True
-            for hit_index_of_first_ray in range(len(first_locations)):
-                if faces[inlier_index] == first_faces[hit_index_of_first_ray]:
-                    gamma = np.pi / 2 + np.arctan2(trajectory_direction.dot(target_mesh.face_normals[first_faces[hit_index_of_first_ray]]), -1 * sensor_direction.dot(target_mesh.face_normals[first_faces[hit_index_of_first_ray]]))
-                    theta = np.arctan2(lateral_direction.dot(target_mesh.face_normals[first_faces[hit_index_of_first_ray]]), -1 * sensor_direction.dot(target_mesh.face_normals[first_faces[hit_index_of_first_ray]]))
-                    z = sensor_direction.dot(first_locations[hit_index_of_first_ray] - first_ray_origin)
-                    if abs(gamma - np.pi/2) > self.maximum_deviation_gamma or abs(theta) > self.maximum_deviation_theta or abs(z - self.optimal_standoff) > self.maximum_deviation_z:
-                        add_inlier = False
-                        break
-                    t_1 = t_0 - self.laser_emission_perception_distance
-                    second_ray_origin = t_1 * trajectory_direction + view.get_position()
-                    second_ray_direction = surface_points[inlier_index] - second_ray_origin
-                    second_locations, _, second_faces = target_mesh.ray.intersects_location(
-                            ray_origins=[second_ray_origin],
-                            ray_directions=[second_ray_direction]
-                        )
+        score_calc = lambda z, gamma : (self.get_max_uncertainty() - self.evaluate_uncertainty(z, gamma)) / (self.get_max_uncertainty() - self.get_min_uncertainty())
+        ray_origins_emitter = np.ndarray((len(inlier_indices), 3), dtype=float)
+        ray_directions_emitter = np.ndarray((len(inlier_indices), 3), dtype=float)
+        ray_origins_detector = np.ndarray((len(inlier_indices), 3), dtype=float)
+        ray_directions_detector = np.ndarray((len(inlier_indices), 3), dtype=float)
+        trajectory_line_arguments = array.array('d', [])
+        surface_points = np.array(surface_points)
+        for i, inlier_index in enumerate(inlier_indices):
+            t_0 =  (surface_points[inlier_index] - view.get_position()).dot(trajectory_direction)
+            trajectory_line_arguments.append(t_0)
+            
+            ray_origins_emitter[i] = t_0 * trajectory_direction + view.get_position()
+            ray_directions_emitter[i] = surface_points[inlier_index] - ray_origins_emitter[i]
+            
+            ray_origins_detector[i] = ray_origins_emitter[i] - trajectory_direction * self.laser_emission_perception_distance
+            ray_directions_detector[i] = surface_points[inlier_index] - ray_origins_detector[i]
+        rt_emitter_result = self.ray_mesh_intersector.intersects_first(
+            ray_origins=ray_origins_emitter,
+            ray_directions=ray_directions_emitter
+            )
+        rt_detector_result = self.ray_mesh_intersector.intersects_first(
+            ray_origins=ray_origins_detector,
+            ray_directions=ray_directions_detector
+            )
 
-                    for hit_index_of_second_ray in range(len(second_locations)):
-                        if faces[inlier_index] == second_faces[hit_index_of_second_ray]:
-                            continue
-                        hit_ray_argument = (second_locations[hit_index_of_second_ray][valid_dimension] - second_ray_origin[valid_dimension]) / second_ray_direction[valid_dimension]
-                        if hit_ray_argument < 1 and hit_ray_argument > 0:
-                            add_inlier = False
-                            break
-                else:
-                    hit_ray_argument = (first_locations[hit_index_of_first_ray][valid_dimension] - first_ray_origin[valid_dimension]) / first_ray_direction[valid_dimension]
-                    if hit_ray_argument < 1 and hit_ray_argument > 0:
-                        add_inlier = False 
-                if not add_inlier:
-                    break  
-            if add_inlier:
-                print(len(first_locations))
-                measurable_surface_points.append((inlier_index, t_0, (max_uncertainty - self.evaluate_uncertainty(z, gamma)) / delta_uncertainty))
-        return measurable_surface_points
+        measurable_surface_point_indices = array.array('i', [])
+        uncertainty_scores = array.array('d', [])
+        trajectory_line_arguments_selected = array.array('d', [])
+        for i, (rt_emitter_face_id, rt_detector_face_id) in enumerate(zip(rt_emitter_result, rt_detector_result)):
+            if rt_emitter_face_id != rt_detector_face_id or faces[inlier_indices[i]] != rt_detector_face_id:
+                continue
+            else:
+                gamma = np.pi / 2 + np.arctan2(trajectory_direction.dot(face_normals[rt_detector_face_id]), -1 * sensor_direction.dot(face_normals[rt_detector_face_id]))
+                theta = np.arctan2(lateral_direction.dot(face_normals[rt_detector_face_id]), -1 * sensor_direction.dot(face_normals[rt_detector_face_id]))
+                z = sensor_direction.dot(surface_points[inlier_indices[i]] - ray_origins_emitter[i])
+                if gamma > np.pi / 4 and gamma < np.pi * 3 / 4 and abs(theta) < np.pi / 4 and z < 200 and z > 100:
+                    uncertainty_scores.append(score_calc(z, gamma))
+                    measurable_surface_point_indices.append(inlier_indices[i])
+                    trajectory_line_arguments_selected.append(trajectory_line_arguments[i])
+        return measurable_surface_point_indices, uncertainty_scores, trajectory_line_arguments_selected
         
 
     def get_scanning_frustum(self, half_length):
@@ -556,6 +567,7 @@ class SensorModel:
             [- half_length, - (self.optimal_standoff + self.maximum_deviation_z) * np.tan(self.fan_angle / 2), self.maximum_deviation_z],
             [half_length, - (self.optimal_standoff + self.maximum_deviation_z) * np.tan(self.fan_angle / 2), self.maximum_deviation_z],
         ]
+        
         return trimesh.PointCloud(scanner_frustum_vertices).convex_hull
     
 
@@ -586,7 +598,7 @@ class View:
         )
         self.lengths = [0,0]
         self.measurable_surface_point_indices = []
-        self.measurable_surface_point_uncertainties = []
+        self.measurable_surface_point_scores = []
         
         self.trajectory_for_measurement = moveit_msgs.msg.RobotTrajectory()
         self.trajectory_to_view = moveit_msgs.msg.RobotTrajectory()
@@ -641,18 +653,18 @@ class View:
         else:
             return self.position
     
-    def set_measurable_surface_points(self, point_indices_and_uncertainty_scores):
+    def set_measurable_surface_points(self, measurable_point_indices, uncertainty_scores):
 
-        self.measurable_surface_point_indices = [point[0] for point in point_indices_and_uncertainty_scores]
-        self.measurable_surface_point_uncertainties = [point[1] for point in point_indices_and_uncertainty_scores]
+        self.measurable_surface_point_indices = measurable_point_indices
+        self.measurable_surface_point_scores = uncertainty_scores
     
-    def get_measurable_surface_points(self, get_only_indices=False, get_only_uncertainties=False):
-        if get_only_indices and not get_only_uncertainties:
+    def get_measurable_surface_points(self, get_only_indices=False, get_only_scores=False):
+        if get_only_indices and not get_only_scores:
             return self.measurable_surface_point_indices
-        elif not get_only_indices and get_only_uncertainties:
-            return self.measurable_surface_point_uncertainties
-        elif not get_only_uncertainties and not get_only_indices:
-            return list(zip(self.measurable_surface_point_indices, self.measurable_surface_point_uncertainties))
+        elif not get_only_indices and get_only_scores:
+            return self.measurable_surface_point_scores
+        elif not get_only_scores and not get_only_indices:
+            return list(zip(self.measurable_surface_point_indices, self.measurable_surface_point_scores))
         else:
             raise ValueError("Only one argument may be true or both arguments false, but both can not be set true!")
     
@@ -668,7 +680,7 @@ if __name__ == "__main__":
     signal.signal(signal.SIGINT, signal_handler)
     tm = TrajectoryManager(OFFSET)
     while True:
-        tm.perform_all("/home/svenbecker/Desktop/motor.stl", 0.002,8)
+        tm.perform_all("/home/svenbecker/Desktop/test6.stl", 0.001, 6)
         rospy.sleep(5)
     rospy.spin()
     
