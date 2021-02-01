@@ -8,6 +8,7 @@ import moveit_msgs.msg
 import geometry_msgs.msg
 import sys
 import signal
+import time
 from geometry_msgs.msg import Quaternion
 import trajectory_msgs.msg
 import time
@@ -15,8 +16,9 @@ import sensor_msgs.msg
 from std_srvs.srv import SetBoolRequest, SetBool
 import pulp
 import itertools
+from moveit_msgs.srv import GetPositionIK, GetPositionIKRequest, GetPositionIKResponse
 
-OFFSET = np.array([600, -600, 1700])
+OFFSET = np.array([500, -500, 1200])
 
 class TrajectoryManager:
     def __init__(self, offset):
@@ -80,9 +82,8 @@ class TrajectoryManager:
 
     def connect_views(self, unordered_views, return_to_initial_pose=False):
         if len(unordered_views) == 0:
-            return []
+            return
         left_views = list(unordered_views)
-        ordered_views = []
         self.group.set_planning_time(0.2)
 
 
@@ -96,13 +97,13 @@ class TrajectoryManager:
         pseudo_trajectory.joint_trajectory.joint_names = left_views[0].get_trajectory_for_measurement().joint_trajectory.joint_names
         pseudo_trajectory.joint_trajectory.points.append(pseudo_end_point)
         initial_pseudo_view.set_trajectory_for_measurement(pseudo_trajectory)       
-        ordered_views.append(initial_pseudo_view)
+        last_view = initial_pseudo_view
 
         while len(left_views) != 0:
             # Set start state for planning to the last pose of the previous trajectory to execute
             temporary_start_state = moveit_msgs.msg.RobotState()
-            temporary_start_state.joint_state.position = ordered_views[-1].get_trajectory_for_measurement().joint_trajectory.points[-1].positions
-            temporary_start_state.joint_state.name = ordered_views[-1].get_trajectory_for_measurement().joint_trajectory.joint_names
+            temporary_start_state.joint_state.position = last_view.get_trajectory_for_measurement().joint_trajectory.points[-1].positions
+            temporary_start_state.joint_state.name = last_view.get_trajectory_for_measurement().joint_trajectory.joint_names
             self.group.set_start_state(temporary_start_state)
             
             min_index = None
@@ -122,19 +123,18 @@ class TrajectoryManager:
                     min_index = index
                     reverse_flag = True
             if min_index is not None:
-                print("Enqueued viewpoint-trajectory ({} left)".format(len(left_views)))
                 next_view = left_views.pop(min_index)
+                print("Enqueued viewpoint-trajectory ({} left)".format(len(left_views)))
                 if reverse_flag:
-                    next_view.reverse_trajectory_for_measurement()
-                    
+                    next_view.reverse_trajectory_for_measurement()   
                 next_view.set_trajectory_to_view(min_plan)
-                ordered_views.append(next_view)
-
-        return ordered_views[1:]
+                last_view = next_view
+                yield last_view
+        return
 
             
         
-    def process_view(self, view, surface_points, face_indices, minimum_required_overmeasure_mm = 10, sample_step_mm = 1, joint_jump_threshold = 1.5, minimum_trajectory_length_mm = 10):
+    def process_view(self, view, surface_points, face_indices, ik_service, minimum_required_overmeasure_mm = 10, sample_step_mm = 1, joint_jump_threshold = 1.5, minimum_trajectory_length_mm = 10):
         assert isinstance(view, View)
         
         trajectory_origin = view.get_position()
@@ -142,7 +142,8 @@ class TrajectoryManager:
 
         # Implementation of a line equation (t is in mm, but result is in m)
         trajectory_in_m = lambda t: (trajectory_origin + trajectory_direction * t) / 1000
-
+        start = time.time()
+        
         # Check if center of viewpoint (= actual viewPOINT) is reachable 
         q = trimesh.transformations.quaternion_from_matrix(view.get_orientation_matrix())
         view_center_pose = geometry_msgs.msg.PoseStamped()
@@ -154,6 +155,7 @@ class TrajectoryManager:
         view_center_pose.pose.position.x = trajectory_in_m(0)[0]
         view_center_pose.pose.position.y = trajectory_in_m(0)[1]
         view_center_pose.pose.position.z = trajectory_in_m(0)[2]
+        
         self.group.set_start_state_to_current_state()
         self.group.set_pose_target(view_center_pose)
         initial_plan = self.group.plan()
@@ -165,11 +167,30 @@ class TrajectoryManager:
         view_center_state = moveit_msgs.msg.RobotState()
         view_center_state.joint_state.position = initial_plan[1].joint_trajectory.points[-1].positions
         view_center_state.joint_state.name = initial_plan[1].joint_trajectory.joint_names
-        self.group.set_start_state(view_center_state)
+        """
+        req = GetPositionIKRequest()
+        req.ik_request.group_name = "manipulator"
+        req.ik_request.avoid_collisions = True
+        # req.ik_request.robot_state = self.group.get_current_state()
+        req.ik_request.pose_stamped = view_center_pose
         
+        for _ in range(10):
+            resp = ik_service.call(req)
+            if resp.error_code.val == GetPositionIKResponse().error_code.SUCCESS:
+                break
+        if not resp.error_code.val == GetPositionIKResponse().error_code.SUCCESS:
+            print("Rejected viewpoint because no IK solution was found")
+            return False"""
+        self.group.set_start_state(view_center_state)
+
+        print("POSE_FOUND\t", time.time() - start)
+        start = time.time()
         
 
         measurement_evaluation = self.sensor_model.process_view_metrologically(surface_points, face_indices, self.target_mesh, view, self.max_edge)
+        print("SENSOR_EVAL\t", time.time() - start)
+        start = time.time()
+
         if len(measurement_evaluation) == 0:
             return False
         max_deflection = max(measurement_evaluation, key=lambda x: x[1])[1] + minimum_required_overmeasure_mm
@@ -200,7 +221,7 @@ class TrajectoryManager:
             return False
         view.set_trajectory_for_measurement(trajectory)
         view.set_measurable_surface_points([(measurable_point[0], measurable_point[2]) for measurable_point in list(filter(lambda x: (x[1] <= fraction_a * max_deflection and x[1] >= fraction_b * min_deflection), measurement_evaluation))])
-
+        print("CART_PTHS\t", time.time() - start)
         return True
 
     def load_target_mesh(self, file_name, transform = np.eye(4)):
@@ -269,10 +290,10 @@ class TrajectoryManager:
             self.group.stop()
             
             view_counter += 1
-            print("Executed view {} of {}".format(view_counter, len(ordered_views)))
+            # print("Executed view {} of {}".format(view_counter, len(ordered_views)))
             # Short break to ensure no parts are moving anymore
             rospy.sleep(0.1)  
-        stitch_service.call(SetBoolRequest(data=False))
+            stitch_service.call(SetBoolRequest(data=False))
             # if not self.group.execute(trajectory) and not try_to_handle_errors:
             #     rospy.logerr("Execution of trajectory failed. Exiting...")
             #     self.group.stop()
@@ -298,10 +319,10 @@ class TrajectoryManager:
     def perform_all(self, target_mesh_filename, density, N_angles_per_view):
         self.load_target_mesh(target_mesh_filename, transform=trimesh.transformations.translation_matrix(OFFSET))
         surface_pts, views  = self.generate_samples_and_views(density, N_angles_per_view)
-        scp_views = self.solve_scp(surface_pts, views, "IP_basic")
-        views = self.connect_views(scp_views)
+        scp_views = self.solve_scp(surface_pts, views, "greedy")
+
         raw_input()
-        self.execute_views(views, surface_pts)
+        self.execute_views(self.connect_views(scp_views), surface_pts)
 
     def generate_samples_and_views(self, density, N_angles_per_view):
         surface_points, face_indices = trimesh.sample.sample_surface_even(self.target_mesh, int(self.target_mesh.area * density))
@@ -318,10 +339,13 @@ class TrajectoryManager:
         processed = 0
         # Estimated as circle radius according to density + safety offset
         minimum_required_overmeasure = np.sqrt(1 / (np.pi * density)) + 5
+        ik_service = rospy.ServiceProxy("/compute_ik", GetPositionIK, persistent=True)
+        START =time.time()
+        #ik_service = None
         for (surface_point, face_index) in zip(surface_points, face_indices):
             for angle in np.linspace(0, 360, N_angles_per_view + 1)[:-1]:
                 new_view = View(surface_point, self.target_mesh.face_normals[face_index], np.deg2rad(angle), self.sensor_model.get_optimal_standoff())
-                if self.process_view(new_view, surface_points, face_indices, minimum_required_overmeasure):
+                if self.process_view(new_view, surface_points, face_indices, ik_service, minimum_required_overmeasure):
                     valid_views.append(new_view)
                 processed += 1
                 print("Processed view {} of {} ({} %, {} of them are usable for measurement)".format(
@@ -330,8 +354,9 @@ class TrajectoryManager:
                     np.round(100.0 * processed / (len(surface_points) * N_angles_per_view), 2),
                     len(valid_views)
                 ))
-
+        ik_service.close()
         print("\n" + "*" * 20 + "\nGenerated {} valid measurement-trajectory/-ies".format(len(valid_views)))
+        print("DURATION WAS ", time.time() - START)
         return surface_points, valid_views
     
 
@@ -363,10 +388,10 @@ class TrajectoryManager:
                 provided_views = sorted(provided_views, key = lambda view: len(measured_surface_point_indices | set(view.get_measurable_surface_points(get_only_indices=True))) + max(view.get_measurable_surface_points(get_only_uncertainties=True)) * 0.9, reverse=True)
                 next_view = provided_views.pop(0)
                 # Only accept new view if it brings an advantage. If no advantage -> Algorithm has reached peak
-                if measured_surface_point_indices == (measured_surface_point_indices | set(next_view.get_covered_surface_points())):
+                if measured_surface_point_indices == (measured_surface_point_indices | set(next_view.get_measurable_surface_points())):
                     print("Covered only {} of {} surface points. Continuing with this solution ...".format(len(measured_surface_point_indices), len(surface_points)))
                     return used_views
-                measured_surface_point_indices |= set(next_view.get_covered_surface_points())
+                measured_surface_point_indices |= set(next_view.get_measurable_surface_points())
                 used_views.add(next_view)
             if measured_surface_point_indices != range(len(surface_points)):
                 print("Covered only {} of {} surface points. Continuing with this solution...".format(len(measured_surface_point_indices), len(surface_points)))
@@ -377,10 +402,10 @@ class TrajectoryManager:
         elif solver_type == "IP_basic":            
             # Get indices of all measurable surface points in ascending order
             # (required so that integer programming can find any solution)
-            measurable_surface_point_indices = sorted(
-                list(set(itertools.chain.from_iterable(
+            measurable_surface_point_indices = set(
+                itertools.chain.from_iterable(
                     [view.get_measurable_surface_points(get_only_indices=True) for view in provided_views]
-                ))))
+                ))
             provided_views = list(provided_views)
             viewpoint_indices = range(len(provided_views))
             print("Provided viewpoints can cover {} of total {} sampled surface points".format(len(measurable_surface_point_indices), len(surface_points)))
@@ -515,6 +540,7 @@ class SensorModel:
                 if not add_inlier:
                     break  
             if add_inlier:
+                print(len(first_locations))
                 measurable_surface_points.append((inlier_index, t_0, (max_uncertainty - self.evaluate_uncertainty(z, gamma)) / delta_uncertainty))
         return measurable_surface_points
         
@@ -642,7 +668,7 @@ if __name__ == "__main__":
     signal.signal(signal.SIGINT, signal_handler)
     tm = TrajectoryManager(OFFSET)
     while True:
-        tm.perform_all("/home/svenbecker/Desktop/test6.stl", 0.006,7)
+        tm.perform_all("/home/svenbecker/Desktop/motor.stl", 0.002,8)
         rospy.sleep(5)
     rospy.spin()
     
