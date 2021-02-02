@@ -102,6 +102,7 @@ class TrajectoryManager:
 
         while len(left_views) != 0:
             # Set start state for planning to the last pose of the previous trajectory to execute
+            
             temporary_start_state = moveit_msgs.msg.RobotState()
             temporary_start_state.joint_state.position = ordered_views[-1].get_trajectory_for_measurement().joint_trajectory.points[-1].positions
             temporary_start_state.joint_state.name = ordered_views[-1].get_trajectory_for_measurement().joint_trajectory.joint_names
@@ -112,12 +113,15 @@ class TrajectoryManager:
             min_plan = pseudo_trajectory
             for index, view in enumerate(left_views):
                 self.group.set_joint_value_target(view.get_trajectory_for_measurement().joint_trajectory.points[0].positions)
+                
                 plan_result = self.group.plan()
                 if plan_result[0] and (min_plan.joint_trajectory.points[-1].time_from_start > plan_result[1].joint_trajectory.points[-1].time_from_start or min_index is None):
                     min_plan = plan_result[1]
                     min_index = index
                     reverse_flag = False
+                
                 self.group.set_joint_value_target(view.get_trajectory_for_measurement().joint_trajectory.points[-1].positions)
+                
                 plan_result = self.group.plan()
                 if plan_result[0] and (min_plan.joint_trajectory.points[-1].time_from_start > plan_result[1].joint_trajectory.points[-1].time_from_start or min_index is None):
                     min_plan = plan_result[1]
@@ -301,10 +305,9 @@ class TrajectoryManager:
         surface_pts, views  = self.generate_samples_and_views(density, N_angles_per_view)
         scp_views = self.solve_scp(surface_pts, views, "IP_basic")
 
-        raw_input()
         self.execute_views(self.connect_views(scp_views), surface_pts)
 
-    def generate_samples_and_views(self, density, N_angles_per_view, view_tilt_mode="conservative", visibility_to_mechanical_viewpoint_ratio = 1):
+    def generate_samples_and_views(self, density, N_angles_per_view, view_tilt_mode="aggressive", visibility_to_mechanical_viewpoint_ratio = 1):
         
         surface_points, face_indices = trimesh.sample.sample_surface_even(self.target_mesh, int(self.target_mesh.area * density))
         print("OK")
@@ -686,7 +689,7 @@ if __name__ == "__main__":
     signal.signal(signal.SIGINT, signal_handler)
     tm = TrajectoryManager(OFFSET)
     while True:
-        tm.perform_all("/home/svenbecker/Desktop/test6.stl", 0.001, 6)
-        rospy.sleep(5)
+        tm.perform_all("/home/svenbecker/Desktop/test6.stl", 0.001, 8)
+        rospy.sleep(1)
     rospy.spin()
     
