@@ -31,11 +31,6 @@ class PointCloudManager:
         # Threading-Lock to prevent multiple accesses on self.stitched_point_cloud at the same moment ("race condition")
         self.stitch_mutex = Lock()
         
-        # Transforms must be read in to correctly map the stitched point into the "world" frame (see process_scan_callback(...) below)
-        self.buffer = tf2_ros.Buffer()
-        tf2_ros.TransformListener(self.buffer)
-        self.tf_timeout = rospy.Duration(rospy.get_param("/coppelia_config/sim_dt") * 100)
-        
         # Required for uncertainty evaluation of incoming data:
         self.sensor_model = SensorModel(rospy.get_param("/sensor_model_parameters"))
         
@@ -72,7 +67,7 @@ class PointCloudManager:
         the points of the scan-line will be stored in the corresponding class member and the stitched point cloud becomes published. """
 
         # The scan-data is decoded as an array of 32-Bit floats with length 1 + 6 * n (n is integer) according to:
-        # First entry is time-stamp (which is important to map the sensor spoint cloud to the correct transform),
+        # First entry is time-stamp (which is important to map the sensors point cloud to the correct transform),
         # subsequent are batches of 6 values, each representing one measured point by CoppliaSim. In each batch,
         # the first 3 values represent coordinates of the point in the sensor frame and the 
         # last 3 values are the uncertainty-critical characteristics z (in mm), gamma (in rad) and theta (in rad).
@@ -90,7 +85,7 @@ class PointCloudManager:
         
         # Contains currently scanned points:
         current_scan_line = PointCloud()
-        current_scan_line.header.frame_id = "laser_emitter_frame"
+        current_scan_line.header.frame_id = "world"
         current_scan_line.header.stamp = stamp
         current_scan_line.channels.append(ChannelFloat32())
         current_scan_line.channels[0].name = "rgb"
@@ -111,18 +106,9 @@ class PointCloudManager:
                 print(raw_data.data[4])
                 color_hex = struct.unpack('f', struct.pack('i', (int(0xff * (1 - score)) << 16) + (int(0xff * score) << 8)))[0]
                 current_scan_line.channels[0].values.append(color_hex)
-                if self.stitch:
-                    try:
-                        # As the laser_emitter_frame changes over time and points in the point cloud can not be indiviually stamped
-                        # (so that their frame-transform can be found afterwards), it is most convenient to transform the current new_point with
-                        # the tf provided by CoppeliaSim into the "world" frame and store them transformed.
-                        new_point = self.buffer.transform_full(new_point, "world", stamp, "world", self.tf_timeout)
-                    except tf2_ros.ExtrapolationException as e:
-                        if "extrapolation into the past" in e.message:
-                            rospy.logwarn("Tried to read too old tf-values. Ignore this if this happens only during node start-up.")
-                            break
-                    self.stitched_point_cloud.points.append(new_point.point) 
-                    self.stitched_point_cloud.channels[0].values.append(color_hex)
+            if self.stitch:                    
+                self.stitched_point_cloud.points.extend(current_scan_line.points) 
+                self.stitched_point_cloud.channels[0].values.extend(current_scan_line.channels[0].values)
             
             # Send out the results   
             self.current_scan_line_pub.publish(current_scan_line)
