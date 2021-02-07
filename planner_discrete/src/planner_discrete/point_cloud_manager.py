@@ -13,7 +13,8 @@ from planner_discrete.sensor_model import SensorModel
 
 
 class PointCloudManager:
-    """Class for processing and evaluation of the raw scan-data published to ROS by CoppeliaSim.        
+    """
+    Class for processing and evaluation of the raw scan-data published to ROS by CoppeliaSim.        
     """
     def __init__(self):
         # Initialize node
@@ -40,13 +41,20 @@ class PointCloudManager:
         
         # Create service callbacks to clear the stitched point cloud or to turn on/off stitching in general on command
         rospy.Service("clear_stitched_point_cloud", Trigger, self.clear_stitched_point_cloud_callback)
-        rospy.Service("switch_stitch_mode", SetBool, self.switch_stitch_mode_callback)
+        rospy.Service("switch_stitch_mode", SetBool, self.set_stitch_mode_callback)
 
         # Listen to the scan-data published by CoppeliaSim
         rospy.Subscriber("/raw_scan_data", Float32MultiArray, self.process_scan_callback)
 
-    def switch_stitch_mode_callback(self, req):
-        """Turns on or off point-stitching dependent on the boolean req.data"""
+    def set_stitch_mode_callback(self, req):
+        """
+        Turns on or off point-stitching dependent on the boolean req.data
+        
+        :param req: Request with a boolean flag indicating whether to enable (true) or disable (false) stitching mode
+        :type req: std_srvs/SetBoolRequest
+        :returns: Response about the success of dis-/enabling of stitching and a message about the performed mode-set
+        :rtype: std_srvs/SetBoolResponse
+        """
         assert isinstance(req, SetBoolRequest)
         with self.stitch_mutex:
             self.stitch = req.data
@@ -54,7 +62,14 @@ class PointCloudManager:
         
 
     def clear_stitched_point_cloud_callback(self, req):
-        """Clears the class member stitched_point_cloud"""
+        """
+        Clears the class member stitched_point_cloud
+        
+        :param req: - (contains no information)
+        :type req: std_srvs/TriggerRequest
+        :returns: Response about the success of clearing the stitched point cloud
+        :rtype: std_srvs/TriggerResponse
+        """
         assert isinstance(req, TriggerRequest)
         with self.stitch_mutex:
             self.stitched_point_cloud.points = []
@@ -64,7 +79,14 @@ class PointCloudManager:
 
     def process_scan_callback(self, raw_data):
         """Decodes scanner-data from CoppeliaSim and publishes the current scan-line. If stitching is enabled,
-        the points of the scan-line will be stored in the corresponding class member and the stitched point cloud becomes published. """
+        the points of the scan-line will be stored in the corresponding class member and the stitched point cloud becomes published.
+        
+        
+        :param raw_data: Raw-data from CoppeliaSim containing coordinates and uncertainty-relevant information of each measured point as well as a ROS time stamp
+        :type raw_data: std_msgs/Float32MultiArray
+        :returns: None
+        :rtype: NoneType
+        """
 
         # The scan-data is decoded as an array of 32-Bit floats with length 1 + 6 * n (n is integer) according to:
         # First entry is time-stamp (which is important to map the sensors point cloud to the correct transform),
@@ -114,6 +136,7 @@ class PointCloudManager:
             self.current_scan_line_pub.publish(current_scan_line)
             self.stitched_point_cloud.header.stamp = stamp
             self.stitched_point_cloud_pub.publish(self.stitched_point_cloud)
+        return
 
 
 if __name__ == "__main__":
