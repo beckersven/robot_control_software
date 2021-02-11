@@ -16,20 +16,22 @@ class View:
         """
         Creates view anchor pose based on geometric specifications (see below). It does not assign execution- or metrology-relevant attributes to the object.
         The pose is designed by moving from surface_point in surface_normal-direction standoff_distance and generate a frame with the z-axis facing
-        towards the surface point (i.e. = -1 * surface_normal) and the x-axis 
+        towards the surface point (i.e. = -1 * surface_normal). This axis is the boresight and the view's laser_emitter_frame will be turned around this angle
+        the specified angle. In the end, tilting may be applied. This rotates the anchor point around the surface point according to the tilt_...-specification.
+        Tilting is performed in a way that the new anchor-position is located on a sphere's surface around the surface-point with radius standoff_distance.
 
         :param surface_point: Point on the target-mesh surface this View's anchor is focused at
         :type surface_point: numpy.array
         :param surface_normal: Normal vector of the surface_point's face
-        :type surface_normal: [type]
-        :param angle_around_boresight: [description]
-        :type angle_around_boresight: [type]
-        :param standoff_distance: [description]
-        :type standoff_distance: [type]
-        :param tilt_theta: [description], defaults to 0
-        :type tilt_theta: int, optional
-        :param tilt_gamma: [description], defaults to 0
-        :type tilt_gamma: int, optional
+        :type surface_normal: numpy.array
+        :param angle_around_boresight: Angle this view's laser_emitter_frame is rotated around boresight at anchor-position
+        :type angle_around_boresight: float
+        :param standoff_distance: Distance of this view's anchor-position to the corresponding surface-point
+        :type standoff_distance: float
+        :param tilt_theta: Tilt-angle in theta-direction (see :ref:`sensor-model`), defaults to 0
+        :type tilt_theta: float, optional
+        :param tilt_gamma: Tilt-angle in gamma-direction (see :ref:`sensor-model`), defaults to 0
+        :type tilt_gamma: float, optional
         """
         self.projected_position = surface_point
         

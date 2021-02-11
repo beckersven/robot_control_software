@@ -211,7 +211,7 @@ of all unenqueued view’s measurement-trajectories and the shortest (in time do
 <col class="field-body" />
 <tbody valign="top">
 <tr class="field-odd field"><th class="field-name">Parameters:</th><td class="field-body"><ul class="first simple">
-<li><strong>unordered_views</strong> (<em>set</em><em>[</em><a class="reference internal" href="agiprobot_measurement.html#module-agiprobot_measurement.view" title="agiprobot_measurement.view"><em>view</em></a><em>]</em>) – Set of views to be connected where each has a stored measurement-trajectory</li>
+<li><strong>unordered_views</strong> (<em>set</em><em>[</em><a class="reference internal" href="module_view.html#module-agiprobot_measurement.view" title="agiprobot_measurement.view"><em>view</em></a><em>]</em>) – Set of views to be connected where each has a stored measurement-trajectory</li>
 <li><strong>min_planning_time</strong> (<em>float</em><em>, </em><em>optional</em>) – Planning time that is used for connection-path-planning (will be increased automatically if no plan was found at first), defaults to 0.2</li>
 </ul>
 </td>
@@ -219,7 +219,7 @@ of all unenqueued view’s measurement-trajectories and the shortest (in time do
 <tr class="field-even field"><th class="field-name">Returns:</th><td class="field-body"><p class="first">List of ordered and execution-ready views</p>
 </td>
 </tr>
-<tr class="field-odd field"><th class="field-name">Return type:</th><td class="field-body"><p class="first last">list[<a class="reference internal" href="agiprobot_measurement.html#agiprobot_measurement.view.View" title="agiprobot_measurement.view.View">View</a>]</p>
+<tr class="field-odd field"><th class="field-name">Return type:</th><td class="field-body"><p class="first last">list[<a class="reference internal" href="module_view.html#agiprobot_measurement.view.View" title="agiprobot_measurement.view.View">View</a>]</p>
 </td>
 </tr>
 </tbody>
@@ -255,7 +255,7 @@ are published in “/currently_measured_points” during execution.</p>
 <col class="field-body" />
 <tbody valign="top">
 <tr class="field-odd field"><th class="field-name">Parameters:</th><td class="field-body"><ul class="first last simple">
-<li><strong>execution_list</strong> (<em>list</em><em>[</em><em>moveit_msgs/RobotTrajectory</em><em>] or </em><em>list</em><em>[</em><a class="reference internal" href="agiprobot_measurement.html#agiprobot_measurement.view.View" title="agiprobot_measurement.view.View"><em>View</em></a><em>]</em>) – List of RobotTrajectories or views that can be executed consecutively (the next segment’s start point is the last segment’s end point)</li>
+<li><strong>execution_list</strong> (<em>list</em><em>[</em><em>moveit_msgs/RobotTrajectory</em><em>] or </em><em>list</em><em>[</em><a class="reference internal" href="module_view.html#agiprobot_measurement.view.View" title="agiprobot_measurement.view.View"><em>View</em></a><em>]</em>) – List of RobotTrajectories or views that can be executed consecutively (the next segment’s start point is the last segment’s end point)</li>
 <li><strong>surface_points</strong> (<em>list</em><em>[</em><em>numpy.array</em><em>]</em><em>, </em><em>optional</em>) – List of the actual sampled surface points, defaults to None</li>
 </ul>
 </td>
@@ -294,7 +294,7 @@ multiple View-objects for a single surface-point by varying the anchor-pose (the
 <tr class="field-even field"><th class="field-name">Returns:</th><td class="field-body"><p class="first">2 lists with the first containing all sampled_surface_points and the second containing all views that were processed successfully</p>
 </td>
 </tr>
-<tr class="field-odd field"><th class="field-name">Return type:</th><td class="field-body"><p class="first last">list[numpy.array], list[<a class="reference internal" href="agiprobot_measurement.html#agiprobot_measurement.view.View" title="agiprobot_measurement.view.View">View</a>]</p>
+<tr class="field-odd field"><th class="field-name">Return type:</th><td class="field-body"><p class="first last">list[numpy.array], list[<a class="reference internal" href="module_view.html#agiprobot_measurement.view.View" title="agiprobot_measurement.view.View">View</a>]</p>
 </td>
 </tr>
 </tbody>
@@ -389,7 +389,7 @@ provided contraints. In the end, the processing-result (trajectory and metrologi
 <col class="field-body" />
 <tbody valign="top">
 <tr class="field-odd field"><th class="field-name">Parameters:</th><td class="field-body"><ul class="first simple">
-<li><strong>view</strong> (<a class="reference internal" href="agiprobot_measurement.html#agiprobot_measurement.view.View" title="agiprobot_measurement.view.View"><em>View</em></a>) – View to be processed (if processing was successful, members of this view-object will be changed)</li>
+<li><strong>view</strong> (<a class="reference internal" href="module_view.html#agiprobot_measurement.view.View" title="agiprobot_measurement.view.View"><em>View</em></a>) – View to be processed (if processing was successful, members of this view-object will be changed)</li>
 <li><strong>ik_service</strong> (<em>rospy.ServiceProxy</em>) – ROS-Serviceproxy that can resolve inverse-kinematics via moveit_msgs/GetPositionIK</li>
 <li><strong>minimum_required_overmeasure</strong> (<em>float</em><em>, </em><em>optional</em>) – How much to add to the trajectory in trajectory-direction in mm after the last measurable sample_point is measured (as samples usually do not occur exactly at edges), defaults to 5</li>
 <li><strong>trajectory_sample_step</strong> (<em>float</em><em>, </em><em>optional</em>) – Euclidian distance between 2 trajectory-points in cartesian sapce in mm, defaults to 2</li>
@@ -432,7 +432,7 @@ but in the objective, costs corresponding to the duration of the trajectory are 
 <col class="field-body" />
 <tbody valign="top">
 <tr class="field-odd field"><th class="field-name">Parameters:</th><td class="field-body"><ul class="first simple">
-<li><strong>provided_views</strong> (<em>set</em><em>[</em><a class="reference internal" href="agiprobot_measurement.html#agiprobot_measurement.view.View" title="agiprobot_measurement.view.View"><em>View</em></a><em>] or </em><em>list</em><em>[</em><a class="reference internal" href="agiprobot_measurement.html#agiprobot_measurement.view.View" title="agiprobot_measurement.view.View"><em>View</em></a><em>]</em>) – All processed views where each has a valid measurement-trajectory and information about the measurable surface_points</li>
+<li><strong>provided_views</strong> (<em>set</em><em>[</em><a class="reference internal" href="module_view.html#agiprobot_measurement.view.View" title="agiprobot_measurement.view.View"><em>View</em></a><em>] or </em><em>list</em><em>[</em><a class="reference internal" href="module_view.html#agiprobot_measurement.view.View" title="agiprobot_measurement.view.View"><em>View</em></a><em>]</em>) – All processed views where each has a valid measurement-trajectory and information about the measurable surface_points</li>
 <li><strong>solver_type</strong> (<em>str</em><em>, </em><em>optional</em>) – See function description, defaults to “greedy”</li>
 </ul>
 </td>
@@ -440,7 +440,7 @@ but in the objective, costs corresponding to the duration of the trajectory are 
 <tr class="field-even field"><th class="field-name">Returns:</th><td class="field-body"><p class="first">Set of views that can measure the union of measurable surface points of all provided views</p>
 </td>
 </tr>
-<tr class="field-odd field"><th class="field-name">Return type:</th><td class="field-body"><p class="first last">set[<a class="reference internal" href="agiprobot_measurement.html#agiprobot_measurement.view.View" title="agiprobot_measurement.view.View">View</a>]</p>
+<tr class="field-odd field"><th class="field-name">Return type:</th><td class="field-body"><p class="first last">set[<a class="reference internal" href="module_view.html#agiprobot_measurement.view.View" title="agiprobot_measurement.view.View">View</a>]</p>
 </td>
 </tr>
 </tbody>
