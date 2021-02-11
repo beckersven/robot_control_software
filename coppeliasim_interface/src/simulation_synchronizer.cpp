@@ -22,10 +22,12 @@ namespace coppeliasim_interface{
     }
 
     SimulationSynchronizer::~SimulationSynchronizer(){
+        // Stop simulation first, if running
         if(simulation_running){
             simxStopSimulation(client_id, simx_opmode_oneshot);
             ROS_DEBUG_STREAM("Stopped CoppeliaSim simulation");
         }
+        // Disconnect from CoppeliaSim, if currently connected
         if(client_id != -1){
             simxFinish(client_id);
             ROS_DEBUG_STREAM("Disconnected from CoppeliaSim");
@@ -123,11 +125,9 @@ namespace coppeliasim_interface{
         clock_pub.publish(current_time);
         ROS_DEBUG_STREAM("Updated ROS-/clock");
 
-        // Handle explicit_sync-services via parallel threads to improve performance
         ROS_DEBUG_STREAM("Calling explicit_sync-services");
-        // Start the threads
         bool success_flag = true;
-        // Wait for thread-termination and evaluate result
+        // Iterate through the services, call them and evaluate their result
         for(size_t i = 0; i < explicit_sync_list.size(); i++){
             std_srvs::Trigger tr;
             explicit_sync_list[i].call(tr);

@@ -4,19 +4,18 @@
 
 namespace coppeliasim_interface{
   HardwareInterface::HardwareInterface(){
+      // Initalize class members for the UR10e (which has 6 joints)
       joint_names_.resize(6, "");
       joint_efforts_.resize(6, 0);
       joint_handles_.resize(6, -1);
       joint_position_command_.resize(6, 0);
-      previous_joint_position_command_.resize(6,0);
       joint_positions_.resize(6, 0);
       joint_velocities_.resize(6, 0);
       joint_velocity_command_.resize(6, 0);
-      fts_measurements_.resize(6, 0);
       pausing_ramp_up_increment_ = 0.01;
-      target_speed_fraction_ = 1;
       run_state_ = RunState::RUNNING;
       speed_scaling_ = 1;
+      // Set static dummy-values (the CoppeliaSim-model has for example no emergency-stop)
       robot_status_resource_.drives_powered = industrial_robot_status_interface::TriState::TRUE;
       robot_status_resource_.e_stopped = industrial_robot_status_interface::TriState::FALSE;
       robot_status_resource_.error_code = 0;
@@ -28,16 +27,21 @@ namespace coppeliasim_interface{
       speed_scaling_combined_ = 1;
   }
   HardwareInterface::~HardwareInterface(){
+      // If connected to CoppeliaSim -> Safely disconnect
       if(client_id_ != -1){
           simxFinish(client_id_);
           ROS_DEBUG_STREAM("Disconnected from CoppeliaSim");
       }
   }
+
   bool HardwareInterface::init(ros::NodeHandle& root_nh, ros::NodeHandle& robot_nh){
       this->root_nh = root_nh;
       this->robot_nh = robot_nh;
-      std::string wrench_frame_id;
       simxInt coppelia_port, connection_timeout_ms;
+
+      // Connect to CoppeliaSim
+      // ^^^^^^^^^^^^^^^^^^^^^^
+      // Resolve required parameters
       if(!root_nh.getParam("/coppelia_config/PORT_hardware_interface", coppelia_port)
             || !root_nh.getParam("/coppelia_config/connection_timeout_ms", connection_timeout_ms)){
             ROS_ERROR_STREAM("Could not resolve CoppeliaSim-config. Expected parameters: " << std::endl 
@@ -46,39 +50,41 @@ namespace coppeliasim_interface{
                 << root_nh.resolveName("/coppelia_config/connection_timeout_ms") << std::endl);
             return false;
         }
-
+      // Establish connection
       client_id_ = simxStart("127.0.0.1", coppelia_port, true, true, 1000, 5);
       if(client_id_ == -1){
           ROS_ERROR_STREAM("Connection to CoppeliaSim failed using 127.0.0.1:" << coppelia_port);
           return false;
       }
       
+      // Create ros_control-interfaces
+      // ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+      // Acquire names of commandable joints
       if(!this->root_nh.getParam("hardware_interface/joints", joint_names_)){
           ROS_ERROR_STREAM("Could not find joint-names in " << this->root_nh.resolveName("hardware_interface/joints"));
           return false;
       }
       std::vector<simxFloat> dummy(4);
-      // Create ros_control interfaces
+      // Register each named joint to the interfaces
       for (std::size_t i = 0; i < joint_names_.size(); ++i)
       {
           ROS_DEBUG_STREAM("Registering handles for joint " << joint_names_[i]);
-          // Create joint state interface for all joints
+          // Create joint state interface with access to all readable joint-data
           js_interface_.registerHandle(hardware_interface::JointStateHandle(joint_names_[i], &joint_positions_[i],
                                                                           &joint_velocities_[i], &joint_efforts_[i]));
+          
+          // Get handle (= number) for the joint in CoppeliaSim by its name
           if(! simxGetObjectHandle(client_id_, joint_names_[i].c_str(), &joint_handles_[i], simx_opmode_blocking) == simx_return_ok){
               ROS_ERROR_STREAM("Can not resolve " << joint_names_[i] << " in CoppeliaSim");
               return false;
           }
           // Set the mode to streaming so that frequent evaluation becomes more lightweight
           simxGetJointPosition(client_id_, joint_handles_[i], &dummy[0], simx_opmode_streaming);
-              // 2012 = "magic-number" from CoppeliaSim-API-constants representing joint-velocity
+          // 2012 = "magic-number" from CoppeliaSim-API-constants representing joint-velocity
           simxGetObjectFloatParameter(client_id_, joint_handles_[i], 2012, &dummy[0], simx_opmode_streaming);
           simxGetJointForce(client_id_, joint_handles_[i], &dummy[0], simx_opmode_streaming);
-          
-          
 
-
-          // Create joint position control interface
+          // Extend control-interfaces to consider this joint
           pj_interface_.registerHandle(
               hardware_interface::JointHandle(js_interface_.getHandle(joint_names_[i]), &joint_position_command_[i]));
           vj_interface_.registerHandle(
@@ -89,14 +95,13 @@ namespace coppeliasim_interface{
               js_interface_.getHandle(joint_names_[i]), &joint_velocity_command_[i], &speed_scaling_combined_));
       }
 
+      // Configure joint-independent interfaces
       speedsc_interface_.registerHandle(
           ur_controllers::SpeedScalingHandle("speed_scaling_factor", &speed_scaling_combined_));
-
-  
-
       robot_status_interface_.registerHandle(industrial_robot_status_interface::IndustrialRobotStatusHandle(
           "industrial_robot_status_handle", robot_status_resource_));
-      // Register interfaces
+      
+      // Register interfaces to ROS (the interfaces themselves have all the joints now registered to them)
       registerInterface(&js_interface_);
       registerInterface(&spj_interface_);
       registerInterface(&pj_interface_);
@@ -104,16 +109,20 @@ namespace coppeliasim_interface{
       registerInterface(&svj_interface_);
       registerInterface(&speedsc_interface_);
       registerInterface(&robot_status_interface_);
+      
+      // Advertise ROS-services
+      // ^^^^^^^^^^^^^^^^^^^^^^
       set_speed_slider_srv_ = robot_nh.advertiseService("set_speed_slider", &HardwareInterface::setSpeedSlider, this);
       pause_button_srv_ = robot_nh.advertiseService("pause", &HardwareInterface::setPause, this);
+      tare_sensor_srv_ = robot_nh.advertiseService("zero_ftsensor", &HardwareInterface::zeroFTSensor, this);
       ROS_DEBUG_STREAM("CoppeliaSim hardware-interface has been initialized successfully!");
-      
       return true;
   }
 
   bool HardwareInterface::prepareSwitch(const std::list<hardware_interface::ControllerInfo>& start_list,
                                         const std::list<hardware_interface::ControllerInfo>& stop_list)
   {
+    // Taken 1:1 from the original ROS-driver
     bool ret_val = true;
     if (controllers_initialized_ && !start_list.empty())
     {
@@ -136,7 +145,8 @@ namespace coppeliasim_interface{
 
 
   void HardwareInterface::read(const ros::Time& time, const ros::Duration& period){
-      // Read in the joint data
+      // Read in the joint data from CoppeliaSim and store them in the controller-registered member-vectors
+      // (from buffer, since opmode has been set to streaming)
       simxFloat position, velocity, torque;
       for(size_t i = 0; i < joint_names_.size(); i++){
           if(simxGetJointPosition(client_id_, joint_handles_[i], &position, simx_opmode_buffer) == simx_return_ok
@@ -157,13 +167,21 @@ namespace coppeliasim_interface{
 
       // Handle speed-scaling and pausing
       if(run_state_ == RunState::PAUSED){
+        // Do not move
         speed_scaling_combined_ = 0.0;
       }
       else if(run_state_ == RunState::RAMPUP){
-        speed_scaling_combined_ += pausing_ramp_up_increment_;
-        if(speed_scaling_combined_ >= speed_scaling_) run_state_ == RunState::RUNNING;
+        // Increase actually used velocity-scale (speed_scaling_combined_) until target (= speed_scaling_) is reached
+        if(speed_scaling_combined_ + pausing_ramp_up_increment_ >= speed_scaling_) {
+          run_state_ = RunState::RUNNING;
+          speed_scaling_combined_ = speed_scaling_;
+        }
+        else{
+          speed_scaling_combined_ += pausing_ramp_up_increment_;
+        }
       }
       else{
+        // Normal operation
         speed_scaling_combined_ = speed_scaling_;
       }
   }
@@ -174,7 +192,6 @@ namespace coppeliasim_interface{
       if (position_controller_running_)
       {
           for(size_t i = 0; i < joint_names_.size(); i++){
-
             simxSetJointTargetPosition(client_id_, joint_handles_[i], static_cast<simxFloat>(joint_position_command_[i]), simx_opmode_oneshot);
           }
       }
@@ -192,6 +209,7 @@ namespace coppeliasim_interface{
 
   bool HardwareInterface::checkControllerClaims(const std::set<std::string>& claimed_resources)
   {
+    // Taken 1:1 from the original ROS-driver
     for (const std::string& it : joint_names_)
     {
       for (const std::string& jt : claimed_resources)
@@ -208,6 +226,7 @@ namespace coppeliasim_interface{
   void HardwareInterface::doSwitch(const std::list<hardware_interface::ControllerInfo>& start_list,
                                   const std::list<hardware_interface::ControllerInfo>& stop_list)
   {
+    // Taken 1:1 from the original ROS-driver
     for (auto& controller_it : stop_list)
     {
       for (auto& resource_it : controller_it.claimed_resources)
@@ -271,6 +290,7 @@ namespace coppeliasim_interface{
 
   bool HardwareInterface::zeroFTSensor(std_srvs::TriggerRequest& req, std_srvs::TriggerResponse& res)
   {
+    // Not implemented yet (but is not required for the desired use-case)!
     res.message = "CoppeliaSim has no zero-ing functionality for force-/torque-sensors";
     res.success = false;
     return true;
@@ -279,6 +299,7 @@ namespace coppeliasim_interface{
   bool HardwareInterface::setSpeedSlider(ur_msgs::SetSpeedSliderFractionRequest& req,
                                         ur_msgs::SetSpeedSliderFractionResponse& res)
   {
+    // Reject request, if out of range
     if (req.speed_slider_fraction >= 0.01 && req.speed_slider_fraction <= 1.0)
     {
       speed_scaling_ = req.speed_slider_fraction;
@@ -296,7 +317,7 @@ namespace coppeliasim_interface{
       res.success = false;
       res.message = "Currently ramping up - Try again later";
     }
-    else if((run_state_ == RunState::PAUSED && !req.data) || (run_state_ == RunState::RUNNING && req.data)){
+    else if((run_state_ == RunState::PAUSED && req.data) || (run_state_ == RunState::RUNNING && !req.data)){
       res.success = false;
       res.message = "Requested mode is already set";
     }

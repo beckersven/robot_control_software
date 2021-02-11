@@ -1,0 +1,294 @@
+
+
+<!DOCTYPE html>
+<html class="writer-html4" lang="en" >
+<head>
+  <meta charset="utf-8" />
+  
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  
+  <title>point_cloud_manager Python-module &mdash; CoppeliaSim Interface 1.0 documentation</title>
+  
+
+  
+  <link rel="stylesheet" href="_static/css/theme.css" type="text/css" />
+  <link rel="stylesheet" href="_static/pygments.css" type="text/css" />
+
+  
+  
+
+  
+  
+
+  
+
+  
+  <!--[if lt IE 9]>
+    <script src="_static/js/html5shiv.min.js"></script>
+  <![endif]-->
+  
+    
+      <script type="text/javascript">
+          var DOCUMENTATION_OPTIONS = {
+              URL_ROOT:'./',
+              VERSION:'1.0',
+              LANGUAGE:'None',
+              COLLAPSE_INDEX:false,
+              FILE_SUFFIX:'.html',
+              HAS_SOURCE:  true,
+              SOURCELINK_SUFFIX: '.txt'
+          };
+      </script>
+        <script type="text/javascript" src="_static/jquery.js"></script>
+        <script type="text/javascript" src="_static/underscore.js"></script>
+        <script type="text/javascript" src="_static/doctools.js"></script>
+        <script type="text/javascript" src="https://cdnjs.cloudflare.com/ajax/libs/mathjax/2.7.1/MathJax.js?config=TeX-AMS-MML_HTMLorMML"></script>
+    
+    <script type="text/javascript" src="_static/js/theme.js"></script>
+
+    
+    <link rel="index" title="Index" href="genindex.html" />
+    <link rel="search" title="Search" href="search.html" />
+    <link rel="next" title="SimulationSynchronizer C++-class" href="SimulationSynchronizer.html" />
+    <link rel="prev" title="HardwareInterface C++-class" href="HardwareInterface.html" /> 
+</head>
+
+<body class="wy-body-for-nav">
+
+   
+  <div class="wy-grid-for-nav">
+    
+    <nav data-toggle="wy-nav-shift" class="wy-nav-side">
+      <div class="wy-side-scroll">
+        <div class="wy-side-nav-search" >
+          
+
+          
+            <a href="index.html" class="icon icon-home"> CoppeliaSim Interface
+          
+
+          
+          </a>
+
+          
+            
+            
+              <div class="version">
+                1.0
+              </div>
+            
+          
+
+          
+<div role="search">
+  <form id="rtd-search-form" class="wy-form" action="search.html" method="get">
+    <input type="text" name="q" placeholder="Search docs" />
+    <input type="hidden" name="check_keywords" value="yes" />
+    <input type="hidden" name="area" value="default" />
+  </form>
+</div>
+
+          
+        </div>
+
+        
+        <div class="wy-menu wy-menu-vertical" data-spy="affix" role="navigation" aria-label="main navigation">
+          
+            
+            
+              
+            
+            
+              <p class="caption"><span class="caption-text">Explanation</span></p>
+<ul>
+<li class="toctree-l1"><a class="reference internal" href="Explanation.html">Explanation</a></li>
+</ul>
+<p class="caption"><span class="caption-text">Components</span></p>
+<ul class="current">
+<li class="toctree-l1"><a class="reference internal" href="HardwareInterface.html">HardwareInterface C++-class</a></li>
+<li class="toctree-l1 current"><a class="current reference internal" href="#">point_cloud_manager Python-module</a></li>
+<li class="toctree-l1"><a class="reference internal" href="SimulationSynchronizer.html">SimulationSynchronizer C++-class</a></li>
+</ul>
+
+            
+          
+        </div>
+        
+      </div>
+    </nav>
+
+    <section data-toggle="wy-nav-shift" class="wy-nav-content-wrap">
+
+      
+      <nav class="wy-nav-top" aria-label="top navigation">
+        
+          <i data-toggle="wy-nav-top" class="fa fa-bars"></i>
+          <a href="index.html">CoppeliaSim Interface</a>
+        
+      </nav>
+
+
+      <div class="wy-nav-content">
+        
+        <div class="rst-content">
+        
+          
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+<div role="navigation" aria-label="breadcrumbs navigation">
+
+  <ul class="wy-breadcrumbs">
+    
+      <li><a href="index.html" class="icon icon-home"></a> &raquo;</li>
+        
+      <li>point_cloud_manager Python-module</li>
+    
+    
+      <li class="wy-breadcrumbs-aside">
+        
+          
+            <a href="_sources/point_cloud_manager.rst.txt" rel="nofollow"> View page source</a>
+          
+        
+      </li>
+    
+  </ul>
+
+  
+  <hr/>
+</div>
+          <div role="main" class="document" itemscope="itemscope" itemtype="http://schema.org/Article">
+           <div itemprop="articleBody">
+            
+  <div class="section" id="module-point_cloud_manager">
+<span id="point-cloud-manager-python-module"></span><span id="point-cloud-manager"></span><h1>point_cloud_manager Python-module<a class="headerlink" href="#module-point_cloud_manager" title="Permalink to this headline">¶</a></h1>
+<dl class="class">
+<dt id="point_cloud_manager.PointCloudManager">
+<em class="property">class </em><code class="descclassname">point_cloud_manager.</code><code class="descname">PointCloudManager</code><a class="reference internal" href="_modules/point_cloud_manager.html#PointCloudManager"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#point_cloud_manager.PointCloudManager" title="Permalink to this definition">¶</a></dt>
+<dd><p>Class for processing and evaluation of the raw scan-data published to ROS by CoppeliaSim.</p>
+<dl class="method">
+<dt id="point_cloud_manager.PointCloudManager.clear_stitched_point_cloud_callback">
+<code class="descname">clear_stitched_point_cloud_callback</code><span class="sig-paren">(</span><em>req</em><span class="sig-paren">)</span><a class="reference internal" href="_modules/point_cloud_manager.html#PointCloudManager.clear_stitched_point_cloud_callback"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#point_cloud_manager.PointCloudManager.clear_stitched_point_cloud_callback" title="Permalink to this definition">¶</a></dt>
+<dd><p>Clears the class member stitched_point_cloud</p>
+<table class="docutils field-list" frame="void" rules="none">
+<col class="field-name" />
+<col class="field-body" />
+<tbody valign="top">
+<tr class="field-odd field"><th class="field-name">Parameters:</th><td class="field-body"><strong>req</strong> (<em>std_srvs/TriggerRequest</em>) – <ul class="simple">
+<li>(contains no information)</li>
+</ul>
+</td>
+</tr>
+<tr class="field-even field"><th class="field-name">Returns:</th><td class="field-body">Response about the success of clearing the stitched point cloud</td>
+</tr>
+<tr class="field-odd field"><th class="field-name">Return type:</th><td class="field-body">std_srvs/TriggerResponse</td>
+</tr>
+</tbody>
+</table>
+</dd></dl>
+
+<dl class="method">
+<dt id="point_cloud_manager.PointCloudManager.process_scan_callback">
+<code class="descname">process_scan_callback</code><span class="sig-paren">(</span><em>raw_data</em><span class="sig-paren">)</span><a class="reference internal" href="_modules/point_cloud_manager.html#PointCloudManager.process_scan_callback"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#point_cloud_manager.PointCloudManager.process_scan_callback" title="Permalink to this definition">¶</a></dt>
+<dd><p>Decodes scanner-data from CoppeliaSim and publishes the current scan-line. If stitching is enabled,
+the points of the scan-line will be stored in the corresponding class member and the stitched point cloud becomes published.</p>
+<table class="docutils field-list" frame="void" rules="none">
+<col class="field-name" />
+<col class="field-body" />
+<tbody valign="top">
+<tr class="field-odd field"><th class="field-name">Parameters:</th><td class="field-body"><strong>raw_data</strong> (<em>std_msgs/Float32MultiArray</em>) – Raw-data from CoppeliaSim containing coordinates and uncertainty-relevant information of each measured point as well as a ROS time stamp</td>
+</tr>
+<tr class="field-even field"><th class="field-name">Returns:</th><td class="field-body">None</td>
+</tr>
+<tr class="field-odd field"><th class="field-name">Return type:</th><td class="field-body">NoneType</td>
+</tr>
+</tbody>
+</table>
+</dd></dl>
+
+<dl class="method">
+<dt id="point_cloud_manager.PointCloudManager.set_stitch_mode_callback">
+<code class="descname">set_stitch_mode_callback</code><span class="sig-paren">(</span><em>req</em><span class="sig-paren">)</span><a class="reference internal" href="_modules/point_cloud_manager.html#PointCloudManager.set_stitch_mode_callback"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#point_cloud_manager.PointCloudManager.set_stitch_mode_callback" title="Permalink to this definition">¶</a></dt>
+<dd><p>Turns on or off point-stitching dependent on the boolean req.data</p>
+<table class="docutils field-list" frame="void" rules="none">
+<col class="field-name" />
+<col class="field-body" />
+<tbody valign="top">
+<tr class="field-odd field"><th class="field-name">Parameters:</th><td class="field-body"><strong>req</strong> (<em>std_srvs/SetBoolRequest</em>) – Request with a boolean flag indicating whether to enable (true) or disable (false) stitching mode</td>
+</tr>
+<tr class="field-even field"><th class="field-name">Returns:</th><td class="field-body">Response about the success of dis-/enabling of stitching and a message about the performed mode-set</td>
+</tr>
+<tr class="field-odd field"><th class="field-name">Return type:</th><td class="field-body">std_srvs/SetBoolResponse</td>
+</tr>
+</tbody>
+</table>
+</dd></dl>
+
+</dd></dl>
+
+</div>
+
+
+           </div>
+           
+          </div>
+          <footer>
+    <div class="rst-footer-buttons" role="navigation" aria-label="footer navigation">
+        <a href="SimulationSynchronizer.html" class="btn btn-neutral float-right" title="SimulationSynchronizer C++-class" accesskey="n" rel="next">Next <span class="fa fa-arrow-circle-right" aria-hidden="true"></span></a>
+        <a href="HardwareInterface.html" class="btn btn-neutral float-left" title="HardwareInterface C++-class" accesskey="p" rel="prev"><span class="fa fa-arrow-circle-left" aria-hidden="true"></span> Previous</a>
+    </div>
+
+  <hr/>
+
+  <div role="contentinfo">
+    <p>
+        &#169; Copyright 2021, Sven Becker.
+
+    </p>
+  </div>
+    
+    
+    
+    Built with <a href="https://www.sphinx-doc.org/">Sphinx</a> using a
+    
+    <a href="https://github.com/readthedocs/sphinx_rtd_theme">theme</a>
+    
+    provided by <a href="https://readthedocs.org">Read the Docs</a>. 
+
+</footer>
+        </div>
+      </div>
+
+    </section>
+
+  </div>
+  
+
+  <script type="text/javascript">
+      jQuery(function () {
+          SphinxRtdTheme.Navigation.enable(true);
+      });
+  </script>
+
+  
+  
+    
+   
+
+</body>
+</html>

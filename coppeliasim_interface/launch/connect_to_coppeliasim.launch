@@ -18,7 +18,8 @@
     <node name="robot_state_publisher" pkg="robot_state_publisher" type="robot_state_publisher"/>
     <node pkg="coppeliasim_interface" type="simulation_synchronizer_node" name="simulation_synchronizer_node" required="true" output="screen">
     </node>
-    <!--
+    <node type="point_cloud_manager.py" name="point_cloud_manager" pkg="coppeliasim_interface"></node>
+    <!-- DEPRECATED
     <node pkg="coppeliasim_interface" type="laser_scanner_node" name="laser_scanner_node" output="screen" required="true">
         <param name="world_frame_id" type="str" value="world"/>
         <param name="resolution" type="int" value="100"/>

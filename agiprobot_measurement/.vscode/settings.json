@@ -1,0 +1,8 @@
+{
+    "python.autoComplete.extraPaths": [
+        "/home/svenbecker/Bachelorarbeit/code/catkin_ws/devel/lib/python2.7/dist-packages",
+        "/home/svenbecker/ws_moveit/devel/lib/python2.7/dist-packages",
+        "/opt/ros/melodic/lib/python2.7/dist-packages"
+    ],
+    "restructuredtext.confPath": "${workspaceFolder}/doc"
+}

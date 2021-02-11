@@ -1,0 +1,82 @@
+\hypertarget{classcoppeliasim__interface_1_1SimulationSynchronizer}{}\section{coppeliasim\+\_\+interface\+:\+:Simulation\+Synchronizer Class Reference}
+\label{classcoppeliasim__interface_1_1SimulationSynchronizer}\index{coppeliasim\+\_\+interface\+::\+Simulation\+Synchronizer@{coppeliasim\+\_\+interface\+::\+Simulation\+Synchronizer}}
+
+
+Synchronizes the R\+O\+S-\/time with the Coppelia\+Sim-\/time in the sense, that both \textquotesingle{}clocks\textquotesingle{} are running at the same speed (but not necessarely at the same time), and ensures that time-\/critical tasks in the R\+O\+S-\/domain are performed in sync with each simulation-\/step.  
+
+
+
+
+{\ttfamily \#include $<$simulation\+\_\+synchronizer.\+h$>$}
+
+\subsection*{Public Member Functions}
+\begin{DoxyCompactItemize}
+\item 
+\mbox{\Hypertarget{classcoppeliasim__interface_1_1SimulationSynchronizer_ac18bb936436db0207cb883539542667b}\label{classcoppeliasim__interface_1_1SimulationSynchronizer_ac18bb936436db0207cb883539542667b}} 
+\hyperlink{classcoppeliasim__interface_1_1SimulationSynchronizer_ac18bb936436db0207cb883539542667b}{Simulation\+Synchronizer} ()
+\begin{DoxyCompactList}\small\item\em Construct a new Simulation Synchronizer object and initialize all members that do not necessarely need a R\+O\+S-\/ or Coppelia\+Sim-\/connection. \end{DoxyCompactList}\item 
+\mbox{\Hypertarget{classcoppeliasim__interface_1_1SimulationSynchronizer_afc14256edba11b6ef38de06292476f10}\label{classcoppeliasim__interface_1_1SimulationSynchronizer_afc14256edba11b6ef38de06292476f10}} 
+\hyperlink{classcoppeliasim__interface_1_1SimulationSynchronizer_afc14256edba11b6ef38de06292476f10}{$\sim$\+Simulation\+Synchronizer} ()
+\begin{DoxyCompactList}\small\item\em Destroy the Simulation Synchronizer object and stop the Coppelia\+Sim-\/\+Simulation and close the connection to Coppelia\+Sim. \end{DoxyCompactList}\item 
+bool \hyperlink{classcoppeliasim__interface_1_1SimulationSynchronizer_a511f8bf3569c7dce3dafb2a6f30dd6f2}{advance\+Simulation} ()
+\begin{DoxyCompactList}\small\item\em Advances the simulation in Coppelia\+Sim exactly one time-\/step (dt = \textquotesingle{}sim-\/dt\textquotesingle{}). Blocks until Coppelia\+Sim has finished the calculations for this advancement. \end{DoxyCompactList}\item 
+bool \hyperlink{classcoppeliasim__interface_1_1SimulationSynchronizer_a14e5777b6eacdd0a2d95603bad137ea0}{synchronize\+R\+OS} ()
+\begin{DoxyCompactList}\small\item\em Increases R\+O\+S-\/time with the same dt as Coppelia\+Sim\textquotesingle{}s \textquotesingle{}sim-\/dt\textquotesingle{} and calls all R\+O\+S-\/services that should be handled during one time-\/step afterwards. \end{DoxyCompactList}\item 
+bool \hyperlink{classcoppeliasim__interface_1_1SimulationSynchronizer_a86f3212df7425b946c6148ab324fd2bc}{init} (ros\+::\+Node\+Handle \&nh)
+\begin{DoxyCompactList}\small\item\em Connects instance to Coppelia\+Sim (registers it as client for the remote\+Api and starts simulation in synchroneous mode) and R\+OS (preparing /clock-\/publication and registering Services that should be handled every simulation-\/step) \end{DoxyCompactList}\end{DoxyCompactItemize}
+
+
+\subsection{Detailed Description}
+Synchronizes the R\+O\+S-\/time with the Coppelia\+Sim-\/time in the sense, that both \textquotesingle{}clocks\textquotesingle{} are running at the same speed (but not necessarely at the same time), and ensures that time-\/critical tasks in the R\+O\+S-\/domain are performed in sync with each simulation-\/step. 
+
+\subsection{Member Function Documentation}
+\mbox{\Hypertarget{classcoppeliasim__interface_1_1SimulationSynchronizer_a511f8bf3569c7dce3dafb2a6f30dd6f2}\label{classcoppeliasim__interface_1_1SimulationSynchronizer_a511f8bf3569c7dce3dafb2a6f30dd6f2}} 
+\index{coppeliasim\+\_\+interface\+::\+Simulation\+Synchronizer@{coppeliasim\+\_\+interface\+::\+Simulation\+Synchronizer}!advance\+Simulation@{advance\+Simulation}}
+\index{advance\+Simulation@{advance\+Simulation}!coppeliasim\+\_\+interface\+::\+Simulation\+Synchronizer@{coppeliasim\+\_\+interface\+::\+Simulation\+Synchronizer}}
+\subsubsection{\texorpdfstring{advance\+Simulation()}{advanceSimulation()}}
+{\footnotesize\ttfamily bool coppeliasim\+\_\+interface\+::\+Simulation\+Synchronizer\+::advance\+Simulation (\begin{DoxyParamCaption}{ }\end{DoxyParamCaption})}
+
+
+
+Advances the simulation in Coppelia\+Sim exactly one time-\/step (dt = \textquotesingle{}sim-\/dt\textquotesingle{}). Blocks until Coppelia\+Sim has finished the calculations for this advancement. 
+
+\begin{DoxyReturn}{Returns}
+Whether advancement was successful (could trigger calculations in Coppelia\+Sim and received success-\/feedback) 
+\end{DoxyReturn}
+\mbox{\Hypertarget{classcoppeliasim__interface_1_1SimulationSynchronizer_a86f3212df7425b946c6148ab324fd2bc}\label{classcoppeliasim__interface_1_1SimulationSynchronizer_a86f3212df7425b946c6148ab324fd2bc}} 
+\index{coppeliasim\+\_\+interface\+::\+Simulation\+Synchronizer@{coppeliasim\+\_\+interface\+::\+Simulation\+Synchronizer}!init@{init}}
+\index{init@{init}!coppeliasim\+\_\+interface\+::\+Simulation\+Synchronizer@{coppeliasim\+\_\+interface\+::\+Simulation\+Synchronizer}}
+\subsubsection{\texorpdfstring{init()}{init()}}
+{\footnotesize\ttfamily bool coppeliasim\+\_\+interface\+::\+Simulation\+Synchronizer\+::init (\begin{DoxyParamCaption}\item[{ros\+::\+Node\+Handle \&}]{nh }\end{DoxyParamCaption})}
+
+
+
+Connects instance to Coppelia\+Sim (registers it as client for the remote\+Api and starts simulation in synchroneous mode) and R\+OS (preparing /clock-\/publication and registering Services that should be handled every simulation-\/step) 
+
+
+\begin{DoxyParams}{Parameters}
+{\em nh} & Nodehandle to that this instance uses to communicate with R\+OS\\
+\hline
+\end{DoxyParams}
+\begin{DoxyReturn}{Returns}
+Whether the method could connect to R\+OS and Coppelia\+Sim 
+\end{DoxyReturn}
+\mbox{\Hypertarget{classcoppeliasim__interface_1_1SimulationSynchronizer_a14e5777b6eacdd0a2d95603bad137ea0}\label{classcoppeliasim__interface_1_1SimulationSynchronizer_a14e5777b6eacdd0a2d95603bad137ea0}} 
+\index{coppeliasim\+\_\+interface\+::\+Simulation\+Synchronizer@{coppeliasim\+\_\+interface\+::\+Simulation\+Synchronizer}!synchronize\+R\+OS@{synchronize\+R\+OS}}
+\index{synchronize\+R\+OS@{synchronize\+R\+OS}!coppeliasim\+\_\+interface\+::\+Simulation\+Synchronizer@{coppeliasim\+\_\+interface\+::\+Simulation\+Synchronizer}}
+\subsubsection{\texorpdfstring{synchronize\+R\+O\+S()}{synchronizeROS()}}
+{\footnotesize\ttfamily bool coppeliasim\+\_\+interface\+::\+Simulation\+Synchronizer\+::synchronize\+R\+OS (\begin{DoxyParamCaption}{ }\end{DoxyParamCaption})}
+
+
+
+Increases R\+O\+S-\/time with the same dt as Coppelia\+Sim\textquotesingle{}s \textquotesingle{}sim-\/dt\textquotesingle{} and calls all R\+O\+S-\/services that should be handled during one time-\/step afterwards. 
+
+\begin{DoxyReturn}{Returns}
+Whether all Services were called successfully 
+\end{DoxyReturn}
+
+
+The documentation for this class was generated from the following files\+:\begin{DoxyCompactItemize}
+\item 
+/home/svenbecker/\+Bachelorarbeit/code/catkin\+\_\+ws/src/robot\+\_\+control\+\_\+software/coppeliasim\+\_\+interface/include/simulation\+\_\+synchronizer.\+h\item 
+/home/svenbecker/\+Bachelorarbeit/code/catkin\+\_\+ws/src/robot\+\_\+control\+\_\+software/coppeliasim\+\_\+interface/src/simulation\+\_\+synchronizer.\+cpp\end{DoxyCompactItemize}

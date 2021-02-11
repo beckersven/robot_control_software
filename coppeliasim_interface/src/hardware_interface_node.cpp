@@ -37,16 +37,22 @@ std::unique_ptr<coppeliasim_interface::HardwareInterface> hw_interface;
 
 int main(int argc, char** argv)
 {
+  // Connect to ROS
   ros::init(argc, argv, "hardware_interface");
   ros::AsyncSpinner spinner(4);
   ros::NodeHandle nh1, nh2, nh3("~");
   spinner.start();
+  
+  // Get sim_dt as it describes the time passed between the writing and the reading of joint values
+  // by the controllers (very time-critical)
   double sim_dt;
   if(!nh1.getParam("/coppelia_config/sim_dt", sim_dt)){
     ROS_ERROR_STREAM("Can not resolve " << nh1.resolveName("/coppelia_config/sim_dt"));
     exit(1);
   }
   ros::Duration dt(sim_dt);
+
+
   hw_interface.reset(new coppeliasim_interface::HardwareInterface);
   if(!hw_interface->init(nh2, nh3)){
     ROS_ERROR_STREAM("Could not initialize hardware-interface!");
@@ -54,6 +60,7 @@ int main(int argc, char** argv)
   }
   controller_manager::ControllerManager cm(hw_interface.get(), nh1);
 
+  // Register the service called at each simulation-step that performs one control-cycle
   ros::ServiceServer srv = nh1.advertiseService<std_srvs::TriggerRequest, std_srvs::TriggerResponse>("/update_hw_interface", 
     [&](std_srvs::TriggerRequest& req, std_srvs::TriggerResponse& res)mutable{
       ros::Time current_time(ros::Time::now());

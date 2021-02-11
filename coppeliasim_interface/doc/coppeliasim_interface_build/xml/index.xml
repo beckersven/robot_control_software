@@ -1,0 +1,78 @@
+<?xml version='1.0' encoding='UTF-8' standalone='no'?>
+<doxygenindex xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xsi:noNamespaceSchemaLocation="index.xsd" version="1.8.13">
+  <compound refid="classcoppeliasim__interface_1_1HardwareInterface" kind="class"><name>coppeliasim_interface::HardwareInterface</name>
+    <member refid="classcoppeliasim__interface_1_1HardwareInterface_1a45c439e4d458905c4ba7bfd00229163d" kind="variable"><name>joint_handles_</name></member>
+    <member refid="classcoppeliasim__interface_1_1HardwareInterface_1af28293177115e84248f2873fe447d3c3" kind="variable"><name>joint_velocity_command_</name></member>
+    <member refid="classcoppeliasim__interface_1_1HardwareInterface_1a569e3225463d6f062c3646a04a9b7ad3" kind="variable"><name>joint_position_command_</name></member>
+    <member refid="classcoppeliasim__interface_1_1HardwareInterface_1ab5d052ecada55ae02a60b3118c2a503e" kind="variable"><name>joint_positions_</name></member>
+    <member refid="classcoppeliasim__interface_1_1HardwareInterface_1a4707518432603367aa9c4a95898faea6" kind="variable"><name>joint_efforts_</name></member>
+    <member refid="classcoppeliasim__interface_1_1HardwareInterface_1a96c84799b6435c7837a117688b55248b" kind="variable"><name>joint_velocities_</name></member>
+    <member refid="classcoppeliasim__interface_1_1HardwareInterface_1a53f1b964f80741a270ece8252ba8beaf" kind="variable"><name>joint_names_</name></member>
+    <member refid="classcoppeliasim__interface_1_1HardwareInterface_1a8ad63a42a0427128f8205238c8cedff5" kind="variable"><name>position_controller_running_</name></member>
+    <member refid="classcoppeliasim__interface_1_1HardwareInterface_1a37c0b737cfbecb97fad9180f9f95d075" kind="variable"><name>velocity_controller_running_</name></member>
+    <member refid="classcoppeliasim__interface_1_1HardwareInterface_1a076f615ef8082af2f81ac2bb3e9f20b9" kind="variable"><name>controllers_initialized_</name></member>
+    <member refid="classcoppeliasim__interface_1_1HardwareInterface_1ae131d497f26abcb3464329540d9efd93" kind="variable"><name>robot_status_resource_</name></member>
+    <member refid="classcoppeliasim__interface_1_1HardwareInterface_1aeb48682585945198d6fa4856c05720c2" kind="variable"><name>js_interface_</name></member>
+    <member refid="classcoppeliasim__interface_1_1HardwareInterface_1ac54c4949825c753fc76aea1dda63f5d8" kind="variable"><name>spj_interface_</name></member>
+    <member refid="classcoppeliasim__interface_1_1HardwareInterface_1a8b5466ea8bb806dcbf19e561f45e6c4f" kind="variable"><name>pj_interface_</name></member>
+    <member refid="classcoppeliasim__interface_1_1HardwareInterface_1a6fcd831ef764e0ecda01f7580f5509ef" kind="variable"><name>speedsc_interface_</name></member>
+    <member refid="classcoppeliasim__interface_1_1HardwareInterface_1a00e327fb4dd2c6515f9bc81dadbc5bd4" kind="variable"><name>vj_interface_</name></member>
+    <member refid="classcoppeliasim__interface_1_1HardwareInterface_1ae50a98edafce6fae4a6823eb5690cf66" kind="variable"><name>svj_interface_</name></member>
+    <member refid="classcoppeliasim__interface_1_1HardwareInterface_1a58f174431317603c902373bbadc077d6" kind="variable"><name>fts_interface_</name></member>
+    <member refid="classcoppeliasim__interface_1_1HardwareInterface_1ad3aff09f0a2a9b3df1563b2425774abe" kind="variable"><name>robot_status_interface_</name></member>
+    <member refid="classcoppeliasim__interface_1_1HardwareInterface_1ac6c66dd42220e8f93860b9c26c90d3b8" kind="variable"><name>root_nh</name></member>
+    <member refid="classcoppeliasim__interface_1_1HardwareInterface_1a4329f87a0e6cd0f4217f4ae07c1f0847" kind="variable"><name>robot_nh</name></member>
+    <member refid="classcoppeliasim__interface_1_1HardwareInterface_1ae18ef21538a55a7feee4d46cb539f072" kind="variable"><name>client_id_</name></member>
+    <member refid="classcoppeliasim__interface_1_1HardwareInterface_1a0eb849b46588929bdb836664794c2d56" kind="variable"><name>run_state_</name></member>
+    <member refid="classcoppeliasim__interface_1_1HardwareInterface_1a800b19982d3e807701eeb4db63d171e3" kind="variable"><name>pausing_ramp_up_increment_</name></member>
+    <member refid="classcoppeliasim__interface_1_1HardwareInterface_1ac2bf380605ce6bdb1720fb23ff3b76ab" kind="variable"><name>speed_scaling_</name></member>
+    <member refid="classcoppeliasim__interface_1_1HardwareInterface_1a1af99d1c9677669d03b3fa73d34d6ef8" kind="variable"><name>speed_scaling_combined_</name></member>
+    <member refid="classcoppeliasim__interface_1_1HardwareInterface_1aa5c1de8535764107d00d928494481bdb" kind="variable"><name>pause_button_srv_</name></member>
+    <member refid="classcoppeliasim__interface_1_1HardwareInterface_1a013833998b70d3ad448505f5aa20283b" kind="variable"><name>set_speed_slider_srv_</name></member>
+    <member refid="classcoppeliasim__interface_1_1HardwareInterface_1a4aef464f532e3ec3e8184af19713bcff" kind="variable"><name>tare_sensor_srv_</name></member>
+    <member refid="classcoppeliasim__interface_1_1HardwareInterface_1a731c52969b54a2cdda78a494bcd878ee" kind="function"><name>HardwareInterface</name></member>
+    <member refid="classcoppeliasim__interface_1_1HardwareInterface_1a61047459c300ddd92e0b2d82e3b7c2e2" kind="function"><name>~HardwareInterface</name></member>
+    <member refid="classcoppeliasim__interface_1_1HardwareInterface_1ada54343beeb383c43951877e3d49cf8e" kind="function"><name>init</name></member>
+    <member refid="classcoppeliasim__interface_1_1HardwareInterface_1abc05d9a9e8761462b2161a33f55203cc" kind="function"><name>read</name></member>
+    <member refid="classcoppeliasim__interface_1_1HardwareInterface_1a2a116645fc33233e4b9b1a37a9165674" kind="function"><name>write</name></member>
+    <member refid="classcoppeliasim__interface_1_1HardwareInterface_1a5b7c2e8dcf2fa17ba6bde7ea001d59e3" kind="function"><name>prepareSwitch</name></member>
+    <member refid="classcoppeliasim__interface_1_1HardwareInterface_1aae36a63c5125172387cfcbf21f9a1c24" kind="function"><name>doSwitch</name></member>
+    <member refid="classcoppeliasim__interface_1_1HardwareInterface_1af3204245bbf1e9e317d5d0a57b3c86c2" kind="function"><name>zeroFTSensor</name></member>
+    <member refid="classcoppeliasim__interface_1_1HardwareInterface_1a0fb3b4bf382fc390db4d8c40036a683b" kind="function"><name>setSpeedSlider</name></member>
+    <member refid="classcoppeliasim__interface_1_1HardwareInterface_1a00cc87162beaecdf82c1510ae84b2d95" kind="function"><name>setPause</name></member>
+    <member refid="classcoppeliasim__interface_1_1HardwareInterface_1af95c41749882b5d60ba02695c6b51407" kind="function"><name>checkControllerClaims</name></member>
+  </compound>
+  <compound refid="classcoppeliasim__interface_1_1SimulationSynchronizer" kind="class"><name>coppeliasim_interface::SimulationSynchronizer</name>
+    <member refid="classcoppeliasim__interface_1_1SimulationSynchronizer_1a2a3482e137aae520b77f3e036c3d4a20" kind="variable"><name>nh_</name></member>
+    <member refid="classcoppeliasim__interface_1_1SimulationSynchronizer_1a89f76a7b2d22f7b783f7154f329a621b" kind="variable"><name>client_id</name></member>
+    <member refid="classcoppeliasim__interface_1_1SimulationSynchronizer_1a00373938bbe911de8217e946b94d1a56" kind="variable"><name>explicit_sync_list</name></member>
+    <member refid="classcoppeliasim__interface_1_1SimulationSynchronizer_1a71180ecf3a60f137b818ab48df4a8def" kind="variable"><name>clock_pub</name></member>
+    <member refid="classcoppeliasim__interface_1_1SimulationSynchronizer_1a6c0190d05cbef07756c0969b21b3f5bf" kind="variable"><name>sim_dt</name></member>
+    <member refid="classcoppeliasim__interface_1_1SimulationSynchronizer_1ad542e018fc9a7333e16c073600e47494" kind="variable"><name>current_time</name></member>
+    <member refid="classcoppeliasim__interface_1_1SimulationSynchronizer_1a76f30c0cad7fe0250df843af8c795966" kind="variable"><name>simulation_running</name></member>
+    <member refid="classcoppeliasim__interface_1_1SimulationSynchronizer_1ac18bb936436db0207cb883539542667b" kind="function"><name>SimulationSynchronizer</name></member>
+    <member refid="classcoppeliasim__interface_1_1SimulationSynchronizer_1afc14256edba11b6ef38de06292476f10" kind="function"><name>~SimulationSynchronizer</name></member>
+    <member refid="classcoppeliasim__interface_1_1SimulationSynchronizer_1a511f8bf3569c7dce3dafb2a6f30dd6f2" kind="function"><name>advanceSimulation</name></member>
+    <member refid="classcoppeliasim__interface_1_1SimulationSynchronizer_1a14e5777b6eacdd0a2d95603bad137ea0" kind="function"><name>synchronizeROS</name></member>
+    <member refid="classcoppeliasim__interface_1_1SimulationSynchronizer_1a86f3212df7425b946c6148ab324fd2bc" kind="function"><name>init</name></member>
+    <member refid="classcoppeliasim__interface_1_1SimulationSynchronizer_1a22e59e0e0465b7d41a0e64e0466dad5e" kind="function"><name>assertSimxCall</name></member>
+  </compound>
+  <compound refid="namespacecoppeliasim__interface" kind="namespace"><name>coppeliasim_interface</name>
+  </compound>
+  <compound refid="hardware__interface_8h" kind="file"><name>hardware_interface.h</name>
+    <member refid="hardware__interface_8h_1a86567c2b79a1ea4b5bc908d49665a16e" kind="enum"><name>RunState</name></member>
+    <member refid="hardware__interface_8h_1a86567c2b79a1ea4b5bc908d49665a16ea99b2439e63f73ad515f7ab2447a80673" kind="enumvalue"><name>PAUSED</name></member>
+    <member refid="hardware__interface_8h_1a86567c2b79a1ea4b5bc908d49665a16ea43491564ebcfd38568918efbd6e840fd" kind="enumvalue"><name>RUNNING</name></member>
+    <member refid="hardware__interface_8h_1a86567c2b79a1ea4b5bc908d49665a16eada5b973ac897cdba542316c6a58191c6" kind="enumvalue"><name>RAMPUP</name></member>
+  </compound>
+  <compound refid="simulation__synchronizer_8h" kind="file"><name>simulation_synchronizer.h</name>
+  </compound>
+  <compound refid="hardware__interface_8cpp" kind="file"><name>hardware_interface.cpp</name>
+  </compound>
+  <compound refid="simulation__synchronizer_8cpp" kind="file"><name>simulation_synchronizer.cpp</name>
+  </compound>
+  <compound refid="dir_d44c64559bbebec7f509842c48db8b23" kind="dir"><name>/home/svenbecker/Bachelorarbeit/code/catkin_ws/src/robot_control_software/coppeliasim_interface/include</name>
+  </compound>
+  <compound refid="dir_68267d1309a1af8e8297ef4c3efbcdba" kind="dir"><name>/home/svenbecker/Bachelorarbeit/code/catkin_ws/src/robot_control_software/coppeliasim_interface/src</name>
+  </compound>
+</doxygenindex>

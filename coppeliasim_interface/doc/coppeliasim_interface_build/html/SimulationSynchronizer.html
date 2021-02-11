@@ -1,0 +1,288 @@
+
+
+<!DOCTYPE html>
+<html class="writer-html4" lang="en" >
+<head>
+  <meta charset="utf-8" />
+  
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  
+  <title>SimulationSynchronizer C++-class &mdash; CoppeliaSim Interface 1.0 documentation</title>
+  
+
+  
+  <link rel="stylesheet" href="_static/css/theme.css" type="text/css" />
+  <link rel="stylesheet" href="_static/pygments.css" type="text/css" />
+
+  
+  
+
+  
+  
+
+  
+
+  
+  <!--[if lt IE 9]>
+    <script src="_static/js/html5shiv.min.js"></script>
+  <![endif]-->
+  
+    
+      <script type="text/javascript">
+          var DOCUMENTATION_OPTIONS = {
+              URL_ROOT:'./',
+              VERSION:'1.0',
+              LANGUAGE:'None',
+              COLLAPSE_INDEX:false,
+              FILE_SUFFIX:'.html',
+              HAS_SOURCE:  true,
+              SOURCELINK_SUFFIX: '.txt'
+          };
+      </script>
+        <script type="text/javascript" src="_static/jquery.js"></script>
+        <script type="text/javascript" src="_static/underscore.js"></script>
+        <script type="text/javascript" src="_static/doctools.js"></script>
+        <script type="text/javascript" src="https://cdnjs.cloudflare.com/ajax/libs/mathjax/2.7.1/MathJax.js?config=TeX-AMS-MML_HTMLorMML"></script>
+    
+    <script type="text/javascript" src="_static/js/theme.js"></script>
+
+    
+    <link rel="index" title="Index" href="genindex.html" />
+    <link rel="search" title="Search" href="search.html" />
+    <link rel="prev" title="point_cloud_manager Python-module" href="point_cloud_manager.html" /> 
+</head>
+
+<body class="wy-body-for-nav">
+
+   
+  <div class="wy-grid-for-nav">
+    
+    <nav data-toggle="wy-nav-shift" class="wy-nav-side">
+      <div class="wy-side-scroll">
+        <div class="wy-side-nav-search" >
+          
+
+          
+            <a href="index.html" class="icon icon-home"> CoppeliaSim Interface
+          
+
+          
+          </a>
+
+          
+            
+            
+              <div class="version">
+                1.0
+              </div>
+            
+          
+
+          
+<div role="search">
+  <form id="rtd-search-form" class="wy-form" action="search.html" method="get">
+    <input type="text" name="q" placeholder="Search docs" />
+    <input type="hidden" name="check_keywords" value="yes" />
+    <input type="hidden" name="area" value="default" />
+  </form>
+</div>
+
+          
+        </div>
+
+        
+        <div class="wy-menu wy-menu-vertical" data-spy="affix" role="navigation" aria-label="main navigation">
+          
+            
+            
+              
+            
+            
+              <p class="caption"><span class="caption-text">Explanation</span></p>
+<ul>
+<li class="toctree-l1"><a class="reference internal" href="Overview.html">Overview</a></li>
+</ul>
+<p class="caption"><span class="caption-text">Components</span></p>
+<ul class="current">
+<li class="toctree-l1"><a class="reference internal" href="HardwareInterface.html">HardwareInterface C++-class</a></li>
+<li class="toctree-l1"><a class="reference internal" href="point_cloud_manager.html">point_cloud_manager Python-module</a></li>
+<li class="toctree-l1 current"><a class="current reference internal" href="#">SimulationSynchronizer C++-class</a></li>
+</ul>
+
+            
+          
+        </div>
+        
+      </div>
+    </nav>
+
+    <section data-toggle="wy-nav-shift" class="wy-nav-content-wrap">
+
+      
+      <nav class="wy-nav-top" aria-label="top navigation">
+        
+          <i data-toggle="wy-nav-top" class="fa fa-bars"></i>
+          <a href="index.html">CoppeliaSim Interface</a>
+        
+      </nav>
+
+
+      <div class="wy-nav-content">
+        
+        <div class="rst-content">
+        
+          
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+<div role="navigation" aria-label="breadcrumbs navigation">
+
+  <ul class="wy-breadcrumbs">
+    
+      <li><a href="index.html" class="icon icon-home"></a> &raquo;</li>
+        
+      <li>SimulationSynchronizer C++-class</li>
+    
+    
+      <li class="wy-breadcrumbs-aside">
+        
+          
+            <a href="_sources/SimulationSynchronizer.rst.txt" rel="nofollow"> View page source</a>
+          
+        
+      </li>
+    
+  </ul>
+
+  
+  <hr/>
+</div>
+          <div role="main" class="document" itemscope="itemscope" itemtype="http://schema.org/Article">
+           <div itemprop="articleBody">
+            
+  <div class="section" id="simulationsynchronizer-c-class">
+<span id="simulation-synchronizer"></span><h1>SimulationSynchronizer C++-class<a class="headerlink" href="#simulationsynchronizer-c-class" title="Permalink to this headline">¶</a></h1>
+<dl class="class">
+<dt id="_CPPv2N21coppeliasim_interface22SimulationSynchronizerE">
+<span id="coppeliasim_interface::SimulationSynchronizer"></span><span class="target" id="project0classcoppeliasim__interface_1_1SimulationSynchronizer"></span><em class="property">class </em></dt>
+<dd><p>Synchronizes the ROS-time with the CoppeliaSim-time in the sense, that both ‘clocks’ are running at the same speed (but not necessarely at the same time), and ensures that time-critical tasks in the ROS-domain are performed in sync with each simulation-step. </p>
+<div class="breathe-sectiondef docutils container">
+<p class="breathe-sectiondef-title rubric">Public Functions</p>
+<dl class="function">
+<dt id="_CPPv2N21coppeliasim_interface22SimulationSynchronizer22SimulationSynchronizerEv">
+<span id="coppeliasim_interface::SimulationSynchronizer::SimulationSynchronizer"></span><span class="target" id="project0classcoppeliasim__interface_1_1SimulationSynchronizer_1ac18bb936436db0207cb883539542667b"></span><code class="descclassname">coppeliasim_interface::SimulationSynchronizer::</code><code class="descname">SimulationSynchronizer</code><span class="sig-paren">(</span><span class="sig-paren">)</span><a class="headerlink" href="#_CPPv2N21coppeliasim_interface22SimulationSynchronizer22SimulationSynchronizerEv" title="Permalink to this definition">¶</a><br /></dt>
+<dd><p>Construct a new Simulation Synchronizer object and initialize all members that do not necessarely need a ROS- or CoppeliaSim-connection. </p>
+</dd></dl>
+
+<dl class="function">
+<dt id="_CPPv2N21coppeliasim_interface22SimulationSynchronizerD0Ev">
+<span id="coppeliasim_interface::SimulationSynchronizer::~SimulationSynchronizer"></span><span class="target" id="project0classcoppeliasim__interface_1_1SimulationSynchronizer_1afc14256edba11b6ef38de06292476f10"></span><code class="descclassname">coppeliasim_interface::SimulationSynchronizer::</code><code class="descname">~SimulationSynchronizer</code><span class="sig-paren">(</span><span class="sig-paren">)</span><a class="headerlink" href="#_CPPv2N21coppeliasim_interface22SimulationSynchronizerD0Ev" title="Permalink to this definition">¶</a><br /></dt>
+<dd><p>Destroy the Simulation Synchronizer object and stop the CoppeliaSim-Simulation and close the connection to CoppeliaSim. </p>
+</dd></dl>
+
+<dl class="function">
+<dt id="_CPPv2N21coppeliasim_interface22SimulationSynchronizer17advanceSimulationEv">
+<span id="coppeliasim_interface::SimulationSynchronizer::advanceSimulation"></span><span class="target" id="project0classcoppeliasim__interface_1_1SimulationSynchronizer_1a511f8bf3569c7dce3dafb2a6f30dd6f2"></span>bool <code class="descclassname">coppeliasim_interface::SimulationSynchronizer::</code><code class="descname">advanceSimulation</code><span class="sig-paren">(</span><span class="sig-paren">)</span><a class="headerlink" href="#_CPPv2N21coppeliasim_interface22SimulationSynchronizer17advanceSimulationEv" title="Permalink to this definition">¶</a><br /></dt>
+<dd><p>Advances the simulation in CoppeliaSim exactly one time-step (dt = ‘sim-dt’). Blocks until CoppeliaSim has finished the calculations for this advancement. </p>
+<p><dl class="docutils">
+<dt><strong>Return</strong></dt>
+<dd>Whether advancement was successful (could trigger calculations in CoppeliaSim and received success-feedback) </dd>
+</dl>
+</p>
+</dd></dl>
+
+<dl class="function">
+<dt id="_CPPv2N21coppeliasim_interface22SimulationSynchronizer14synchronizeROSEv">
+<span id="coppeliasim_interface::SimulationSynchronizer::synchronizeROS"></span><span class="target" id="project0classcoppeliasim__interface_1_1SimulationSynchronizer_1a14e5777b6eacdd0a2d95603bad137ea0"></span>bool <code class="descclassname">coppeliasim_interface::SimulationSynchronizer::</code><code class="descname">synchronizeROS</code><span class="sig-paren">(</span><span class="sig-paren">)</span><a class="headerlink" href="#_CPPv2N21coppeliasim_interface22SimulationSynchronizer14synchronizeROSEv" title="Permalink to this definition">¶</a><br /></dt>
+<dd><p>Increases ROS-time with the same dt as CoppeliaSim’s ‘sim-dt’ and calls all ROS-services that should be handled during one time-step afterwards. </p>
+<p><dl class="docutils">
+<dt><strong>Return</strong></dt>
+<dd>Whether all Services were called successfully </dd>
+</dl>
+</p>
+</dd></dl>
+
+<dl class="function">
+<dt id="_CPPv2N21coppeliasim_interface22SimulationSynchronizer4initERN3ros10NodeHandleE">
+<span id="coppeliasim_interface::SimulationSynchronizer::init__ros::NodeHandleR"></span><span class="target" id="project0classcoppeliasim__interface_1_1SimulationSynchronizer_1a86f3212df7425b946c6148ab324fd2bc"></span>bool <code class="descclassname">coppeliasim_interface::SimulationSynchronizer::</code><code class="descname">init</code><span class="sig-paren">(</span>ros::NodeHandle &amp;<em>nh</em><span class="sig-paren">)</span><a class="headerlink" href="#_CPPv2N21coppeliasim_interface22SimulationSynchronizer4initERN3ros10NodeHandleE" title="Permalink to this definition">¶</a><br /></dt>
+<dd><p>Connects instance to CoppeliaSim (registers it as client for the remoteApi and starts simulation in synchroneous mode) and ROS (preparing /clock-publication and registering Services that should be handled every simulation-step) </p>
+<p><dl class="docutils">
+<dt><strong>Return</strong></dt>
+<dd>Whether the method could connect to ROS and CoppeliaSim </dd>
+<dt><strong>Parameters</strong></dt>
+<dd><ul class="breatheparameterlist first last">
+<li><code class="first docutils literal"><span class="pre">nh</span></code> - <p>Nodehandle to that this instance uses to communicate with ROS</p>
+</li>
+</ul>
+</dd>
+</dl>
+</p>
+</dd></dl>
+
+</div>
+</dd></dl>
+
+</div>
+
+
+           </div>
+           
+          </div>
+          <footer>
+    <div class="rst-footer-buttons" role="navigation" aria-label="footer navigation">
+        <a href="point_cloud_manager.html" class="btn btn-neutral float-left" title="point_cloud_manager Python-module" accesskey="p" rel="prev"><span class="fa fa-arrow-circle-left" aria-hidden="true"></span> Previous</a>
+    </div>
+
+  <hr/>
+
+  <div role="contentinfo">
+    <p>
+        &#169; Copyright 2021, Sven Becker.
+
+    </p>
+  </div>
+    
+    
+    
+    Built with <a href="https://www.sphinx-doc.org/">Sphinx</a> using a
+    
+    <a href="https://github.com/readthedocs/sphinx_rtd_theme">theme</a>
+    
+    provided by <a href="https://readthedocs.org">Read the Docs</a>. 
+
+</footer>
+        </div>
+      </div>
+
+    </section>
+
+  </div>
+  
+
+  <script type="text/javascript">
+      jQuery(function () {
+          SphinxRtdTheme.Navigation.enable(true);
+      });
+  </script>
+
+  
+  
+    
+   
+
+</body>
+</html>

@@ -1,13 +1,15 @@
 <?xml version="1.0"?>
 <package format="2">
   <name>coppeliasim_interface</name>
-  <version>0.0.0</version>
-  <description>The coppeliasim_interface package</description>
+  <version>1.0.0</version>
+  <description>Package to make the ROS-Framework interact with CoppeliaSim. Consists of a 'dummy'-hardware-interface that uses ros_control to
+  control the CoppeliaSim-joints that behaves similar to the real ROS-UR10e-drivers. Also, the laser-scanner-data from CoppeliaSim can be encoded and stitched.
+  </description>
 
   <!-- One maintainer tag required, multiple allowed, one person per tag -->
   <!-- Example:  -->
   <!-- <maintainer email="jane.doe@example.com">Jane Doe</maintainer> -->
-  <maintainer email="svenbecker@todo.todo">svenbecker</maintainer>
+  <maintainer email="ujily@student.kit.edu">Sven Becker</maintainer>
 
 
   <!-- One license tag required, multiple allowed, one license per tag -->
@@ -52,6 +54,33 @@
   <build_depend>roscpp</build_depend>
   <build_export_depend>roscpp</build_export_depend>
   <exec_depend>roscpp</exec_depend>
+  
+  <build_depend>boost</build_depend>
+  <build_depend>industrial_robot_status_interface</build_depend>
+
+  <depend>control_msgs</depend>
+  <depend>controller_manager</depend>
+  <depend>geometry_msgs</depend>
+  <depend>hardware_interface</depend>
+  <depend>sensor_msgs</depend>
+  <depend>tf</depend>
+  <depend>tf2_msgs</depend>
+  <depend>tf2_geometry_msgs</depend>
+  <depend>ur_controllers</depend>
+  <depend>ur_msgs</depend>
+  <depend>std_srvs</depend>
+
+  <exec_depend>controller_stopper</exec_depend>
+  <exec_depend>force_torque_sensor_controller</exec_depend>
+  <exec_depend>industrial_robot_status_controller</exec_depend>
+  <exec_depend>joint_state_controller</exec_depend>
+  <exec_depend>joint_trajectory_controller</exec_depend>
+  <exec_depend>robot_state_publisher</exec_depend>
+  <exec_depend>ur_e_description</exec_depend>
+  <exec_depend>velocity_controllers</exec_depend>
+  
+  
+  <doc_depend>doxygen</doc_depend>
 
 
   <!-- The export tag contains other, unspecified, tags -->

@@ -1,0 +1,917 @@
+
+
+<!DOCTYPE html>
+<html class="writer-html4" lang="en" >
+<head>
+  <meta charset="utf-8" />
+  
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  
+  <title>agiprobot_measurement package &mdash; Agiprobot Measurement 1.0 documentation</title>
+  
+
+  
+  <link rel="stylesheet" href="_static/css/theme.css" type="text/css" />
+  <link rel="stylesheet" href="_static/pygments.css" type="text/css" />
+
+  
+  
+
+  
+  
+
+  
+
+  
+  <!--[if lt IE 9]>
+    <script src="_static/js/html5shiv.min.js"></script>
+  <![endif]-->
+  
+    
+      <script type="text/javascript">
+          var DOCUMENTATION_OPTIONS = {
+              URL_ROOT:'./',
+              VERSION:'1.0',
+              LANGUAGE:'None',
+              COLLAPSE_INDEX:false,
+              FILE_SUFFIX:'.html',
+              HAS_SOURCE:  true,
+              SOURCELINK_SUFFIX: '.txt'
+          };
+      </script>
+        <script type="text/javascript" src="_static/jquery.js"></script>
+        <script type="text/javascript" src="_static/underscore.js"></script>
+        <script type="text/javascript" src="_static/doctools.js"></script>
+        <script type="text/javascript" src="https://cdnjs.cloudflare.com/ajax/libs/mathjax/2.7.1/MathJax.js?config=TeX-AMS-MML_HTMLorMML"></script>
+    
+    <script type="text/javascript" src="_static/js/theme.js"></script>
+
+    
+    <link rel="index" title="Index" href="genindex.html" />
+    <link rel="search" title="Search" href="search.html" /> 
+</head>
+
+<body class="wy-body-for-nav">
+
+   
+  <div class="wy-grid-for-nav">
+    
+    <nav data-toggle="wy-nav-shift" class="wy-nav-side">
+      <div class="wy-side-scroll">
+        <div class="wy-side-nav-search" >
+          
+
+          
+            <a href="index.html" class="icon icon-home"> Agiprobot Measurement
+          
+
+          
+          </a>
+
+          
+            
+            
+              <div class="version">
+                1.0
+              </div>
+            
+          
+
+          
+<div role="search">
+  <form id="rtd-search-form" class="wy-form" action="search.html" method="get">
+    <input type="text" name="q" placeholder="Search docs" />
+    <input type="hidden" name="check_keywords" value="yes" />
+    <input type="hidden" name="area" value="default" />
+  </form>
+</div>
+
+          
+        </div>
+
+        
+        <div class="wy-menu wy-menu-vertical" data-spy="affix" role="navigation" aria-label="main navigation">
+          
+            
+            
+              
+            
+            
+              <p class="caption"><span class="caption-text">Explanation</span></p>
+<ul>
+<li class="toctree-l1"><a class="reference internal" href="overview.html">Overview</a></li>
+<li class="toctree-l1"><a class="reference internal" href="view_planning_detailed.html">View Planning Detailed</a></li>
+</ul>
+<p class="caption"><span class="caption-text">Components</span></p>
+<ul>
+<li class="toctree-l1"><a class="reference internal" href="module_trajectory_manager.html">Trajectory Manager</a></li>
+<li class="toctree-l1"><a class="reference internal" href="module_sensor_model.html">Sensor Model</a></li>
+<li class="toctree-l1"><a class="reference internal" href="module_view.html">View</a></li>
+</ul>
+
+            
+          
+        </div>
+        
+      </div>
+    </nav>
+
+    <section data-toggle="wy-nav-shift" class="wy-nav-content-wrap">
+
+      
+      <nav class="wy-nav-top" aria-label="top navigation">
+        
+          <i data-toggle="wy-nav-top" class="fa fa-bars"></i>
+          <a href="index.html">Agiprobot Measurement</a>
+        
+      </nav>
+
+
+      <div class="wy-nav-content">
+        
+        <div class="rst-content">
+        
+          
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+<div role="navigation" aria-label="breadcrumbs navigation">
+
+  <ul class="wy-breadcrumbs">
+    
+      <li><a href="index.html" class="icon icon-home"></a> &raquo;</li>
+        
+      <li>agiprobot_measurement package</li>
+    
+    
+      <li class="wy-breadcrumbs-aside">
+        
+          
+            <a href="_sources/agiprobot_measurement.rst.txt" rel="nofollow"> View page source</a>
+          
+        
+      </li>
+    
+  </ul>
+
+  
+  <hr/>
+</div>
+          <div role="main" class="document" itemscope="itemscope" itemtype="http://schema.org/Article">
+           <div itemprop="articleBody">
+            
+  <div class="section" id="agiprobot-measurement-package">
+<h1>agiprobot_measurement package<a class="headerlink" href="#agiprobot-measurement-package" title="Permalink to this headline">¶</a></h1>
+<div class="section" id="submodules">
+<h2>Submodules<a class="headerlink" href="#submodules" title="Permalink to this headline">¶</a></h2>
+</div>
+<div class="section" id="module-agiprobot_measurement.sensor_model">
+<span id="agiprobot-measurement-sensor-model-module"></span><h2>agiprobot_measurement.sensor_model module<a class="headerlink" href="#module-agiprobot_measurement.sensor_model" title="Permalink to this headline">¶</a></h2>
+<dl class="class">
+<dt id="agiprobot_measurement.sensor_model.SensorModel">
+<em class="property">class </em><code class="descclassname">agiprobot_measurement.sensor_model.</code><code class="descname">SensorModel</code><span class="sig-paren">(</span><em>parameter_map</em><span class="sig-paren">)</span><a class="reference internal" href="_modules/agiprobot_measurement/sensor_model.html#SensorModel"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#agiprobot_measurement.sensor_model.SensorModel" title="Permalink to this definition">¶</a></dt>
+<dd><p>Computional representation of an laser triangulation sensor under influence of uncertainty.</p>
+<dl class="method">
+<dt id="agiprobot_measurement.sensor_model.SensorModel.evaluate_score">
+<code class="descname">evaluate_score</code><span class="sig-paren">(</span><em>z</em>, <em>gamma</em><span class="sig-paren">)</span><a class="reference internal" href="_modules/agiprobot_measurement/sensor_model.html#SensorModel.evaluate_score"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#agiprobot_measurement.sensor_model.SensorModel.evaluate_score" title="Permalink to this definition">¶</a></dt>
+<dd><p>Calculates a score of uncertainty <span class="math">\(\in [0,1]\)</span> for the given z and gamma (higher score means lower uncertainty). The score
+is linear affine in the uncertainty based on z and gamma - It is 1 if the provided values match the best possible case (lowest
+possible uncertainty of the sensor model) and 0 when both values are right at the rejection limit (i.e. are equal to <a href="#id1"><span class="problematic" id="id2">max_deviation_</span></a>…):
+<span class="math">\(\frac{u_{max} - u(z, \gamma)}{u_{max} - u_{min}}\)</span></p>
+<table class="docutils field-list" frame="void" rules="none">
+<col class="field-name" />
+<col class="field-body" />
+<tbody valign="top">
+<tr class="field-odd field"><th class="field-name">Parameters:</th><td class="field-body"><ul class="first simple">
+<li><strong>z</strong> (<em>float</em>) – z-coordinate of the point to evaluate in the laser_emitter_frame in mm</li>
+<li><strong>gamma</strong> (<em>float</em>) – Angle of the laser_emitter_frame’s z-y-plane with the surface-triangle of the point to evaluate in rad</li>
+</ul>
+</td>
+</tr>
+<tr class="field-even field"><th class="field-name">Returns:</th><td class="field-body"><p class="first">Score <span class="math">\(\in [0,1]\)</span> based on the parameters and the max_deviations of them</p>
+</td>
+</tr>
+<tr class="field-odd field"><th class="field-name">Return type:</th><td class="field-body"><p class="first last">float</p>
+</td>
+</tr>
+</tbody>
+</table>
+</dd></dl>
+
+<dl class="method">
+<dt id="agiprobot_measurement.sensor_model.SensorModel.evaluate_uncertainty">
+<code class="descname">evaluate_uncertainty</code><span class="sig-paren">(</span><em>z</em>, <em>gamma</em><span class="sig-paren">)</span><a class="reference internal" href="_modules/agiprobot_measurement/sensor_model.html#SensorModel.evaluate_uncertainty"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#agiprobot_measurement.sensor_model.SensorModel.evaluate_uncertainty" title="Permalink to this definition">¶</a></dt>
+<dd><p>Computes the uncertainty of a surface point with given z and gamma using the specified geometric sensor parameters.</p>
+<table class="docutils field-list" frame="void" rules="none">
+<col class="field-name" />
+<col class="field-body" />
+<tbody valign="top">
+<tr class="field-odd field"><th class="field-name">Parameters:</th><td class="field-body"><ul class="first simple">
+<li><strong>z</strong> (<em>float</em>) – z-coordinate of the point to evaluate in the laser_emitter_frame in mm</li>
+<li><strong>gamma</strong> (<em>float</em>) – Angle of the laser_emitter_frame’s z-y-plane with the surface-triangle of the point to evaluate in rad</li>
+</ul>
+</td>
+</tr>
+<tr class="field-even field"><th class="field-name">Returns:</th><td class="field-body"><p class="first">Uncertainty based on the z, gamma, and the geometric sensor parameters, or ‘NaN’ if z and gamma are invalid</p>
+</td>
+</tr>
+<tr class="field-odd field"><th class="field-name">Return type:</th><td class="field-body"><p class="first last">float</p>
+</td>
+</tr>
+</tbody>
+</table>
+</dd></dl>
+
+<dl class="method">
+<dt id="agiprobot_measurement.sensor_model.SensorModel.get_max_uncertainty">
+<code class="descname">get_max_uncertainty</code><span class="sig-paren">(</span><span class="sig-paren">)</span><a class="reference internal" href="_modules/agiprobot_measurement/sensor_model.html#SensorModel.get_max_uncertainty"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#agiprobot_measurement.sensor_model.SensorModel.get_max_uncertainty" title="Permalink to this definition">¶</a></dt>
+<dd><p>Computes maximum possible uncertainty of a measured point that is not rejected using geometric sensor parameters. 
+The uncertainty-formula is evaluated at z- and gamma-values that are at rejection-limits for a surface point, so that this value corresponds
+to the worst uncertainty assignable to a measurable point.</p>
+<table class="docutils field-list" frame="void" rules="none">
+<col class="field-name" />
+<col class="field-body" />
+<tbody valign="top">
+<tr class="field-odd field"><th class="field-name">Returns:</th><td class="field-body">Maximum possible uncertainty of a measurable point (= is within the <a href="#id3"><span class="problematic" id="id4">max_deviation_</span></a>…-range) in mm</td>
+</tr>
+<tr class="field-even field"><th class="field-name">Return type:</th><td class="field-body">float</td>
+</tr>
+</tbody>
+</table>
+</dd></dl>
+
+<dl class="method">
+<dt id="agiprobot_measurement.sensor_model.SensorModel.get_median_deviation_angle">
+<code class="descname">get_median_deviation_angle</code><span class="sig-paren">(</span><span class="sig-paren">)</span><a class="reference internal" href="_modules/agiprobot_measurement/sensor_model.html#SensorModel.get_median_deviation_angle"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#agiprobot_measurement.sensor_model.SensorModel.get_median_deviation_angle" title="Permalink to this definition">¶</a></dt>
+<dd><p>Get the smallest angle allowed for tilting (smallest of maximum deviations of theta and gamma devided by 2).</p>
+<table class="docutils field-list" frame="void" rules="none">
+<col class="field-name" />
+<col class="field-body" />
+<tbody valign="top">
+<tr class="field-odd field"><th class="field-name">Returns:</th><td class="field-body">Smallest angle allowed for tilting</td>
+</tr>
+<tr class="field-even field"><th class="field-name">Return type:</th><td class="field-body">float</td>
+</tr>
+</tbody>
+</table>
+</dd></dl>
+
+<dl class="method">
+<dt id="agiprobot_measurement.sensor_model.SensorModel.get_min_uncertainty">
+<code class="descname">get_min_uncertainty</code><span class="sig-paren">(</span><span class="sig-paren">)</span><a class="reference internal" href="_modules/agiprobot_measurement/sensor_model.html#SensorModel.get_min_uncertainty"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#agiprobot_measurement.sensor_model.SensorModel.get_min_uncertainty" title="Permalink to this definition">¶</a></dt>
+<dd><p>Computes the minimum possible uncertainty using the geometric sensor parameters. It returns the uncertainty value assignable to
+a surface point which has been measured with optimal z- and gamma-values, i.e. the best-case.</p>
+<table class="docutils field-list" frame="void" rules="none">
+<col class="field-name" />
+<col class="field-body" />
+<tbody valign="top">
+<tr class="field-odd field"><th class="field-name">Returns:</th><td class="field-body">Minimum possible uncertainty in mm</td>
+</tr>
+<tr class="field-even field"><th class="field-name">Return type:</th><td class="field-body">float</td>
+</tr>
+</tbody>
+</table>
+</dd></dl>
+
+<dl class="method">
+<dt id="agiprobot_measurement.sensor_model.SensorModel.get_optimal_standoff">
+<code class="descname">get_optimal_standoff</code><span class="sig-paren">(</span><span class="sig-paren">)</span><a class="reference internal" href="_modules/agiprobot_measurement/sensor_model.html#SensorModel.get_optimal_standoff"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#agiprobot_measurement.sensor_model.SensorModel.get_optimal_standoff" title="Permalink to this definition">¶</a></dt>
+<dd><p>Gets the optimal standoff, i.e. required the .
+The returned optimal standoff is not equal to the standoff providing the lowest uncertainty, but in the center between the z-rejection-limits
+to allow maximum flexibility in surface height deviation when moving the sensor.</p>
+<table class="docutils field-list" frame="void" rules="none">
+<col class="field-name" />
+<col class="field-body" />
+<tbody valign="top">
+<tr class="field-odd field"><th class="field-name">Returns:</th><td class="field-body">z-coordinate in the laser_emitter_frame of an surface point for measurement in mm</td>
+</tr>
+<tr class="field-even field"><th class="field-name">Return type:</th><td class="field-body">float</td>
+</tr>
+</tbody>
+</table>
+</dd></dl>
+
+<dl class="method">
+<dt id="agiprobot_measurement.sensor_model.SensorModel.get_scanning_frustum">
+<code class="descname">get_scanning_frustum</code><span class="sig-paren">(</span><em>half_length</em><span class="sig-paren">)</span><a class="reference internal" href="_modules/agiprobot_measurement/sensor_model.html#SensorModel.get_scanning_frustum"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#agiprobot_measurement.sensor_model.SensorModel.get_scanning_frustum" title="Permalink to this definition">¶</a></dt>
+<dd><p>Generates a trimesh-mesh object representing the ‘frustum of measurability’ in the laser_emitter_frame. Points within this frustum have 
+the potential to be measurable, but <a href="#id5"><span class="problematic" id="id6">maximum_deviation_</span></a>… may still reject points within this frustum. The frustum is constructed based on
+the laser-fan-angle and the allowed z-range and the idea that the trajectory is a straight line (it can be imagined as a cut-off ‘Toblerone’). 
+So points lying wthin this frustum can be touched by the laser line AND can be mapped to the optical sensor.</p>
+<table class="docutils field-list" frame="void" rules="none">
+<col class="field-name" />
+<col class="field-body" />
+<tbody valign="top">
+<tr class="field-odd field"><th class="field-name">Parameters:</th><td class="field-body"><strong>half_length</strong> (<em>float</em>) – Length of the frustum perpendicular to the fan-plane in each direction of the laser_emitter_frame in mm</td>
+</tr>
+<tr class="field-even field"><th class="field-name">Returns:</th><td class="field-body">Scan frustum represting the volume of potentially measurable points</td>
+</tr>
+<tr class="field-odd field"><th class="field-name">Return type:</th><td class="field-body">trimesh.Trimesh</td>
+</tr>
+</tbody>
+</table>
+</dd></dl>
+
+<dl class="method">
+<dt id="agiprobot_measurement.sensor_model.SensorModel.process_view_metrologically">
+<code class="descname">process_view_metrologically</code><span class="sig-paren">(</span><em>view</em>, <em>maximum_deflection=500.0</em><span class="sig-paren">)</span><a class="reference internal" href="_modules/agiprobot_measurement/sensor_model.html#SensorModel.process_view_metrologically"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#agiprobot_measurement.sensor_model.SensorModel.process_view_metrologically" title="Permalink to this definition">¶</a></dt>
+<dd><p>Computes all measurable surface-points by a view-object as well as uncertainties and where they are measurable on the view-measurement-trajectory.
+Requires context to be set via set_processing_context(…). Checks for every sampled surface point of the given context whether it is visible and calculates the
+uncertainty-score for it eventually. Also, the deflection of the laser_emitter_frame along the trajectory-line from the view-center pose is evaluated.</p>
+<table class="docutils field-list" frame="void" rules="none">
+<col class="field-name" />
+<col class="field-body" />
+<tbody valign="top">
+<tr class="field-odd field"><th class="field-name">Parameters:</th><td class="field-body"><ul class="first simple">
+<li><strong>view</strong> (<a class="reference internal" href="#agiprobot_measurement.view.View" title="agiprobot_measurement.view.View"><em>View</em></a>) – View with set view-center-pose</li>
+<li><strong>maximum_deflection</strong> (<em>float</em><em>, </em><em>optional</em>) – Maximum deflection of the trajectory to be considered for processing in mm, defaults to 5e2</li>
+</ul>
+</td>
+</tr>
+<tr class="field-even field"><th class="field-name">Returns:</th><td class="field-body"><p class="first"><p>3 unpacked arrays of the same length in order:</p>
+<ul class="simple">
+<li>Indices of the measurable surface points in samples_surface_points_list</li>
+<li>Corresponding uncertainty-scores</li>
+<li>Metric distance in mm in trajectory-direction from the view-center where the corresponding surface point is measurable</li>
+</ul>
+</p>
+</td>
+</tr>
+<tr class="field-odd field"><th class="field-name">Return type:</th><td class="field-body"><p class="first last">array[int], array[float], array[float]</p>
+</td>
+</tr>
+</tbody>
+</table>
+</dd></dl>
+
+<dl class="method">
+<dt id="agiprobot_measurement.sensor_model.SensorModel.set_processing_context">
+<code class="descname">set_processing_context</code><span class="sig-paren">(</span><em>mesh</em>, <em>sampled_surface_points</em>, <em>sampled_face_indices</em><span class="sig-paren">)</span><a class="reference internal" href="_modules/agiprobot_measurement/sensor_model.html#SensorModel.set_processing_context"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#agiprobot_measurement.sensor_model.SensorModel.set_processing_context" title="Permalink to this definition">¶</a></dt>
+<dd><p>Loads a context for metrological processing to the sensor model.
+This includes loading the target mesh into a ray-tracer as well as gaining awareness over the
+sampling results because they are directly used to assess a View during process_view_metrologically().
+This method must be called before any metrological processing can be performed. A previously set
+context becomes overwritten completely by calling this method again.</p>
+<table class="docutils field-list" frame="void" rules="none">
+<col class="field-name" />
+<col class="field-body" />
+<tbody valign="top">
+<tr class="field-odd field"><th class="field-name">Parameters:</th><td class="field-body"><ul class="first last simple">
+<li><strong>mesh</strong> (<em>trimesh.Trimesh</em>) – Mesh-object to load into the RayMeshIntersector</li>
+<li><strong>sampled_surface_points</strong> (<em>list</em><em>[</em><em>numpy.array</em><em>]</em>) – List of all sampled surface points that should be considered for the metrological processing</li>
+<li><strong>sampled_face_ids</strong> (<em>list</em><em>[</em><em>int</em><em>]</em>) – List of face-indices, where each entry corresponds to the face of the sampled surface point at the same position</li>
+</ul>
+</td>
+</tr>
+</tbody>
+</table>
+</dd></dl>
+
+</dd></dl>
+
+</div>
+<div class="section" id="module-agiprobot_measurement.trajectory_manager">
+<span id="agiprobot-measurement-trajectory-manager-module"></span><h2>agiprobot_measurement.trajectory_manager module<a class="headerlink" href="#module-agiprobot_measurement.trajectory_manager" title="Permalink to this headline">¶</a></h2>
+<dl class="class">
+<dt id="agiprobot_measurement.trajectory_manager.TrajectoryManager">
+<em class="property">class </em><code class="descclassname">agiprobot_measurement.trajectory_manager.</code><code class="descname">TrajectoryManager</code><a class="reference internal" href="_modules/agiprobot_measurement/trajectory_manager.html#TrajectoryManager"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#agiprobot_measurement.trajectory_manager.TrajectoryManager" title="Permalink to this definition">¶</a></dt>
+<dd><p>Completely integrated system for high-coverage and uncertainty-minimal scanning of given objects with an optical scanner. An instance can perform
+the entire planning pipeline - from the CAD-file and pose to a list of consecutively executable trajectories.</p>
+<dl class="method">
+<dt id="agiprobot_measurement.trajectory_manager.TrajectoryManager.connect_views">
+<code class="descname">connect_views</code><span class="sig-paren">(</span><em>unordered_views</em>, <em>min_planning_time=0.2</em><span class="sig-paren">)</span><a class="reference internal" href="_modules/agiprobot_measurement/trajectory_manager.html#TrajectoryManager.connect_views"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#agiprobot_measurement.trajectory_manager.TrajectoryManager.connect_views" title="Permalink to this definition">¶</a></dt>
+<dd><p>Connect a set of unordered views with the current state and in between greedily so that they can be executed as fast as possible.
+Until all views are enqueued, do: From the end-point of the last enqueued trajetory, motion plans are calculated to the start-/end-poses
+of all unenqueued view’s measurement-trajectories and the shortest (in time domain) will be selected.</p>
+<table class="docutils field-list" frame="void" rules="none">
+<col class="field-name" />
+<col class="field-body" />
+<tbody valign="top">
+<tr class="field-odd field"><th class="field-name">Parameters:</th><td class="field-body"><ul class="first simple">
+<li><strong>unordered_views</strong> (<em>set</em><em>[</em><a class="reference internal" href="#module-agiprobot_measurement.view" title="agiprobot_measurement.view"><em>view</em></a><em>]</em>) – Set of views to be connected where each has a stored measurement-trajectory</li>
+<li><strong>min_planning_time</strong> (<em>float</em><em>, </em><em>optional</em>) – Planning time that is used for connection-path-planning (will be increased automatically if no plan was found at first), defaults to 0.2</li>
+</ul>
+</td>
+</tr>
+<tr class="field-even field"><th class="field-name">Returns:</th><td class="field-body"><p class="first">List of ordered and execution-ready views</p>
+</td>
+</tr>
+<tr class="field-odd field"><th class="field-name">Return type:</th><td class="field-body"><p class="first last">list[<a class="reference internal" href="#agiprobot_measurement.view.View" title="agiprobot_measurement.view.View">View</a>]</p>
+</td>
+</tr>
+</tbody>
+</table>
+</dd></dl>
+
+<dl class="method">
+<dt id="agiprobot_measurement.trajectory_manager.TrajectoryManager.convert_viewlist_to_execution_plan">
+<code class="descname">convert_viewlist_to_execution_plan</code><span class="sig-paren">(</span><em>viewlist</em><span class="sig-paren">)</span><a class="reference internal" href="_modules/agiprobot_measurement/trajectory_manager.html#TrajectoryManager.convert_viewlist_to_execution_plan"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#agiprobot_measurement.trajectory_manager.TrajectoryManager.convert_viewlist_to_execution_plan" title="Permalink to this definition">¶</a></dt>
+<dd><p>Convert a list of View-objects into a list of moveit_msgs/RobotTrajectory-entries so that the views can be executed consecutively.</p>
+<table class="docutils field-list" frame="void" rules="none">
+<col class="field-name" />
+<col class="field-body" />
+<tbody valign="top">
+<tr class="field-odd field"><th class="field-name">Parameters:</th><td class="field-body"><strong>viewlist</strong> – List of View-objects with set trajectories for steering-to-view and measurement</td>
+</tr>
+<tr class="field-even field"><th class="field-name">Returns:</th><td class="field-body">List of moveit_msgs/RobotTrajectory with 2 entries per provided View-object (first = steering-to-view-trajectory, second = measurement-trajectory)</td>
+</tr>
+<tr class="field-odd field"><th class="field-name">Return type:</th><td class="field-body">list</td>
+</tr>
+</tbody>
+</table>
+</dd></dl>
+
+<dl class="method">
+<dt id="agiprobot_measurement.trajectory_manager.TrajectoryManager.execute">
+<code class="descname">execute</code><span class="sig-paren">(</span><em>execution_list</em>, <em>surface_points=None</em><span class="sig-paren">)</span><a class="reference internal" href="_modules/agiprobot_measurement/trajectory_manager.html#TrajectoryManager.execute"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#agiprobot_measurement.trajectory_manager.TrajectoryManager.execute" title="Permalink to this definition">¶</a></dt>
+<dd><p>Execute a list of RobotTrajectories or Views via MoveIt. When problems occur during execution,
+the robot will be stopped and an exception will be raised. When executing from a list of views, the currently measured surface_points
+are published in “/currently_measured_points” during execution.</p>
+<table class="docutils field-list" frame="void" rules="none">
+<col class="field-name" />
+<col class="field-body" />
+<tbody valign="top">
+<tr class="field-odd field"><th class="field-name">Parameters:</th><td class="field-body"><ul class="first last simple">
+<li><strong>execution_list</strong> (<em>list</em><em>[</em><em>moveit_msgs/RobotTrajectory</em><em>] or </em><em>list</em><em>[</em><a class="reference internal" href="#agiprobot_measurement.view.View" title="agiprobot_measurement.view.View"><em>View</em></a><em>]</em>) – List of RobotTrajectories or views that can be executed consecutively (the next segment’s start point is the last segment’s end point)</li>
+<li><strong>surface_points</strong> (<em>list</em><em>[</em><em>numpy.array</em><em>]</em><em>, </em><em>optional</em>) – List of the actual sampled surface points, defaults to None</li>
+</ul>
+</td>
+</tr>
+</tbody>
+</table>
+</dd></dl>
+
+<dl class="method">
+<dt id="agiprobot_measurement.trajectory_manager.TrajectoryManager.generate_samples_and_views">
+<code class="descname">generate_samples_and_views</code><span class="sig-paren">(</span><em>sampling_density</em>, <em>orientations_around_boresight</em>, <em>view_tilt_mode='full'</em>, <em>plan_path_to_check_reachability=False</em>, <em>minimum_trajectory_length=25</em>, <em>trajectory_sample_step=2</em><span class="sig-paren">)</span><a class="reference internal" href="_modules/agiprobot_measurement/trajectory_manager.html#TrajectoryManager.generate_samples_and_views"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#agiprobot_measurement.trajectory_manager.TrajectoryManager.generate_samples_and_views" title="Permalink to this definition">¶</a></dt>
+<dd><p>Samples the mesh’s surface into discrete points, generates views for each sample and processes these views metrologically and mechanically.
+Only views that do meet the contraints specified in the method’s parameters and in MoveIt (collision, reachability, …) will be returned. This method allows to generate
+multiple View-objects for a single surface-point by varying the anchor-pose (the boresight is always focused on the corresponding surface_point).</p>
+<table class="docutils field-list" frame="void" rules="none">
+<col class="field-name" />
+<col class="field-body" />
+<tbody valign="top">
+<tr class="field-odd field"><th class="field-name">Parameters:</th><td class="field-body"><ul class="first simple">
+<li><strong>sampling_density</strong> (<em>float</em>) – Density of sampling to generate the points for measurement-calculations and view-generation in points per mm^2</li>
+<li><strong>orientations_around_boresight</strong> (<em>int</em>) – Number of orientations around the sensor’s boresight to be considered per sampled_surface_point</li>
+<li><strong>view_tilt_mode</strong> (<em>str</em><em>, </em><em>optional</em>) – <p>For each orientation, deviate the gamma- and theta-values of the view-anchor-pose slightly from the optimum according to (one deviation-step per angle and orientation available right now):</p>
+<ul>
+<li>”none”: Do not perform any tilting.</li>
+<li>”limited”: When the optimal angle-configuration did not work, try deviations and stop after finding the first valid solution.</li>
+<li>”full”: Calculation for every possible angle-calculation. Every boresight orientation has 9 sub-views.</li>
+</ul>
+<p>, defaults to “full”</p>
+</li>
+<li><strong>plan_path_to_check_reachability</strong> (<em>bool</em><em>, </em><em>optional</em>) – Do not use one inverse-kinematics-request to check view-reachability but try to create complete plan from the current-state to the view’s anchor-pose, defaults to False</li>
+<li><strong>minimum_trajectory_length</strong> (<em>float</em><em>, </em><em>optional</em>) – Minimum length a generated trajectory has to have so that it is accepted in mm, defaults to 50</li>
+<li><strong>trajectory_sample_step</strong> (<em>float</em><em>, </em><em>optional</em>) – Euclidian distance between 2 trajectory-points in cartesian sapce in mm, defaults to 2</li>
+</ul>
+</td>
+</tr>
+<tr class="field-even field"><th class="field-name">Returns:</th><td class="field-body"><p class="first">2 lists with the first containing all sampled_surface_points and the second containing all views that were processed successfully</p>
+</td>
+</tr>
+<tr class="field-odd field"><th class="field-name">Return type:</th><td class="field-body"><p class="first last">list[numpy.array], list[<a class="reference internal" href="#agiprobot_measurement.view.View" title="agiprobot_measurement.view.View">View</a>]</p>
+</td>
+</tr>
+</tbody>
+</table>
+</dd></dl>
+
+<dl class="method">
+<dt id="agiprobot_measurement.trajectory_manager.TrajectoryManager.load_execution_plan">
+<code class="descname">load_execution_plan</code><span class="sig-paren">(</span><em>file_path</em>, <em>adapt_to_current_start_pose=True</em><span class="sig-paren">)</span><a class="reference internal" href="_modules/agiprobot_measurement/trajectory_manager.html#TrajectoryManager.load_execution_plan"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#agiprobot_measurement.trajectory_manager.TrajectoryManager.load_execution_plan" title="Permalink to this definition">¶</a></dt>
+<dd><p>Extracts a list of moveit_msgs/RobotTrajectory specified in the yaml-file at the provided path.</p>
+<p>The trajectories can be executed consecutively, however if the execution should start from the current state (which is most
+likely the case), the parameter ‘adapt_to_current_start_pose’ should be set true to add movement from the current point (which
+in general deviates from the ‘current point’ during planning) to the trajectory start. The yaml-file must correspond to a list with the first
+entry being a dictionary for metadata and the following entries being dictionaries of ‘expanded’ RobotTrajectories with following structure:
+Trajecories connecting measurements (C) and measurement trajectories (M) themselves in an alternating fashion (C-M-C-M-C-…).</p>
+<table class="docutils field-list" frame="void" rules="none">
+<col class="field-name" />
+<col class="field-body" />
+<tbody valign="top">
+<tr class="field-odd field"><th class="field-name">Parameters:</th><td class="field-body"><ul class="first simple">
+<li><strong>file_path</strong> (<em>str</em>) – Where the yaml-file is located</li>
+<li><strong>adapt_to_current_start_pose</strong> (<em>bool</em>) – If true (default), the plan will be adapted so that it can start from the current state</li>
+</ul>
+</td>
+</tr>
+<tr class="field-even field"><th class="field-name">Returns:</th><td class="field-body"><p class="first">List of moveit_msgs/RobotTrajectory-ies that can be consecutively executed</p>
+</td>
+</tr>
+<tr class="field-odd field"><th class="field-name">Return type:</th><td class="field-body"><p class="first last">list</p>
+</td>
+</tr>
+</tbody>
+</table>
+</dd></dl>
+
+<dl class="method">
+<dt id="agiprobot_measurement.trajectory_manager.TrajectoryManager.load_target_mesh">
+<code class="descname">load_target_mesh</code><span class="sig-paren">(</span><em>file_name, transform=array([[1., 0., 0., 0.],        [0., 1., 0., 0.],        [0., 0., 1., 0.],        [0., 0., 0., 1.]]), add_wbk_mirrors=True</em><span class="sig-paren">)</span><a class="reference internal" href="_modules/agiprobot_measurement/trajectory_manager.html#TrajectoryManager.load_target_mesh"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#agiprobot_measurement.trajectory_manager.TrajectoryManager.load_target_mesh" title="Permalink to this definition">¶</a></dt>
+<dd><p>Loads the mesh-to-measure from file into the instance’s target_mesh-member (to generate and evaluate view-trajectories) and into
+MoveIt (for collision-prevention). To move the mesh into a feasible measurement-pose, a transform may be applied to set the mesh’s
+reference frame specified in CAD with respect to the ‘world’ frame</p>
+<table class="docutils field-list" frame="void" rules="none">
+<col class="field-name" />
+<col class="field-body" />
+<tbody valign="top">
+<tr class="field-odd field"><th class="field-name">Parameters:</th><td class="field-body"><ul class="first simple">
+<li><strong>file_name</strong> (<em>str</em>) – Where the target_mesh’s CAD file is located (should be given starting at root-level: ‘/X/Y/…’)</li>
+<li><strong>transform</strong> (<em>numpy.array</em><em>, </em><em>optional</em>) – Homogeneous 4x4-matrix to move the mesh into the desired pose with translation in mm, defaults to identity-matrix</li>
+<li><strong>add_wbk_mirrors</strong> (<em>bool</em><em>, </em><em>optional</em>) – Adds hard-coded collision objects to MoveIt as the robot station at the institute is placed besides 2 fragile mirrors, defaults to True</li>
+</ul>
+</td>
+</tr>
+<tr class="field-even field"><th class="field-name">Returns:</th><td class="field-body"><p class="first">Whether all operations (esp. loading from file into trimesh and MoveIt) were successful</p>
+</td>
+</tr>
+<tr class="field-odd field"><th class="field-name">Return type:</th><td class="field-body"><p class="first last">bool</p>
+</td>
+</tr>
+</tbody>
+</table>
+</dd></dl>
+
+<dl class="method">
+<dt id="agiprobot_measurement.trajectory_manager.TrajectoryManager.postprocess_trajectory">
+<code class="descname">postprocess_trajectory</code><span class="sig-paren">(</span><em>trajectory</em><span class="sig-paren">)</span><a class="reference internal" href="_modules/agiprobot_measurement/trajectory_manager.html#TrajectoryManager.postprocess_trajectory"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#agiprobot_measurement.trajectory_manager.TrajectoryManager.postprocess_trajectory" title="Permalink to this definition">¶</a></dt>
+<dd><p>Check if trajectory meets the limits specified in ‘joint_limits.yaml’ and if the time between two points is increasing.
+MoveIt does not apply the values from ‘joint_limits.yaml’ when computing a cartesian path, which is dangerous for trajectory-execution.
+For prevention, trajectories with too heavy violations will be rejected. However, specifying the joint-limits from the yaml in the xacro-urdf as
+well seems to have eliminated this problem (but this code is still active for safety purposes).</p>
+<table class="docutils field-list" frame="void" rules="none">
+<col class="field-name" />
+<col class="field-body" />
+<tbody valign="top">
+<tr class="field-odd field"><th class="field-name">Parameters:</th><td class="field-body"><strong>trajectory</strong> (<em>moveit_msgs/RobotTrajectory</em>) – RobotTrajectory to check and improve</td>
+</tr>
+<tr class="field-even field"><th class="field-name">Returns:</th><td class="field-body">Boolean value indicating if the trajectory could be post-processed reasonably or if it has to be rejected</td>
+</tr>
+<tr class="field-odd field"><th class="field-name">Return type:</th><td class="field-body">bool</td>
+</tr>
+</tbody>
+</table>
+</dd></dl>
+
+<dl class="method">
+<dt id="agiprobot_measurement.trajectory_manager.TrajectoryManager.process_view">
+<code class="descname">process_view</code><span class="sig-paren">(</span><em>view</em>, <em>ik_service</em>, <em>minimum_required_overmeasure=5</em>, <em>trajectory_sample_step=2</em>, <em>joint_jump_threshold=1.5</em>, <em>minimum_trajectory_length=50</em><span class="sig-paren">)</span><a class="reference internal" href="_modules/agiprobot_measurement/trajectory_manager.html#TrajectoryManager.process_view"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#agiprobot_measurement.trajectory_manager.TrajectoryManager.process_view" title="Permalink to this definition">¶</a></dt>
+<dd><p>Processes a single view entirely. Starting on a simple reachability-analysis of the anchor-pose, a metrological evaluation is performed using the sensor_model to
+review the measurement-gain this view can contribute in theory. Then, the actual meausrement-trajectories are calculated and examined regarding the
+provided contraints. In the end, the processing-result (trajectory and metrological values) are stored in the view object</p>
+<table class="docutils field-list" frame="void" rules="none">
+<col class="field-name" />
+<col class="field-body" />
+<tbody valign="top">
+<tr class="field-odd field"><th class="field-name">Parameters:</th><td class="field-body"><ul class="first simple">
+<li><strong>view</strong> (<a class="reference internal" href="#agiprobot_measurement.view.View" title="agiprobot_measurement.view.View"><em>View</em></a>) – View to be processed (if processing was successful, members of this view-object will be changed)</li>
+<li><strong>ik_service</strong> (<em>rospy.ServiceProxy</em>) – ROS-Serviceproxy that can resolve inverse-kinematics via moveit_msgs/GetPositionIK</li>
+<li><strong>minimum_required_overmeasure</strong> (<em>float</em><em>, </em><em>optional</em>) – How much to add to the trajectory in trajectory-direction in mm after the last measurable sample_point is measured (as samples usually do not occur exactly at edges), defaults to 5</li>
+<li><strong>trajectory_sample_step</strong> (<em>float</em><em>, </em><em>optional</em>) – Euclidian distance between 2 trajectory-points in cartesian sapce in mm, defaults to 2</li>
+<li><strong>joint_jump_threshold</strong> (<em>float</em><em>, </em><em>optional</em>) – Maximum change in joint values allowed between 2 trajectory-points in rad (since all joints are revolute), defaults to 1.5</li>
+<li><strong>minimum_trajectory_length</strong> (<em>float</em><em>, </em><em>optional</em>) – Minimum length a generated trajectory has to have so that it is accepted in mm, defaults to 50</li>
+</ul>
+</td>
+</tr>
+<tr class="field-even field"><th class="field-name">Returns:</th><td class="field-body"><p class="first">Boolean value that is true, if the view could be processed and all contraints were met, and false otherwise</p>
+</td>
+</tr>
+<tr class="field-odd field"><th class="field-name">Return type:</th><td class="field-body"><p class="first last">bool</p>
+</td>
+</tr>
+</tbody>
+</table>
+</dd></dl>
+
+<dl class="method">
+<dt id="agiprobot_measurement.trajectory_manager.TrajectoryManager.solve_scp">
+<code class="descname">solve_scp</code><span class="sig-paren">(</span><em>provided_views</em>, <em>solver_type='greedy'</em><span class="sig-paren">)</span><a class="reference internal" href="_modules/agiprobot_measurement/trajectory_manager.html#TrajectoryManager.solve_scp"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#agiprobot_measurement.trajectory_manager.TrajectoryManager.solve_scp" title="Permalink to this definition">¶</a></dt>
+<dd><p>Solve Set Covering Problem to cover all measurable surface_points with a fraction of the set of provided views.
+Possible solver_types are:</p>
+<ul class="simple">
+<li>“greedy”: Fills return set at each step with the trajectory that delivers the most
+additional coverage compared to the points already in the set. If this additional coverage is
+identical in size for several new optimal viewpoint-candidates, the one with the lowest maximum
+uncertainty will be added similarly to the improvement introduced in chapter 4.4 of 
+“View and sensor planning for multi-sensor surface inspection” (Gronle et al., 2016)  (default)</li>
+<li>“IP_basic”: Solves the SCP-Problem with integer programming (IP) using the formulation in
+“Model-based view planning” (Scott, 2009), i.e. the objective function is the number of all
+selected viewpoints whereas the constraint is that every surface point must be covered at least by one viewpoint</li>
+<li>“IP_uncertainty”: Solves the SCP using IP with respect to the uncertainty. The formulas are similar to “IP_basic”
+but in the objective, costs corresponding to the worst uncertainty are assigned to every viewpoint-trajectory.</li>
+<li>“IP_time”: Solves the SCP using IP with respect to the time of trajectory-execution. The formulas are similar to “IP_basic”
+but in the objective, costs corresponding to the duration of the trajectory are assigned to every viewpoint.</li>
+</ul>
+<table class="docutils field-list" frame="void" rules="none">
+<col class="field-name" />
+<col class="field-body" />
+<tbody valign="top">
+<tr class="field-odd field"><th class="field-name">Parameters:</th><td class="field-body"><ul class="first simple">
+<li><strong>provided_views</strong> (<em>set</em><em>[</em><a class="reference internal" href="#agiprobot_measurement.view.View" title="agiprobot_measurement.view.View"><em>View</em></a><em>] or </em><em>list</em><em>[</em><a class="reference internal" href="#agiprobot_measurement.view.View" title="agiprobot_measurement.view.View"><em>View</em></a><em>]</em>) – All processed views where each has a valid measurement-trajectory and information about the measurable surface_points</li>
+<li><strong>solver_type</strong> (<em>str</em><em>, </em><em>optional</em>) – See function description, defaults to “greedy”</li>
+</ul>
+</td>
+</tr>
+<tr class="field-even field"><th class="field-name">Returns:</th><td class="field-body"><p class="first">Set of views that can measure the union of measurable surface points of all provided views</p>
+</td>
+</tr>
+<tr class="field-odd field"><th class="field-name">Return type:</th><td class="field-body"><p class="first last">set[<a class="reference internal" href="#agiprobot_measurement.view.View" title="agiprobot_measurement.view.View">View</a>]</p>
+</td>
+</tr>
+</tbody>
+</table>
+</dd></dl>
+
+<dl class="method">
+<dt id="agiprobot_measurement.trajectory_manager.TrajectoryManager.store_execution_plan">
+<code class="descname">store_execution_plan</code><span class="sig-paren">(</span><em>file_path</em>, <em>execution_plan</em>, <em>metadata={}</em><span class="sig-paren">)</span><a class="reference internal" href="_modules/agiprobot_measurement/trajectory_manager.html#TrajectoryManager.store_execution_plan"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#agiprobot_measurement.trajectory_manager.TrajectoryManager.store_execution_plan" title="Permalink to this definition">¶</a></dt>
+<dd><p>Stores the provided execution_plan segments (= moveit_msgs/RobotTrajectory) in a yaml-file at the provided file_path formatted so that it can be read in by the class’s ‘load_execution_plan’-method.</p>
+<table class="docutils field-list" frame="void" rules="none">
+<col class="field-name" />
+<col class="field-body" />
+<tbody valign="top">
+<tr class="field-odd field"><th class="field-name">Parameters:</th><td class="field-body"><ul class="first simple">
+<li><strong>file_path</strong> (<em>str</em>) – Path specifying where to safe the generated file at</li>
+<li><strong>execution_plan</strong> (<em>list of moveit_msgs/RobotTrajectory</em>) – List of path-segments that can be executed consecutively (i.e. joint-values at the last point of any entry = joint-values at the beginning of the next entry).</li>
+<li><strong>metadata</strong> (<em>dict</em>) – Dictionary of information about this plan in key-value-fashion (e.g. {‘sampling_density’: 0.01, ‘timestamp’: ‘12:00, 01.01.2021’, ‘planning_duration_in_s’:42}”)#</li>
+</ul>
+</td>
+</tr>
+<tr class="field-even field"><th class="field-name">Returns:</th><td class="field-body"><p class="first">True (always)</p>
+</td>
+</tr>
+<tr class="field-odd field"><th class="field-name">Return type:</th><td class="field-body"><p class="first last">bool</p>
+</td>
+</tr>
+</tbody>
+</table>
+</dd></dl>
+
+</dd></dl>
+
+</div>
+<div class="section" id="module-agiprobot_measurement.view">
+<span id="agiprobot-measurement-view-module"></span><h2>agiprobot_measurement.view module<a class="headerlink" href="#module-agiprobot_measurement.view" title="Permalink to this headline">¶</a></h2>
+<dl class="class">
+<dt id="agiprobot_measurement.view.View">
+<em class="property">class </em><code class="descclassname">agiprobot_measurement.view.</code><code class="descname">View</code><span class="sig-paren">(</span><em>surface_point</em>, <em>surface_normal</em>, <em>angle_around_boresight</em>, <em>standoff_distance</em>, <em>tilt_theta=0</em>, <em>tilt_gamma=0</em><span class="sig-paren">)</span><a class="reference internal" href="_modules/agiprobot_measurement/view.html#View"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#agiprobot_measurement.view.View" title="Permalink to this definition">¶</a></dt>
+<dd><p>Class for keeping track about one view.
+A view consists on the one hand of geometrical specifications (about location and length of the view and execution informations), on the other
+hand of metrological specifications (e.g. what can be measured by this view).</p>
+<dl class="method">
+<dt id="agiprobot_measurement.view.View.get_anchor_position">
+<code class="descname">get_anchor_position</code><span class="sig-paren">(</span><em>as_matrix=False</em><span class="sig-paren">)</span><a class="reference internal" href="_modules/agiprobot_measurement/view.html#View.get_anchor_position"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#agiprobot_measurement.view.View.get_anchor_position" title="Permalink to this definition">¶</a></dt>
+<dd><p>Gets the laser_emitter_frame’s position that was generated during construction. This is the point where the z-axis of the laser_emitter_frame
+hits the surface_point of the target mesh that was used to design this view. Keep in mind that ‘anchor’ does not necessarely mean ‘anchor’ of the trajectory.</p>
+<table class="docutils field-list" frame="void" rules="none">
+<col class="field-name" />
+<col class="field-body" />
+<tbody valign="top">
+<tr class="field-odd field"><th class="field-name">Parameters:</th><td class="field-body"><strong>as_matrix</strong> (<em>bool</em><em>, </em><em>optional</em>) – Whether to give the translation as homogeneous 4x4-matrix or vector, defaults to False</td>
+</tr>
+<tr class="field-even field"><th class="field-name">Returns:</th><td class="field-body">Homogeneous 4x4-matrix or vector of the view’s anchor position</td>
+</tr>
+<tr class="field-odd field"><th class="field-name">Return type:</th><td class="field-body">np.array (dimensions depend on parameter as_matrix)</td>
+</tr>
+</tbody>
+</table>
+</dd></dl>
+
+<dl class="method">
+<dt id="agiprobot_measurement.view.View.get_measurable_surface_point_indices">
+<code class="descname">get_measurable_surface_point_indices</code><span class="sig-paren">(</span><span class="sig-paren">)</span><a class="reference internal" href="_modules/agiprobot_measurement/view.html#View.get_measurable_surface_point_indices"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#agiprobot_measurement.view.View.get_measurable_surface_point_indices" title="Permalink to this definition">¶</a></dt>
+<dd><p>Gets the surface_point-indices measurable by this view’s measurement-trajectory. The indices are abstract and are only useful 
+when inserted into an externally maintained list of the actual surface points.</p>
+<table class="docutils field-list" frame="void" rules="none">
+<col class="field-name" />
+<col class="field-body" />
+<tbody valign="top">
+<tr class="field-odd field"><th class="field-name">Returns:</th><td class="field-body">Surface_point-indices measurable by this view’s measurement-trajectory of an external list</td>
+</tr>
+<tr class="field-even field"><th class="field-name">Return type:</th><td class="field-body">list[int]</td>
+</tr>
+</tbody>
+</table>
+</dd></dl>
+
+<dl class="method">
+<dt id="agiprobot_measurement.view.View.get_measurable_surface_point_scores">
+<code class="descname">get_measurable_surface_point_scores</code><span class="sig-paren">(</span><span class="sig-paren">)</span><a class="reference internal" href="_modules/agiprobot_measurement/view.html#View.get_measurable_surface_point_scores"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#agiprobot_measurement.view.View.get_measurable_surface_point_scores" title="Permalink to this definition">¶</a></dt>
+<dd><p>Gets the uncertainty scores of each measurable surface point. The values in the returned list must be matched with the
+actual surface points in an external viewpoint list using this views measurable_surface_point_indices: The uncertainty-score at index i
+is meant for the surface_point in the external list evaluated at index measurable_surface_point_indices[i].</p>
+<table class="docutils field-list" frame="void" rules="none">
+<col class="field-name" />
+<col class="field-body" />
+<tbody valign="top">
+<tr class="field-odd field"><th class="field-name">Returns:</th><td class="field-body">Uncertainty scores of each measurable surface point</td>
+</tr>
+<tr class="field-even field"><th class="field-name">Return type:</th><td class="field-body">list[float]</td>
+</tr>
+</tbody>
+</table>
+</dd></dl>
+
+<dl class="method">
+<dt id="agiprobot_measurement.view.View.get_orientation_matrix">
+<code class="descname">get_orientation_matrix</code><span class="sig-paren">(</span><span class="sig-paren">)</span><a class="reference internal" href="_modules/agiprobot_measurement/view.html#View.get_orientation_matrix"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#agiprobot_measurement.view.View.get_orientation_matrix" title="Permalink to this definition">¶</a></dt>
+<dd><p>Gets the orientation of the laser_emitter_frame of this view. The orientation (not the position) remains the same for every point on the assigned measurement-trajectory</p>
+<table class="docutils field-list" frame="void" rules="none">
+<col class="field-name" />
+<col class="field-body" />
+<tbody valign="top">
+<tr class="field-odd field"><th class="field-name">Returns:</th><td class="field-body">Orientation of the laser_emitter_frame</td>
+</tr>
+<tr class="field-even field"><th class="field-name">Return type:</th><td class="field-body">numpy.array</td>
+</tr>
+</tbody>
+</table>
+</dd></dl>
+
+<dl class="method">
+<dt id="agiprobot_measurement.view.View.get_surface_point">
+<code class="descname">get_surface_point</code><span class="sig-paren">(</span><em>as_matrix=False</em><span class="sig-paren">)</span><a class="reference internal" href="_modules/agiprobot_measurement/view.html#View.get_surface_point"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#agiprobot_measurement.view.View.get_surface_point" title="Permalink to this definition">¶</a></dt>
+<dd><p>Gets the position of the surface point this view is based on. This is not the same as the view_anchor-point.</p>
+<table class="docutils field-list" frame="void" rules="none">
+<col class="field-name" />
+<col class="field-body" />
+<tbody valign="top">
+<tr class="field-odd field"><th class="field-name">Parameters:</th><td class="field-body"><strong>as_matrix</strong> (<em>bool</em><em>, </em><em>optional</em>) – Whether to give the translation as homogeneous 4x4-matrix or vector, defaults to False</td>
+</tr>
+<tr class="field-even field"><th class="field-name">Returns:</th><td class="field-body">Homogeneous 4x4-matrix or vector of the surface point</td>
+</tr>
+<tr class="field-odd field"><th class="field-name">Return type:</th><td class="field-body">numpy.array (dimensions depend on parameter as_matrix)</td>
+</tr>
+</tbody>
+</table>
+</dd></dl>
+
+<dl class="method">
+<dt id="agiprobot_measurement.view.View.get_trajectory_for_measurement">
+<code class="descname">get_trajectory_for_measurement</code><span class="sig-paren">(</span><span class="sig-paren">)</span><a class="reference internal" href="_modules/agiprobot_measurement/view.html#View.get_trajectory_for_measurement"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#agiprobot_measurement.view.View.get_trajectory_for_measurement" title="Permalink to this definition">¶</a></dt>
+<dd><p>Returns trajectory that is performed to execute the measurement corresponding to this view.
+This measurement-trajectory is a straight line in cartesian space.</p>
+<table class="docutils field-list" frame="void" rules="none">
+<col class="field-name" />
+<col class="field-body" />
+<tbody valign="top">
+<tr class="field-odd field"><th class="field-name">Returns:</th><td class="field-body">Trajectory describing how to move the robot for this views measurement</td>
+</tr>
+<tr class="field-even field"><th class="field-name">Return type:</th><td class="field-body">moveit_msgs/RobotTrajectory</td>
+</tr>
+</tbody>
+</table>
+</dd></dl>
+
+<dl class="method">
+<dt id="agiprobot_measurement.view.View.get_trajectory_to_view">
+<code class="descname">get_trajectory_to_view</code><span class="sig-paren">(</span><span class="sig-paren">)</span><a class="reference internal" href="_modules/agiprobot_measurement/view.html#View.get_trajectory_to_view"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#agiprobot_measurement.view.View.get_trajectory_to_view" title="Permalink to this definition">¶</a></dt>
+<dd><p>Returns the stored trajectory from a former state (might be robot’s current_state or the end point of a previously executed trajectory) to
+the start state of this views’s measurement trajectory. This is useful to connect multiple views into an execution plan.</p>
+<table class="docutils field-list" frame="void" rules="none">
+<col class="field-name" />
+<col class="field-body" />
+<tbody valign="top">
+<tr class="field-odd field"><th class="field-name">Returns:</th><td class="field-body">Trajectory from certain start state to this views’s measurement trajectory</td>
+</tr>
+<tr class="field-even field"><th class="field-name">Return type:</th><td class="field-body">moveit_msgs/RobotTrajectory</td>
+</tr>
+</tbody>
+</table>
+</dd></dl>
+
+<dl class="method">
+<dt id="agiprobot_measurement.view.View.reverse_trajectory_for_measurement">
+<code class="descname">reverse_trajectory_for_measurement</code><span class="sig-paren">(</span><span class="sig-paren">)</span><a class="reference internal" href="_modules/agiprobot_measurement/view.html#View.reverse_trajectory_for_measurement"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#agiprobot_measurement.view.View.reverse_trajectory_for_measurement" title="Permalink to this definition">¶</a></dt>
+<dd><p>Flips the measurement-trajectory of this view. The start-pose becomes the end-pose and vice versa. The execution time stays the same.</p>
+<table class="docutils field-list" frame="void" rules="none">
+<col class="field-name" />
+<col class="field-body" />
+<tbody valign="top">
+<tr class="field-odd field"><th class="field-name">Returns:</th><td class="field-body">None</td>
+</tr>
+<tr class="field-even field"><th class="field-name">Return type:</th><td class="field-body">NoneType</td>
+</tr>
+</tbody>
+</table>
+</dd></dl>
+
+<dl class="method">
+<dt id="agiprobot_measurement.view.View.set_measurable_surface_point_indices_and_scores">
+<code class="descname">set_measurable_surface_point_indices_and_scores</code><span class="sig-paren">(</span><em>measurable_point_indices</em>, <em>uncertainty_scores</em><span class="sig-paren">)</span><a class="reference internal" href="_modules/agiprobot_measurement/view.html#View.set_measurable_surface_point_indices_and_scores"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#agiprobot_measurement.view.View.set_measurable_surface_point_indices_and_scores" title="Permalink to this definition">¶</a></dt>
+<dd><p>Sets the indices of surface points measurable by this view’s measurement-trajectory as well as their model-predicted uncertainties. 
+The indices are abstract and only meaningful when connected to a concrete surface-point-list which is maintained externally of the View-scope.
+Both lists must have the same length.</p>
+<table class="docutils field-list" frame="void" rules="none">
+<col class="field-name" />
+<col class="field-body" />
+<tbody valign="top">
+<tr class="field-odd field"><th class="field-name">Parameters:</th><td class="field-body"><ul class="first last simple">
+<li><strong>measurable_point_indices</strong> (<em>list</em><em>[</em><em>int</em><em>]</em>) – List of the indices of points in an external surface_point-list that can be measured by this view</li>
+<li><strong>uncertainty_scores</strong> (<em>list</em><em>[</em><em>float</em><em>]</em>) – List of uncertainty-score values for the measured surface_point masked through the index at the same position</li>
+</ul>
+</td>
+</tr>
+</tbody>
+</table>
+</dd></dl>
+
+<dl class="method">
+<dt id="agiprobot_measurement.view.View.set_trajectory_for_measurement">
+<code class="descname">set_trajectory_for_measurement</code><span class="sig-paren">(</span><em>trajectory_for_measurement</em><span class="sig-paren">)</span><a class="reference internal" href="_modules/agiprobot_measurement/view.html#View.set_trajectory_for_measurement"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#agiprobot_measurement.view.View.set_trajectory_for_measurement" title="Permalink to this definition">¶</a></dt>
+<dd><p>Trajectory that is performed to execute the measurement corresponding to this view.
+This measurement-trajectory is a straight line in cartesian space.</p>
+<table class="docutils field-list" frame="void" rules="none">
+<col class="field-name" />
+<col class="field-body" />
+<tbody valign="top">
+<tr class="field-odd field"><th class="field-name">Parameters:</th><td class="field-body"><strong>trajectory_for_measurement</strong> (<em>moveit_msgs/RobotTrajectory</em>) – Trajectory describing how to move the robot for this views measurement</td>
+</tr>
+</tbody>
+</table>
+</dd></dl>
+
+<dl class="method">
+<dt id="agiprobot_measurement.view.View.set_trajectory_to_view">
+<code class="descname">set_trajectory_to_view</code><span class="sig-paren">(</span><em>trajectory_to_view</em><span class="sig-paren">)</span><a class="reference internal" href="_modules/agiprobot_measurement/view.html#View.set_trajectory_to_view"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#agiprobot_measurement.view.View.set_trajectory_to_view" title="Permalink to this definition">¶</a></dt>
+<dd><p>Sets a trajectory that moves the robot to the start of the view’s measurement trajectory.
+The trajectory can be arbitrary but must end at this start point. This is useful to connect multiple views into an execution plan.</p>
+<table class="docutils field-list" frame="void" rules="none">
+<col class="field-name" />
+<col class="field-body" />
+<tbody valign="top">
+<tr class="field-odd field"><th class="field-name">Parameters:</th><td class="field-body"><strong>trajectory_to_view</strong> (<em>moveit_msgs/RobotTrajectory</em>) – Trajectory from certain start state to this views’s measurement trajectory</td>
+</tr>
+</tbody>
+</table>
+</dd></dl>
+
+</dd></dl>
+
+</div>
+<div class="section" id="module-agiprobot_measurement">
+<span id="module-contents"></span><h2>Module contents<a class="headerlink" href="#module-agiprobot_measurement" title="Permalink to this headline">¶</a></h2>
+</div>
+</div>
+
+
+           </div>
+           
+          </div>
+          <footer>
+
+  <hr/>
+
+  <div role="contentinfo">
+    <p>
+        &#169; Copyright 2021, Sven Becker.
+
+    </p>
+  </div>
+    
+    
+    
+    Built with <a href="https://www.sphinx-doc.org/">Sphinx</a> using a
+    
+    <a href="https://github.com/readthedocs/sphinx_rtd_theme">theme</a>
+    
+    provided by <a href="https://readthedocs.org">Read the Docs</a>. 
+
+</footer>
+        </div>
+      </div>
+
+    </section>
+
+  </div>
+  
+
+  <script type="text/javascript">
+      jQuery(function () {
+          SphinxRtdTheme.Navigation.enable(true);
+      });
+  </script>
+
+  
+  
+    
+   
+
+</body>
+</html>
