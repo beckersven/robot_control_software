@@ -238,6 +238,26 @@ class TrajectoryManager:
         sampled_surface_points, sampled_face_indices = trimesh.sample.sample_surface_even(self.target_mesh, int(self.target_mesh.area * sampling_density))
         print("Sampled target mesh's surface into {} surface points".format(len(sampled_surface_points)))
         
+        mechanical_surface_points, mechanical_face_indices = [], []
+        for i, (sampled_surface_point, sampled_face_index) in enumerate(zip(sampled_surface_points, sampled_face_indices)):
+            add = True
+            for (mechanical_surface_point, mechanical_face_index) in zip(mechanical_surface_points, mechanical_face_indices):
+                if np.linalg.norm(mechanical_surface_point - sampled_surface_point) < 10:
+                    if self.target_mesh.face_normals[mechanical_face_index].dot(self.target_mesh.face_normals[sampled_face_index]) > 0.9:
+                        add = False
+                        break
+            print(float(i) / len(sampled_surface_points))
+            if add:
+                mechanical_surface_points.append(sampled_surface_point)
+                mechanical_face_indices.append(sampled_face_index)
+        
+
+        a = trimesh.PointCloud(sampled_surface_points)
+        a.visual.vertex_colors = [255, 0, 0, 255]
+        b = trimesh.PointCloud(mechanical_surface_points)
+        b.visual.vertex_colors = [0, 255, 0, 255]
+        trimesh.Scene([self.target_mesh, b, a]).show()
+
         # Use the sampling results to set the processing context of the sensor model
         self.sensor_model.set_processing_context(self.target_mesh, sampled_surface_points, sampled_face_indices)
         # Very conservative limit of the maximum length in and againts trajectory_direction of 
@@ -276,7 +296,7 @@ class TrajectoryManager:
         # Then, rotate the orientation of the view's laser_emitter_frame around the z-Axis (= boresight) with respect to the anchor point (-> Changes only orientation).
         # If specified, apply tilting to the view for every orientation, so that the view's anchor point is turned around the laser_emitter_frame's x-/y-axis but 
         # with respect to the corresponding surface point (-> Changes orientation and position of view-anchor).
-        for (surface_point, face_index) in zip(sampled_surface_points, sampled_face_indices):
+        for (surface_point, face_index) in zip(mechanical_surface_points, mechanical_face_indices):
             for angle in np.linspace(0, 360, orientations_around_boresight + 1)[:-1]:
                 new_view = View(surface_point, self.target_mesh.face_normals[face_index], np.deg2rad(angle), self.sensor_model.get_optimal_standoff())
                 if view_tilt_mode == "none":
@@ -749,8 +769,8 @@ if __name__ == "__main__":
     signal.signal(signal.SIGINT, signal_handler)
     tm = TrajectoryManager()
     while True:
-        tm.perform_all("/home/svenbecker/Desktop/test6.stl", 0.1, 8)
-        #tm.perform_all("/home/svenbecker/Bachelorarbeit/test/motor_without_internals_upright.stl", 0.05, 8)
+        #tm.perform_all("/home/svenbecker/Desktop/test6.stl", 1, 8)
+        tm.perform_all("/home/svenbecker/Bachelorarbeit/test/motor_without_internals_upright.stl", 0.1, 8)
         rospy.sleep(1)
     rospy.spin()
     
