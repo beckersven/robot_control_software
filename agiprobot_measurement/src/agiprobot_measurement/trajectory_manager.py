@@ -145,7 +145,7 @@ class TrajectoryManager:
 
 
     
-    def load_target_mesh(self, file_name, transform = np.eye(4), add_wbk_mirrors=True):
+    def load_target_mesh(self, file_name, transform = np.eye(4), add_wbk_mirrors=True, remove_downside=True, remove_threshold_angle_deg=20):
         """
         Loads the mesh-to-measure from file into the instance's target_mesh-member (to generate and evaluate view-trajectories) and into
         MoveIt (for collision-prevention). To move the mesh into a feasible measurement-pose, a transform may be applied to set the mesh's
@@ -173,6 +173,11 @@ class TrajectoryManager:
         # to where it is mounted with respect to the "world"-frame of MoveIt
         self.target_mesh.apply_transform(self.target_mesh_transform)
 
+        # If specified, remove the downside faces of the CAD-Model (this is where the fixture is located)
+        if remove_downside:
+            comp = np.cos(np.deg2rad(remove_threshold_angle_deg))
+            mask = np.array([-self.target_mesh.face_normals[i][2] < comp for i in range(len(self.target_mesh.faces))])
+            self.target_mesh.update_faces(mask)        
 
         # Add mesh to MoveIt so that it will be considered as a collision object during planning
         # (here, the given transform also needs to be applied via a ROS-pose-message)
@@ -242,8 +247,8 @@ class TrajectoryManager:
         for i, (sampled_surface_point, sampled_face_index) in enumerate(zip(sampled_surface_points, sampled_face_indices)):
             add = True
             for (mechanical_surface_point, mechanical_face_index) in zip(mechanical_surface_points, mechanical_face_indices):
-                if np.linalg.norm(mechanical_surface_point - sampled_surface_point) < 10:
-                    if self.target_mesh.face_normals[mechanical_face_index].dot(self.target_mesh.face_normals[sampled_face_index]) > 0.9:
+                if np.linalg.norm(mechanical_surface_point - sampled_surface_point) < 20:
+                    if self.target_mesh.face_normals[mechanical_face_index].dot(self.target_mesh.face_normals[sampled_face_index]) > np.cos(np.pi/6):
                         add = False
                         break
             print(float(i) / len(sampled_surface_points))
@@ -251,7 +256,8 @@ class TrajectoryManager:
                 mechanical_surface_points.append(sampled_surface_point)
                 mechanical_face_indices.append(sampled_face_index)
         
-
+        orientations_around_boresight = np.ceil(400 * np.pi * sampling_density)
+        print(orientations_around_boresight)
         a = trimesh.PointCloud(sampled_surface_points)
         a.visual.vertex_colors = [255, 0, 0, 255]
         b = trimesh.PointCloud(mechanical_surface_points)
@@ -319,8 +325,8 @@ class TrajectoryManager:
                 processed += 1
                 print("Processed view {} of {} ({} %, {} of them are usable for measurement)".format(
                     processed, 
-                    len(sampled_surface_points) * orientations_around_boresight, 
-                    np.round(100.0 * processed / (len(sampled_surface_points) * orientations_around_boresight), 2),
+                    len(mechanical_surface_points) * orientations_around_boresight, 
+                    np.round(100.0 * processed / (len(mechanical_surface_points) * orientations_around_boresight), 2),
                     len(valid_views)
                 ))
                 
@@ -575,9 +581,9 @@ class TrajectoryManager:
                 # Goal is that the combined trajectory-execution-time of all measurement-trajectories becomes minimal
                 ip_problem += pulp.lpSum([viewpoint_variables[i] * provided_views[i].get_trajectory_for_measurement().joint_trajectory.points[-1].time_from_start.to_sec() for i in viewpoint_indices])
             elif solver_type == "IP_uncertainty":
-                ip_problem += pulp.lpSum([viewpoint_variables[i] * (1 - sum(provided_views[i].get_measurable_surface_point_indices()) / len(provided_views[i].get_measurable_surface_point_indices())) for i in viewpoint_indices])
+                ip_problem += pulp.lpSum([viewpoint_variables[i] * (1 - sum(provided_views[i].get_measurable_surface_point_scores()) / len(provided_views[i].get_measurable_surface_point_scores())) for i in viewpoint_indices])
             elif solver_type == "IP_combined":
-                ip_problem += pulp.lpSum([viewpoint_variables[i] * (1 - sum(provided_views[i].get_measurable_surface_point_indices()) / len(provided_views[i].get_measurable_surface_point_indices())) * provided_views[i].get_trajectory_for_measurement().joint_trajectory.points[-1].time_from_start.to_sec() for i in viewpoint_indices])
+                ip_problem += pulp.lpSum([viewpoint_variables[i] * (1 - sum(provided_views[i].get_measurable_surface_point_scores()) / len(provided_views[i].get_measurable_surface_point_scores())) * provided_views[i].get_trajectory_for_measurement().joint_trajectory.points[-1].time_from_start.to_sec() for i in viewpoint_indices])
             
             # Add constraints: Viewpoint_variable's elements are either 1 or 0
             for i in viewpoint_indices:
@@ -760,6 +766,7 @@ class TrajectoryManager:
         connected_views = self.connect_views(scp_views)
         execution_plan = self.convert_viewlist_to_execution_plan(connected_views)
         self.store_execution_plan("/home/svenbecker/Bachelorarbeit/test/stored_plans/TEST1.yaml", execution_plan, {"Time of calculation": "Jetzt"})
+        raw_input("JETZT")
         #execution_plan = self.load_execution_plan("/home/svenbecker/Bachelorarbeit/test/stored_plans/TEST1.yaml")
         self.execute(execution_plan)
         
@@ -769,8 +776,8 @@ if __name__ == "__main__":
     signal.signal(signal.SIGINT, signal_handler)
     tm = TrajectoryManager()
     while True:
-        #tm.perform_all("/home/svenbecker/Desktop/test6.stl", 1, 8)
-        tm.perform_all("/home/svenbecker/Bachelorarbeit/test/motor_without_internals_upright.stl", 0.1, 8)
+        #tm.perform_all("/home/svenbecker/Desktop/test6.stl", 0.0001, 16)
+        tm.perform_all("/home/svenbecker/Bachelorarbeit/test/motor_without_internals_upright.stl", 0.005, 12)
         rospy.sleep(1)
     rospy.spin()
     

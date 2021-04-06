@@ -22,7 +22,8 @@ class SensorModel:
         # Get sensor specifications from parameter server
         try:   
             self.optimal_standoff = parameter_map["optimal_standoff_mm"]
-            self.maximum_deviation_z = parameter_map["maximum_deviations"]["z_mm"]
+            self.minimum_standoff = parameter_map["minimum_standoff_mm"]
+            self.maximum_standoff = parameter_map["maximum_standoff_mm"]
             self.maximum_deviation_theta = parameter_map["maximum_deviations"]["theta_rad"]
             self.maximum_deviation_gamma = parameter_map["maximum_deviations"]["gamma_rad"]
             self.beam_taille_diameter = parameter_map["beam_taille_diameter_mm"]
@@ -74,7 +75,7 @@ class SensorModel:
         :returns: Maximum possible uncertainty of a measurable point (= is within the max_deviation_...-range) in mm
         :rtype: float
         """
-        return self.evaluate_uncertainty(self.optimal_standoff + self.maximum_deviation_z, self.maximum_deviation_gamma + np.pi / 2)
+        return self.evaluate_uncertainty(self.maximum_standoff, self.maximum_deviation_gamma + np.pi / 2)
     
     def get_min_uncertainty(self):
         """
@@ -84,7 +85,7 @@ class SensorModel:
         :returns: Minimum possible uncertainty in mm
         :rtype: float
         """
-        return self.evaluate_uncertainty(self.optimal_standoff - self.maximum_deviation_z, np.pi / 2)
+        return self.evaluate_uncertainty(self.minimum_standoff, np.pi / 2)
 
     def evaluate_uncertainty(self, z, gamma):
         """
@@ -247,8 +248,8 @@ class SensorModel:
                     theta = 2 * np.pi + theta
                 z = sensor_direction.dot(self.context["sampled_surface_points"][inlier_indices[i]] - ray_origins_emitter[i])
                 # Only accept, if no violation of max_deviation_...-limit
-                if abs(gamma - np.pi/2) < self.maximum_deviation_gamma and abs(theta) < self.maximum_deviation_theta and abs(z - self.optimal_standoff) < self.maximum_deviation_z:
-                    uncertainty_scores.append(self.evaluate_score(z, gamma))
+                if abs(gamma - np.pi/2) < self.maximum_deviation_gamma and abs(theta) < self.maximum_deviation_theta and z < self.maximum_standoff:
+                    uncertainty_scores.append(self.evaluate_score(z, gamma) * abs(sensor_direction.dot(self.context["face_normals"][rt_detector_face_id])))
                     measurable_surface_point_indices.append(inlier_indices[i])
                     trajectory_line_arguments_selected.append(trajectory_line_arguments[i])
         
@@ -270,14 +271,14 @@ class SensorModel:
         :rtype: trimesh.Trimesh
         """
         scanner_frustum_vertices = [
-            [half_length, (self.optimal_standoff - self.maximum_deviation_z) * np.tan(self.fan_angle / 2), - self.maximum_deviation_z],
-            [- half_length, (self.optimal_standoff - self.maximum_deviation_z) * np.tan(self.fan_angle / 2), - self.maximum_deviation_z],
-            [- half_length, - (self.optimal_standoff - self.maximum_deviation_z) * np.tan(self.fan_angle / 2), - self.maximum_deviation_z],
-            [half_length, - (self.optimal_standoff - self.maximum_deviation_z) * np.tan(self.fan_angle / 2), - self.maximum_deviation_z],
-            [half_length, (self.optimal_standoff + self.maximum_deviation_z) * np.tan(self.fan_angle / 2), self.maximum_deviation_z],
-            [- half_length, (self.optimal_standoff + self.maximum_deviation_z) * np.tan(self.fan_angle / 2), self.maximum_deviation_z],
-            [- half_length, - (self.optimal_standoff + self.maximum_deviation_z) * np.tan(self.fan_angle / 2), self.maximum_deviation_z],
-            [half_length, - (self.optimal_standoff + self.maximum_deviation_z) * np.tan(self.fan_angle / 2), self.maximum_deviation_z],
+            [half_length, (self.minimum_standoff) * np.tan(self.fan_angle / 2), - (self.maximum_standoff - self.minimum_standoff)],
+            [- half_length, (self.minimum_standoff) * np.tan(self.fan_angle / 2), - (self.maximum_standoff - self.minimum_standoff)],
+            [- half_length, - (self.minimum_standoff) * np.tan(self.fan_angle / 2), - (self.maximum_standoff - self.minimum_standoff)],
+            [half_length, - (self.minimum_standoff) * np.tan(self.fan_angle / 2), - (self.maximum_standoff - self.minimum_standoff)],
+            [half_length, (self.maximum_standoff) * np.tan(self.fan_angle / 2), (self.maximum_standoff - self.minimum_standoff)],
+            [- half_length, (self.maximum_standoff) * np.tan(self.fan_angle / 2), (self.maximum_standoff - self.minimum_standoff)],
+            [- half_length, - (self.maximum_standoff) * np.tan(self.fan_angle / 2), (self.maximum_standoff - self.minimum_standoff)],
+            [half_length, - (self.maximum_standoff) * np.tan(self.fan_angle / 2), (self.maximum_standoff - self.minimum_standoff)],
         ]
         
         return trimesh.PointCloud(scanner_frustum_vertices).convex_hull
