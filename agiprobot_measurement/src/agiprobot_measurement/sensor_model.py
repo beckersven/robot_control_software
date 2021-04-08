@@ -26,7 +26,7 @@ class SensorModel:
             self.maximum_standoff = parameter_map["maximum_standoff_mm"]
             self.maximum_deviation_theta = parameter_map["maximum_deviations"]["theta_rad"]
             self.maximum_deviation_gamma = parameter_map["maximum_deviations"]["gamma_rad"]
-            self.beam_taille_diameter = parameter_map["beam_taille_diameter_mm"]
+            self.K_u = parameter_map["K_u"]
             self.alpha = parameter_map["alpha_rad"]
             self.fan_angle = parameter_map["fan_angle_rad"]
         except KeyError as e:
@@ -101,7 +101,7 @@ class SensorModel:
         try:
             # See the corresponding Bachelors Thesis to understand the origin of this equation
             beta = np.arcsin((self.u_0 * np.sin(np.pi/2 - self.alpha)) / np.sqrt((z + np.sqrt(self.u_0**2 + (self.u_0/self.m_L)**2))**2+self.u_0**2-2*(z + np.sqrt(self.u_0**2 + (self.u_0/self.m_L)**2))*self.u_0*np.cos(np.pi/2 - self.alpha)))
-            d_z = np.sin(beta+gamma) / (np.sin(beta) * np.sin(gamma)) * (z + np.sqrt(self.u_0**2 + (self.u_0/self.m_L)**2)) * self.beam_taille_diameter / np.sqrt(self.u_0**2 + (self.u_0/self.m_L)**2)
+            d_z = np.sin(beta+gamma) / (np.sin(beta) * np.sin(gamma)) * (z + np.sqrt(self.u_0**2 + (self.u_0/self.m_L)**2)) * self.K_u / np.sqrt(self.u_0**2 + (self.u_0/self.m_L)**2)
             u = d_z / np.cos(gamma + beta - np.pi/2)
         except:
             return float("NaN")
@@ -183,7 +183,7 @@ class SensorModel:
         scan_frustum = self.get_scanning_frustum(maximum_deflection)
         # Transform frustum so that it is aligned with the laser_emitter_frame at the view-center-pose
         scan_frustum.apply_transform(view.get_orientation_matrix())
-        scan_frustum.apply_transform(view.get_surface_point(True))
+        scan_frustum.apply_transform(view.get_anchor_position(True))
         # Use RayMeshIntersector to identify the surface_points that are potentially measurable
         try:
             find_module("pyembree")
@@ -271,14 +271,14 @@ class SensorModel:
         :rtype: trimesh.Trimesh
         """
         scanner_frustum_vertices = [
-            [half_length, (self.minimum_standoff) * np.tan(self.fan_angle / 2), - (self.maximum_standoff - self.minimum_standoff)],
-            [- half_length, (self.minimum_standoff) * np.tan(self.fan_angle / 2), - (self.maximum_standoff - self.minimum_standoff)],
-            [- half_length, - (self.minimum_standoff) * np.tan(self.fan_angle / 2), - (self.maximum_standoff - self.minimum_standoff)],
-            [half_length, - (self.minimum_standoff) * np.tan(self.fan_angle / 2), - (self.maximum_standoff - self.minimum_standoff)],
-            [half_length, (self.maximum_standoff) * np.tan(self.fan_angle / 2), (self.maximum_standoff - self.minimum_standoff)],
-            [- half_length, (self.maximum_standoff) * np.tan(self.fan_angle / 2), (self.maximum_standoff - self.minimum_standoff)],
-            [- half_length, - (self.maximum_standoff) * np.tan(self.fan_angle / 2), (self.maximum_standoff - self.minimum_standoff)],
-            [half_length, - (self.maximum_standoff) * np.tan(self.fan_angle / 2), (self.maximum_standoff - self.minimum_standoff)],
+            [half_length, (self.minimum_standoff) * np.tan(self.fan_angle / 2), self.minimum_standoff],
+            [- half_length, (self.minimum_standoff) * np.tan(self.fan_angle / 2), self.minimum_standoff],
+            [- half_length, - (self.minimum_standoff) * np.tan(self.fan_angle / 2), self.minimum_standoff],
+            [half_length, - (self.minimum_standoff) * np.tan(self.fan_angle / 2), self.minimum_standoff],
+            [half_length, (self.maximum_standoff) * np.tan(self.fan_angle / 2), self.maximum_standoff],
+            [- half_length, (self.maximum_standoff) * np.tan(self.fan_angle / 2), self.maximum_standoff],
+            [- half_length, - (self.maximum_standoff) * np.tan(self.fan_angle / 2), self.maximum_standoff],
+            [half_length, - (self.maximum_standoff) * np.tan(self.fan_angle / 2), self.maximum_standoff],
         ]
         
         return trimesh.PointCloud(scanner_frustum_vertices).convex_hull

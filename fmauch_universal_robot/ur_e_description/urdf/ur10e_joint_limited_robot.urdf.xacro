@@ -53,19 +53,34 @@
     <origin xyz="0.36 0.36 0.55" rpy="0 0 0" />
   </joint>
 
+  <!-- See corresponding Bachelor Thesis for the origin of these numbers -->
   <link name="laser_scanner">
     <visual>
       <geometry>
-        <box size="0.15 0.3 0.17"/>
+        <mesh scale="0.001 0.001 0.001" filename="package://ur_e_description/meshes/laser_scanner/zeiss_tscan_visual.stl" />
       </geometry>
       <material name="wbk_green"/>
-      <origin rpy="0 0 0" xyz="0.00 0.075 0.086"/>  <!--tiny offset to ensure friction-absence -->
+      <!-- Those parameters have been optimized heuristically so that the visual model is apprx. enclosed by the collision model-->
+      <origin rpy="0 -1.5707963267948966 -1.5707963267948966" xyz="-0.05 0 0.013"/>  
     </visual>
+
+    
+
+    <!--Body-->
     <collision>
-      <origin rpy="0 0 0" xyz="0.0 0.08 0.095"/>
+      <origin rpy="0 0 0" xyz="0.0 0.0 0.083"/>
       <geometry>
-        <box size="0.17 0.32 0.19"/>     <!--size="0.23 0.09 0.15" -->
+        <box size="0.125 0.052 0.058"/>     
       </geometry>
+      <material name="wbk_green"/>
+    </collision>
+    <!--Handle-->
+    <collision>
+      <origin rpy="0 0 0" xyz=" 0.155 0.0 0.09"/>
+      <geometry>
+        <box size="0.185 0.16 0.18"/>     <!--size="0.23 0.09 0.15" -->
+      </geometry>
+      <material name="wbk_green"/>
     </collision>
   </link>
   
@@ -75,14 +90,12 @@
     <origin xyz="0 0 0" rpy="0.0 0.0 0.0" />
   </joint>
   
-  <link name="scanner_focus" ></link>
+  <link name="laser_emitter_frame" ></link>
   <joint name="scanner_internal" type="fixed">
-    <parent link="tool0"/>
-    <child link="scanner_focus"/>
-    <origin xyz="0 0.15 0.171" rpy="0 0 1.5707963"/>
+    <parent link="laser_scanner"/>
+    <child link="laser_emitter_frame"/>
+    <origin xyz="0.1665 0.0 0.14318" rpy="0 0 0"/>
   </joint>
-
- <!--added: END       <origin xyz="${-(0.125/2)-(0.11/2)} -0.01 0" rpy="0 0 ${pi/2}" /> -->
 
 
   <link name="world" />
