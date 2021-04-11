@@ -61,7 +61,7 @@ class View:
 
         self.lengths = [0,0]
         self.measurable_surface_point_indices = []
-        self.measurable_surface_point_scores = []
+        self.measurable_surface_point_uncertainties = []
         
         self.trajectory_for_measurement = RobotTrajectory()
         self.trajectory_to_view = RobotTrajectory()
@@ -175,7 +175,7 @@ class View:
         else:
             return self.anchor_position
     
-    def set_measurable_surface_point_indices_and_scores(self, measurable_point_indices, uncertainty_scores):
+    def set_measurable_surface_point_indices_and_uncertainties(self, measurable_point_indices, uncertainties):
         """
         Sets the indices of surface points measurable by this view's measurement-trajectory as well as their model-predicted uncertainties. 
         The indices are abstract and only meaningful when connected to a concrete surface-point-list which is maintained externally of the View-scope.
@@ -183,12 +183,12 @@ class View:
 
         :param measurable_point_indices: List of the indices of points in an external surface_point-list that can be measured by this view
         :type measurable_point_indices: list[int]
-        :param uncertainty_scores: List of uncertainty-score values for the measured surface_point masked through the index at the same position
-        :type uncertainty_scores: list[float]
+        :param uncertainties: List of uncertainty values for the measured surface_point masked through the index at the same position
+        :type uncertainties: list[float]
         """
-        assert len(measurable_point_indices) == len(uncertainty_scores)
+        assert len(measurable_point_indices) == len(uncertainties)
         self.measurable_surface_point_indices = measurable_point_indices
-        self.measurable_surface_point_scores = uncertainty_scores
+        self.measurable_surface_point_uncertainties = uncertainties
     
     def get_measurable_surface_point_indices(self):
         """
@@ -201,16 +201,16 @@ class View:
 
         return self.measurable_surface_point_indices
         
-    def get_measurable_surface_point_scores(self):
+    def get_measurable_surface_point_uncertainties(self):
         """
-        Gets the uncertainty scores of each measurable surface point. The values in the returned list must be matched with the
-        actual surface points in an external viewpoint list using this views measurable_surface_point_indices: The uncertainty-score at index i
+        Gets the uncertainties of each measurable surface point. The values in the returned list must be matched with the
+        actual surface points in an external viewpoint list using this views measurable_surface_point_indices: The uncertainty at index i
         is meant for the surface_point in the external list evaluated at index measurable_surface_point_indices[i].
 
-        :return: Uncertainty scores of each measurable surface point
+        :return: uncertainties of each measurable surface point
         :rtype: list[float]
         """
 
-        return self.measurable_surface_point_scores
+        return self.measurable_surface_point_uncertainties
     
 

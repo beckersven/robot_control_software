@@ -2,8 +2,8 @@ optimal_standoff_mm: 150
 minimum_standoff_mm: 100
 maximum_standoff_mm: 200
 maximum_deviations:
-  theta_rad: 0.78   # Is roughly 45deg
-  gamma_rad: 0.78
-K_u: 0.1
-alpha_rad: 0.524    # Is roughly 30deg
-fan_angle_rad: 0.785 # Is roughly 45deg
+  theta_rad: 0.785398   # Is roughly 45deg
+  gamma_rad: 0.785398
+K_u: 2.63e-6
+alpha_rad: 0.39602      # ca. 22,69deg
+phi_x_rad: 0.53669  # Is roughly 30,75deg

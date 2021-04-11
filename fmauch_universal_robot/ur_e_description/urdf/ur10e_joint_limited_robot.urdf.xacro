@@ -12,13 +12,14 @@
 
   <!-- arm -->
   <xacro:arg name="kinematics_config" default="$(find ur_e_description)/config/ur10e_default.yaml"/>
+  <!-- Use numerical values instead of "pi" to assert coherence with the joint_limits.yaml -->
   <xacro:ur10e_robot prefix="" joint_limited="true"
-    shoulder_pan_lower_limit="-3.0" shoulder_pan_upper_limit="3.0"
-    shoulder_lift_lower_limit="-3.0" shoulder_lift_upper_limit="0.52"
-    elbow_joint_lower_limit="-2.9" elbow_joint_upper_limit="0.1"
-    wrist_1_lower_limit="-3.14" wrist_1_upper_limit="3.14"
-    wrist_2_lower_limit="-3.14" wrist_2_upper_limit="3.14"
-    wrist_3_lower_limit="-3.14" wrist_3_upper_limit="3.14"
+    shoulder_pan_lower_limit="-6.283" shoulder_pan_upper_limit="6.283"
+    shoulder_lift_lower_limit="-3.14"    shoulder_lift_upper_limit="0.52"
+    elbow_joint_lower_limit="-2.9"    elbow_joint_upper_limit="0.1"
+    wrist_1_lower_limit="-6.283"      wrist_1_upper_limit="6.283"
+    wrist_2_lower_limit="-6.283"      wrist_2_upper_limit="6.283"
+    wrist_3_lower_limit="-6.283"      wrist_3_upper_limit="6.283"
     transmission_hw_interface="$(arg transmission_hw_interface)"
     kinematics_file="${load_yaml('$(arg kinematics_config)')}"
     />
@@ -53,7 +54,7 @@
     <origin xyz="0.36 0.36 0.55" rpy="0 0 0" />
   </joint>
 
-  <!-- See corresponding Bachelor Thesis for the origin of these numbers -->
+  <!-- See corresponding Bachelor Thesis for the origin of these numbers / geometries / ... -->
   <link name="laser_scanner">
     <visual>
       <geometry>
@@ -66,7 +67,7 @@
 
     
 
-    <!--Body-->
+    <!--Handle-->
     <collision>
       <origin rpy="0 0 0" xyz="0.0 0.0 0.083"/>
       <geometry>
@@ -74,7 +75,7 @@
       </geometry>
       <material name="wbk_green"/>
     </collision>
-    <!--Handle-->
+    <!--Body-->
     <collision>
       <origin rpy="0 0 0" xyz=" 0.155 0.0 0.09"/>
       <geometry>

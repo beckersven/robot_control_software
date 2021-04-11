@@ -28,7 +28,7 @@ class SensorModel:
             self.maximum_deviation_gamma = parameter_map["maximum_deviations"]["gamma_rad"]
             self.K_u = parameter_map["K_u"]
             self.alpha = parameter_map["alpha_rad"]
-            self.fan_angle = parameter_map["fan_angle_rad"]
+            self.phi_x = parameter_map["phi_x_rad"]
         except KeyError as e:
             raise Exception("Provided parameter-map for sensor-model incomplete: {}".format(e.message))
         
@@ -100,9 +100,7 @@ class SensorModel:
         """
         try:
             # See the corresponding Bachelors Thesis to understand the origin of this equation
-            beta = np.arcsin((self.u_0 * np.sin(np.pi/2 - self.alpha)) / np.sqrt((z + np.sqrt(self.u_0**2 + (self.u_0/self.m_L)**2))**2+self.u_0**2-2*(z + np.sqrt(self.u_0**2 + (self.u_0/self.m_L)**2))*self.u_0*np.cos(np.pi/2 - self.alpha)))
-            d_z = np.sin(beta+gamma) / (np.sin(beta) * np.sin(gamma)) * (z + np.sqrt(self.u_0**2 + (self.u_0/self.m_L)**2)) * self.K_u / np.sqrt(self.u_0**2 + (self.u_0/self.m_L)**2)
-            u = d_z / np.cos(gamma + beta - np.pi/2)
+            u = self.K_u * np.sqrt(z**2+self.u_0**2-2*z*self.u_0*np.sin(self.alpha)) / np.sin(gamma) * z
         except:
             return float("NaN")
         return u
@@ -155,20 +153,22 @@ class SensorModel:
 
 
 
-    def process_view_metrologically(self, view, maximum_deflection = 5e2):
+    def process_view_metrologically(self, view, uncertainty_threshold, maximum_deflection = 5e2):
         """
         Computes all measurable surface-points by a view-object as well as uncertainties and where they are measurable on the view-measurement-trajectory.
         Requires context to be set via set_processing_context(...). Checks for every sampled surface point of the given context whether it is visible and calculates the
-        uncertainty-score for it eventually. Also, the deflection of the laser_emitter_frame along the trajectory-line from the view-center pose is evaluated.
+        uncertainty for it eventually. Also, the deflection of the laser_emitter_frame along the trajectory-line from the view-anchor pose is evaluated.
         
-        :param view: View with set view-center-pose
+        :param view: View with set view-anchor-pose
         :type view: View
+        :param uncertainty_threshold: Maximum permissible uncertainty of a measured surface point, in mm
+        :type uncertainty_threshold: float
         :param maximum_deflection: Maximum deflection of the trajectory to be considered for processing in mm, defaults to 5e2 
         :type maximum_deflection: float, optional
         :returns:   3 unpacked arrays of the same length in order:\n
                     - Indices of the measurable surface points in samples_surface_points_list\n
                     - Corresponding uncertainty-scores\n
-                    - Metric distance in mm in trajectory-direction from the view-center where the corresponding surface point is measurable\n
+                    - Metric distance in mm in trajectory-direction from the view-anchor where the corresponding surface point is measurable\n
         :rtype: array[int], array[float], array[float]
         """
 
@@ -181,9 +181,10 @@ class SensorModel:
 
         # Make scan-frustum
         scan_frustum = self.get_scanning_frustum(maximum_deflection)
-        # Transform frustum so that it is aligned with the laser_emitter_frame at the view-center-pose
+        # Transform frustum so that it is aligned with the laser_emitter_frame at the view-anchor-pose
         scan_frustum.apply_transform(view.get_orientation_matrix())
         scan_frustum.apply_transform(view.get_anchor_position(True))
+
         # Use RayMeshIntersector to identify the surface_points that are potentially measurable
         try:
             find_module("pyembree")
@@ -228,7 +229,7 @@ class SensorModel:
             )
 
         measurable_surface_point_indices = array.array('i', [])
-        uncertainty_scores = array.array('d', [])
+        uncertainties = array.array('d', [])
         trajectory_line_arguments_selected = array.array('d', [])
 
         # Filter the inliers (each iteration represents the evaluation of one inlier as rt_..._results are sorted)
@@ -247,15 +248,19 @@ class SensorModel:
                 elif theta < -np.pi:
                     theta = 2 * np.pi + theta
                 z = sensor_direction.dot(self.context["sampled_surface_points"][inlier_indices[i]] - ray_origins_emitter[i])
-                # Only accept, if no violation of max_deviation_...-limit
-                if abs(gamma - np.pi/2) < self.maximum_deviation_gamma and abs(theta) < self.maximum_deviation_theta and z < self.maximum_standoff:
-                    uncertainty_scores.append(self.evaluate_score(z, gamma) * abs(sensor_direction.dot(self.context["face_normals"][rt_detector_face_id])))
-                    measurable_surface_point_indices.append(inlier_indices[i])
-                    trajectory_line_arguments_selected.append(trajectory_line_arguments[i])
+                # Only accept, if no violation of hard geometric limit
+                
+                if abs(gamma - np.pi/2) < self.maximum_deviation_gamma and abs(theta) < self.maximum_deviation_theta and z < self.maximum_standoff and z > self.minimum_standoff:
+                    u = self.evaluate_uncertainty(z, gamma) * abs(sensor_direction.dot(self.context["face_normals"][rt_detector_face_id]))
+                    # Only accept, if no violation of hard uncertainty threshold
+                    if u < uncertainty_threshold:
+                        uncertainties.append(u)
+                        measurable_surface_point_indices.append(inlier_indices[i])
+                        trajectory_line_arguments_selected.append(trajectory_line_arguments[i])
         
        
 
-        return measurable_surface_point_indices, uncertainty_scores, trajectory_line_arguments_selected
+        return measurable_surface_point_indices, uncertainties, trajectory_line_arguments_selected
         
 
     def get_scanning_frustum(self, half_length):
@@ -271,14 +276,14 @@ class SensorModel:
         :rtype: trimesh.Trimesh
         """
         scanner_frustum_vertices = [
-            [half_length, (self.minimum_standoff) * np.tan(self.fan_angle / 2), self.minimum_standoff],
-            [- half_length, (self.minimum_standoff) * np.tan(self.fan_angle / 2), self.minimum_standoff],
-            [- half_length, - (self.minimum_standoff) * np.tan(self.fan_angle / 2), self.minimum_standoff],
-            [half_length, - (self.minimum_standoff) * np.tan(self.fan_angle / 2), self.minimum_standoff],
-            [half_length, (self.maximum_standoff) * np.tan(self.fan_angle / 2), self.maximum_standoff],
-            [- half_length, (self.maximum_standoff) * np.tan(self.fan_angle / 2), self.maximum_standoff],
-            [- half_length, - (self.maximum_standoff) * np.tan(self.fan_angle / 2), self.maximum_standoff],
-            [half_length, - (self.maximum_standoff) * np.tan(self.fan_angle / 2), self.maximum_standoff],
+            [half_length, (self.minimum_standoff) * np.tan(self.phi_x / 2), self.minimum_standoff],
+            [- half_length, (self.minimum_standoff) * np.tan(self.phi_x / 2), self.minimum_standoff],
+            [- half_length, - (self.minimum_standoff) * np.tan(self.phi_x / 2), self.minimum_standoff],
+            [half_length, - (self.minimum_standoff) * np.tan(self.phi_x / 2), self.minimum_standoff],
+            [half_length, (self.maximum_standoff) * np.tan(self.phi_x / 2), self.maximum_standoff],
+            [- half_length, (self.maximum_standoff) * np.tan(self.phi_x / 2), self.maximum_standoff],
+            [- half_length, - (self.maximum_standoff) * np.tan(self.phi_x / 2), self.maximum_standoff],
+            [half_length, - (self.maximum_standoff) * np.tan(self.phi_x / 2), self.maximum_standoff],
         ]
         
         return trimesh.PointCloud(scanner_frustum_vertices).convex_hull

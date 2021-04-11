@@ -195,7 +195,7 @@ class TrajectoryManager:
             self.scene.add_mesh("target", target_mesh_pose_stamped, file_name, size=(1e-3, 1e-3, 1e-3))
             pass
         except:
-            # add_mesh hat troubles with "non-root" filenames (e.g. ~/cadfiles/target.stl)
+            # add_mesh has troubles with "non-root" filenames (e.g. ~/cadfiles/target.stl)
             rospy.logerr("Moveit could not load mesh {}.\nHave you tried specifying it with a file path starting at root /...?".format(file_name))
             return False
 
@@ -214,7 +214,7 @@ class TrajectoryManager:
             self.scene.add_box("mirror2", box_pose, size=(2, 0.1, 3))
         return True
 
-    def generate_samples_and_views(self, sampling_density, orientations_around_boresight, view_tilt_mode="full", plan_path_to_check_reachability = False, minimum_trajectory_length = 25, trajectory_sample_step = 2):
+    def generate_samples_and_views(self, sampling_density, uncertainty_threshold, orientations_around_boresight, view_tilt_mode="full", plan_path_to_check_reachability = False, minimum_trajectory_length = 25, trajectory_sample_step = 2):
         """
         Samples the mesh's surface into discrete points, generates views for each sample and processes these views metrologically and mechanically.
         Only views that do meet the contraints specified in the method's parameters and in MoveIt (collision, reachability, ...) will be returned. This method allows to generate
@@ -243,26 +243,10 @@ class TrajectoryManager:
         sampled_surface_points, sampled_face_indices = trimesh.sample.sample_surface_even(self.target_mesh, int(self.target_mesh.area * sampling_density))
         print("Sampled target mesh's surface into {} surface points".format(len(sampled_surface_points)))
         
-        mechanical_surface_points, mechanical_face_indices = [], []
-        for i, (sampled_surface_point, sampled_face_index) in enumerate(zip(sampled_surface_points, sampled_face_indices)):
-            add = True
-            for (mechanical_surface_point, mechanical_face_index) in zip(mechanical_surface_points, mechanical_face_indices):
-                if np.linalg.norm(mechanical_surface_point - sampled_surface_point) < 20:
-                    if self.target_mesh.face_normals[mechanical_face_index].dot(self.target_mesh.face_normals[sampled_face_index]) > np.cos(np.pi/6):
-                        add = False
-                        break
-            print(float(i) / len(sampled_surface_points))
-            if add:
-                mechanical_surface_points.append(sampled_surface_point)
-                mechanical_face_indices.append(sampled_face_index)
-        
-        orientations_around_boresight = np.ceil(400 * np.pi * sampling_density)
+       
+        orientations_around_boresight
         print(orientations_around_boresight)
-        a = trimesh.PointCloud(sampled_surface_points)
-        a.visual.vertex_colors = [255, 0, 0, 255]
-        b = trimesh.PointCloud(mechanical_surface_points)
-        b.visual.vertex_colors = [0, 255, 0, 255]
-        trimesh.Scene([self.target_mesh, b, a]).show()
+        
 
         # Use the sampling results to set the processing context of the sensor model
         self.sensor_model.set_processing_context(self.target_mesh, sampled_surface_points, sampled_face_indices)
@@ -302,31 +286,33 @@ class TrajectoryManager:
         # Then, rotate the orientation of the view's laser_emitter_frame around the z-Axis (= boresight) with respect to the anchor point (-> Changes only orientation).
         # If specified, apply tilting to the view for every orientation, so that the view's anchor point is turned around the laser_emitter_frame's x-/y-axis but 
         # with respect to the corresponding surface point (-> Changes orientation and position of view-anchor).
-        for (surface_point, face_index) in zip(mechanical_surface_points, mechanical_face_indices):
+        for (surface_point, face_index) in zip(sampled_surface_points, sampled_face_indices):
             for angle in np.linspace(0, 360, orientations_around_boresight + 1)[:-1]:
                 new_view = View(surface_point, self.target_mesh.face_normals[face_index], np.deg2rad(angle), self.sensor_model.get_optimal_standoff())
                 if view_tilt_mode == "none":
-                    if self.process_view(new_view, ik_service, minimum_required_overmeasure):
+                    if self.process_view(new_view, ik_service, uncertainty_threshold, minimum_required_overmeasure):
                         valid_views.append(new_view)
                 elif view_tilt_mode == "limited":
                     # angle_config = tuple describing (tilt around x-axis, tilt around y-axis) from the set of 2-element permutations with repitions of all valid tilt-angles
                     for angle_config in itertools.product([0, self.sensor_model.get_median_deviation_angle(), -1 * self.sensor_model.get_median_deviation_angle()], repeat=2):
                         new_view = View(surface_point, self.target_mesh.face_normals[face_index], np.deg2rad(angle), self.sensor_model.get_optimal_standoff(), angle_config[0], angle_config[1])
                         # When valid view could be obtained through tilting -> Continue to next orientation
-                        if self.process_view(new_view, ik_service, minimum_required_overmeasure):
+                        if self.process_view(new_view, ik_service, uncertainty_threshold, minimum_required_overmeasure):
                             valid_views.append(new_view)
-                            break  
+                            break
                 elif view_tilt_mode == "full":
                     # angle_config = tuple describing (tilt around x-axis, tilt around y-axis) from the set of 2-element permutations with repitions of all valid tilt-angles
                     for angle_config in itertools.product([0, self.sensor_model.get_median_deviation_angle(), -1 * self.sensor_model.get_median_deviation_angle()], repeat=2):
                         new_view = View(surface_point, self.target_mesh.face_normals[face_index], np.deg2rad(angle), self.sensor_model.get_optimal_standoff(), angle_config[0], angle_config[1])
-                        if self.process_view(new_view, ik_service, minimum_required_overmeasure):
+                        if self.process_view(new_view, ik_service, uncertainty_threshold, minimum_required_overmeasure):
                             valid_views.append(new_view)
+                else:
+                    raise ValueError("view_tilt_mode has to be 'none', 'limited' or 'full'. You entered: '{}'".format(view_tilt_mode))
                 processed += 1
                 print("Processed view {} of {} ({} %, {} of them are usable for measurement)".format(
                     processed, 
-                    len(mechanical_surface_points) * orientations_around_boresight, 
-                    np.round(100.0 * processed / (len(mechanical_surface_points) * orientations_around_boresight), 2),
+                    len(sampled_surface_points) * orientations_around_boresight, 
+                    np.round(100.0 * processed / (len(sampled_surface_points) * orientations_around_boresight), 2),
                     len(valid_views)
                 ))
                 
@@ -339,7 +325,7 @@ class TrajectoryManager:
         return sampled_surface_points, valid_views
 
 
-    def process_view(self, view, ik_service, minimum_required_overmeasure = 5, trajectory_sample_step = 2, joint_jump_threshold = 1.5, minimum_trajectory_length = 50):
+    def process_view(self, view, ik_service, uncertainty_threshold, minimum_required_overmeasure = 5, trajectory_sample_step = 2, joint_jump_threshold = 1.5, minimum_trajectory_length = 50):
         """
         Processes a single view entirely. Starting on a simple reachability-analysis of the anchor-pose, a metrological evaluation is performed using the sensor_model to
         review the measurement-gain this view can contribute in theory. Then, the actual meausrement-trajectories are calculated and examined regarding the
@@ -413,8 +399,7 @@ class TrajectoryManager:
         self.group.set_start_state(view_anchor_state)
 
         # Perform metrological evaluation
-        measurable_surface_point_indices, uncertainty_scores, trajectory_line_arguments_selected = self.sensor_model.process_view_metrologically(view, self.max_edge)
-
+        measurable_surface_point_indices, uncertainties, trajectory_line_arguments_selected = self.sensor_model.process_view_metrologically(view, uncertainty_threshold, self.max_edge)
         if len(measurable_surface_point_indices) == 0:
             return False
 
@@ -455,11 +440,11 @@ class TrajectoryManager:
         for i in reversed(range(len(trajectory_line_arguments_selected))):
             if trajectory_line_arguments_selected[i] > fraction_a * max_deflection or trajectory_line_arguments_selected[i] < fraction_b * min_deflection:
                 measurable_surface_point_indices.pop(i)
-                uncertainty_scores.pop(i)
+                uncertainties.pop(i)
 
         # If restrictions are satisfied, store the measurement-trajectory and metrological information in the view
         view.set_trajectory_for_measurement(trajectory)
-        view.set_measurable_surface_point_indices_and_scores(measurable_surface_point_indices, uncertainty_scores)
+        view.set_measurable_surface_point_indices_and_uncertainties(measurable_surface_point_indices, uncertainties)
         return True
 
     def postprocess_trajectory(self, trajectory):
@@ -546,14 +531,16 @@ class TrajectoryManager:
                 itertools.chain.from_iterable(
                     [view.get_measurable_surface_point_indices() for view in provided_views]
                 ))
+        print("Can cover {} surface-points".format(len(measur)))
         if solver_type == "greedy":
             measured_surface_point_indices = set()
             used_views = set()
+            maximum_uncertainty = self.sensor_model.get_max_uncertainty()
             while len(provided_views) > 0:
                 # The sort-key-function is designed as follows: Pre-decimal-point numbers indicate the amount of newly measurable surface contributed by this view.
-                # Post-decimal-point-values indicate the lowest overall uncertainty-score of this view (in [0,1]) scaled by 0.9. That way, when multiple views provide
-                # the same amount of new measurements, the uncertainty will be compared just in Gronle et al.'s paper.
-                provided_views = sorted(provided_views, key = lambda view: len(measured_surface_point_indices | set(view.get_measurable_surface_point_indices())) + min(view.get_measurable_surface_point_scores()) * 0.9, reverse=True)
+                # Post-decimal-point-values indicate the lowest overall uncertainty of this view (in [0,1]) scaled by 0.9. That way, when multiple views provide
+                # the same amount of new measurements, the uncertainty will be compared as in Gronle et al.'s paper.
+                provided_views = sorted(provided_views, key = lambda view: len(measured_surface_point_indices | set(view.get_measurable_surface_point_indices())) + (maximum_uncertainty - max(view.get_measurable_surface_point_uncertainties())) / maximum_uncertainty * 0.9, reverse=True)
                 next_view = provided_views.pop(0)
                 measured_surface_point_indices |= set(next_view.get_measurable_surface_point_indices())
                 used_views.add(next_view)
@@ -578,12 +565,12 @@ class TrajectoryManager:
                 # Optimize only for the total amount of viewpoints
                 ip_problem += pulp.lpSum([viewpoint_variables[i] for i in viewpoint_indices])
             elif solver_type == "IP_time":
-                # Goal is that the combined trajectory-execution-time of all measurement-trajectories becomes minimal
+                # Goal is that the combined measurement-trajectory-execution-time of all measurement-trajectories becomes minimal
                 ip_problem += pulp.lpSum([viewpoint_variables[i] * provided_views[i].get_trajectory_for_measurement().joint_trajectory.points[-1].time_from_start.to_sec() for i in viewpoint_indices])
             elif solver_type == "IP_uncertainty":
-                ip_problem += pulp.lpSum([viewpoint_variables[i] * (1 - sum(provided_views[i].get_measurable_surface_point_scores()) / len(provided_views[i].get_measurable_surface_point_scores())) for i in viewpoint_indices])
-            elif solver_type == "IP_combined":
-                ip_problem += pulp.lpSum([viewpoint_variables[i] * (1 - sum(provided_views[i].get_measurable_surface_point_scores()) / len(provided_views[i].get_measurable_surface_point_scores())) * provided_views[i].get_trajectory_for_measurement().joint_trajectory.points[-1].time_from_start.to_sec() for i in viewpoint_indices])
+                # Goal is that the sum of 
+                ip_problem += pulp.lpSum([viewpoint_variables[i] * sum(provided_views[i].get_measurable_surface_point_uncertainties()) / len(provided_views[i].get_measurable_surface_point_uncertainties()) for i in viewpoint_indices])
+        
             
             # Add constraints: Viewpoint_variable's elements are either 1 or 0
             for i in viewpoint_indices:
@@ -606,7 +593,7 @@ class TrajectoryManager:
                 if solved_viewpoint_variable.varValue == 1:  
                     output.add(provided_views[int(solved_viewpoint_variable.name.split("_")[-1])])
             return output           
-
+        
     def connect_views(self, unordered_views, min_planning_time=0.2):
         """
         Connect a set of unordered views with the current state and in between greedily so that they can be executed as fast as possible.
@@ -646,6 +633,7 @@ class TrajectoryManager:
             temporary_start_state.joint_state.position = enqueud_views[-1].get_trajectory_for_measurement().joint_trajectory.points[-1].positions
             temporary_start_state.joint_state.name = enqueud_views[-1].get_trajectory_for_measurement().joint_trajectory.joint_names
             self.group.set_start_state(temporary_start_state)
+            self.group.set_planning_time(min_planning_time)
             
             # For each unenqueued view: Calculate a path to the start- and end-point of its measurement trajectory and remember the time-shortest
             # trajectory by index in the unenqueued-list (as well as the corresponding trajectory and if the path was calculated to the end-point -> reverse_flag)
@@ -759,9 +747,9 @@ class TrajectoryManager:
         # Finally, ensure stitching is disabled     
         stitch_service.call(SetBoolRequest(data=False))   
 
-    def perform_all(self, target_mesh_filename, density, orientations_around_boresight):
+    def perform_all(self, target_mesh_filename, density, orientations_around_boresight, uncertainty_threshold):
         self.load_target_mesh(target_mesh_filename, transform=trimesh.transformations.translation_matrix(OFFSET))
-        surface_pts, views  = self.generate_samples_and_views(density, orientations_around_boresight)
+        surface_pts, views  = self.generate_samples_and_views(density, uncertainty_threshold, orientations_around_boresight)
         scp_views = self.solve_scp(views, "IP_basic")
         connected_views = self.connect_views(scp_views)
         execution_plan = self.convert_viewlist_to_execution_plan(connected_views)
@@ -777,7 +765,7 @@ if __name__ == "__main__":
     tm = TrajectoryManager()
     while True:
         #tm.perform_all("/home/svenbecker/Desktop/test6.stl", 0.0001, 16)
-        tm.perform_all("/home/svenbecker/Bachelorarbeit/test/motor_without_internals_upright.stl", 0.005, 12)
+        tm.perform_all("/home/svenbecker/Bachelorarbeit/test/motor_without_internals_upright.stl", 0.001, 6, 0.1)
         rospy.sleep(1)
     rospy.spin()
     
