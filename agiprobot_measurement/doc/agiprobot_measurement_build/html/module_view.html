@@ -7,7 +7,7 @@
   
   <meta name="viewport" content="width=device-width, initial-scale=1.0" />
   
-  <title>View &mdash; Agiprobot Measurement 1.0 documentation</title>
+  <title>ViewPoint &mdash; Agiprobot Measurement 1.0 documentation</title>
   
 
   
@@ -107,13 +107,13 @@
 <ul class="current">
 <li class="toctree-l1"><a class="reference internal" href="module_trajectory_manager.html">Trajectory Manager</a></li>
 <li class="toctree-l1"><a class="reference internal" href="module_sensor_model.html">Sensor Model</a></li>
-<li class="toctree-l1 current"><a class="current reference internal" href="#">View</a><ul>
+<li class="toctree-l1 current"><a class="current reference internal" href="#">ViewPoint</a><ul>
 <li class="toctree-l2"><a class="reference internal" href="#introduction-and-basic-ideas">Introduction and Basic Ideas</a><ul>
 <li class="toctree-l3"><a class="reference internal" href="#commonly-used-terms">Commonly Used Terms</a></li>
 <li class="toctree-l3"><a class="reference internal" href="#visualization-of-concepts">Visualization of Concepts</a></li>
 </ul>
 </li>
-<li class="toctree-l2"><a class="reference internal" href="#module-agiprobot_measurement.view">API-Specification</a></li>
+<li class="toctree-l2"><a class="reference internal" href="#module-agiprobot_measurement.viewpoint">API-Specification</a></li>
 </ul>
 </li>
 </ul>
@@ -164,7 +164,7 @@
     
       <li><a href="index.html" class="icon icon-home"></a> &raquo;</li>
         
-      <li>View</li>
+      <li>ViewPoint</li>
     
     
       <li class="wy-breadcrumbs-aside">
@@ -183,19 +183,19 @@
           <div role="main" class="document" itemscope="itemscope" itemtype="http://schema.org/Article">
            <div itemprop="articleBody">
             
-  <div class="section" id="view">
-<span id="id1"></span><h1>View<a class="headerlink" href="#view" title="Permalink to this headline">¶</a></h1>
+  <div class="section" id="viewpoint">
+<span id="id1"></span><h1>ViewPoint<a class="headerlink" href="#viewpoint" title="Permalink to this headline">¶</a></h1>
 <div class="section" id="introduction-and-basic-ideas">
 <h2>Introduction and Basic Ideas<a class="headerlink" href="#introduction-and-basic-ideas" title="Permalink to this headline">¶</a></h2>
-<p>A View is a container of one measurement-trajectory with extra-functionality.</p>
+<p>A ViewPoint is a container of one measurement-trajectory with extra-functionality.</p>
 <p>It can store besides the actual measurement-trajectory another trajectory towards its
 measurement trajectory as well as quantitative metrological predictions about the measurement. A View can construct itself in a bare geometrical sense: Given a surface point,
 a anchor-position as well as an orientation of the laser_emitter_frame are created so that the z-axis of this frame points towards this surface_point, when in anchor-position.</p>
 <div class="section" id="commonly-used-terms">
 <h3>Commonly Used Terms<a class="headerlink" href="#commonly-used-terms" title="Permalink to this headline">¶</a></h3>
 <ul class="simple">
-<li>surface-point: The sampled surface point on the target-mesh this view is based on</li>
-<li>anchor-position: The position this view’s trajectory goes through and where its laser_emitter_frame’s z-axis points towards the corresponding surface-point</li>
+<li>surface-point: The sampled surface point on the target-mesh this viewpoint is based on</li>
+<li>anchor-position: The position this viewpoint’s trajectory goes through and where its laser_emitter_frame’s z-axis points towards the corresponding surface-point</li>
 <li><dl class="first docutils">
 <dt>laser_emitter_frame: Frame positioned at the scanners’s laser-emitter (“where the laser leaves the scanner”) that is moved along the straight trajectory during execution</dt>
 <dd><ul class="first last">
@@ -207,7 +207,7 @@ a anchor-position as well as an orientation of the laser_emitter_frame are creat
 </dd>
 </dl>
 </li>
-<li>angle-around-boresight: Angle for rotation of this views straight-trajectory around the laser_emitter_frame’s z-axis in anchor-position</li>
+<li>angle-around-boresight: Angle for rotation of this viewpoints straight-trajectory around the laser_emitter_frame’s z-axis in anchor-position</li>
 </ul>
 </div>
 <div class="section" id="visualization-of-concepts">
@@ -217,19 +217,19 @@ a anchor-position as well as an orientation of the laser_emitter_frame are creat
 </div>
 </div>
 </div>
-<div class="section" id="module-agiprobot_measurement.view">
-<span id="api-specification"></span><h2>API-Specification<a class="headerlink" href="#module-agiprobot_measurement.view" title="Permalink to this headline">¶</a></h2>
+<div class="section" id="module-agiprobot_measurement.viewpoint">
+<span id="api-specification"></span><h2>API-Specification<a class="headerlink" href="#module-agiprobot_measurement.viewpoint" title="Permalink to this headline">¶</a></h2>
 <dl class="class">
-<dt id="agiprobot_measurement.view.View">
-<em class="property">class </em><code class="descclassname">agiprobot_measurement.view.</code><code class="descname">View</code><span class="sig-paren">(</span><em>surface_point</em>, <em>surface_normal</em>, <em>angle_around_boresight</em>, <em>standoff_distance</em>, <em>tilt_theta=0</em>, <em>tilt_gamma=0</em><span class="sig-paren">)</span><a class="reference internal" href="_modules/agiprobot_measurement/view.html#View"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#agiprobot_measurement.view.View" title="Permalink to this definition">¶</a></dt>
-<dd><p>Class for keeping track about one view.
-A view consists on the one hand of geometrical specifications (about location and length of the view and execution informations), on the other
-hand of metrological specifications (e.g. what can be measured by this view).</p>
+<dt id="agiprobot_measurement.viewpoint.ViewPoint">
+<em class="property">class </em><code class="descclassname">agiprobot_measurement.viewpoint.</code><code class="descname">ViewPoint</code><span class="sig-paren">(</span><em>surface_point</em>, <em>surface_normal</em>, <em>angle_around_boresight</em>, <em>standoff_distance</em>, <em>tilt_theta=0</em>, <em>tilt_psi=0</em><span class="sig-paren">)</span><a class="reference internal" href="_modules/agiprobot_measurement/viewpoint.html#ViewPoint"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#agiprobot_measurement.viewpoint.ViewPoint" title="Permalink to this definition">¶</a></dt>
+<dd><p>Class for keeping track about one viewpoint.
+A viewpoint consists on the one hand of geometrical specifications (about location and length of the viewpointand execution informations), on the other
+hand of metrological specifications (e.g. what can be measured by this viewpoint).</p>
 <dl class="method">
-<dt id="agiprobot_measurement.view.View.get_anchor_position">
-<code class="descname">get_anchor_position</code><span class="sig-paren">(</span><em>as_matrix=False</em><span class="sig-paren">)</span><a class="reference internal" href="_modules/agiprobot_measurement/view.html#View.get_anchor_position"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#agiprobot_measurement.view.View.get_anchor_position" title="Permalink to this definition">¶</a></dt>
+<dt id="agiprobot_measurement.viewpoint.ViewPoint.get_anchor_position">
+<code class="descname">get_anchor_position</code><span class="sig-paren">(</span><em>as_matrix=False</em><span class="sig-paren">)</span><a class="reference internal" href="_modules/agiprobot_measurement/viewpoint.html#ViewPoint.get_anchor_position"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#agiprobot_measurement.viewpoint.ViewPoint.get_anchor_position" title="Permalink to this definition">¶</a></dt>
 <dd><p>Gets the laser_emitter_frame’s position that was generated during construction. This is the point where the z-axis of the laser_emitter_frame
-hits the surface_point of the target mesh that was used to design this view. Keep in mind that ‘anchor’ does not necessarely mean ‘anchor’ of the trajectory.</p>
+hits the surface_point of the target mesh that was used to design this viewpoint. Keep in mind that ‘anchor’ does not necessarely mean ‘anchor’ of the trajectory.</p>
 <table class="docutils field-list" frame="void" rules="none">
 <col class="field-name" />
 <col class="field-body" />
@@ -245,8 +245,8 @@ hits the surface_point of the target mesh that was used to design this view. Kee
 </dd></dl>
 
 <dl class="method">
-<dt id="agiprobot_measurement.view.View.get_measurable_surface_point_indices">
-<code class="descname">get_measurable_surface_point_indices</code><span class="sig-paren">(</span><span class="sig-paren">)</span><a class="reference internal" href="_modules/agiprobot_measurement/view.html#View.get_measurable_surface_point_indices"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#agiprobot_measurement.view.View.get_measurable_surface_point_indices" title="Permalink to this definition">¶</a></dt>
+<dt id="agiprobot_measurement.viewpoint.ViewPoint.get_measurable_surface_point_indices">
+<code class="descname">get_measurable_surface_point_indices</code><span class="sig-paren">(</span><span class="sig-paren">)</span><a class="reference internal" href="_modules/agiprobot_measurement/viewpoint.html#ViewPoint.get_measurable_surface_point_indices"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#agiprobot_measurement.viewpoint.ViewPoint.get_measurable_surface_point_indices" title="Permalink to this definition">¶</a></dt>
 <dd><p>Gets the surface_point-indices measurable by this view’s measurement-trajectory. The indices are abstract and are only useful 
 when inserted into an externally maintained list of the actual surface points.</p>
 <table class="docutils field-list" frame="void" rules="none">
@@ -262,16 +262,16 @@ when inserted into an externally maintained list of the actual surface points.</
 </dd></dl>
 
 <dl class="method">
-<dt id="agiprobot_measurement.view.View.get_measurable_surface_point_scores">
-<code class="descname">get_measurable_surface_point_scores</code><span class="sig-paren">(</span><span class="sig-paren">)</span><a class="reference internal" href="_modules/agiprobot_measurement/view.html#View.get_measurable_surface_point_scores"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#agiprobot_measurement.view.View.get_measurable_surface_point_scores" title="Permalink to this definition">¶</a></dt>
-<dd><p>Gets the uncertainty scores of each measurable surface point. The values in the returned list must be matched with the
-actual surface points in an external viewpoint list using this views measurable_surface_point_indices: The uncertainty-score at index i
+<dt id="agiprobot_measurement.viewpoint.ViewPoint.get_measurable_surface_point_uncertainties">
+<code class="descname">get_measurable_surface_point_uncertainties</code><span class="sig-paren">(</span><span class="sig-paren">)</span><a class="reference internal" href="_modules/agiprobot_measurement/viewpoint.html#ViewPoint.get_measurable_surface_point_uncertainties"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#agiprobot_measurement.viewpoint.ViewPoint.get_measurable_surface_point_uncertainties" title="Permalink to this definition">¶</a></dt>
+<dd><p>Gets the uncertainties of each measurable surface point. The values in the returned list must be matched with the
+actual surface points in an external viewpoint list using this views measurable_surface_point_indices: The uncertainty at index i
 is meant for the surface_point in the external list evaluated at index measurable_surface_point_indices[i].</p>
 <table class="docutils field-list" frame="void" rules="none">
 <col class="field-name" />
 <col class="field-body" />
 <tbody valign="top">
-<tr class="field-odd field"><th class="field-name">Returns:</th><td class="field-body">Uncertainty scores of each measurable surface point</td>
+<tr class="field-odd field"><th class="field-name">Returns:</th><td class="field-body">uncertainties of each measurable surface point</td>
 </tr>
 <tr class="field-even field"><th class="field-name">Return type:</th><td class="field-body">list[float]</td>
 </tr>
@@ -280,9 +280,9 @@ is meant for the surface_point in the external list evaluated at index measurabl
 </dd></dl>
 
 <dl class="method">
-<dt id="agiprobot_measurement.view.View.get_orientation_matrix">
-<code class="descname">get_orientation_matrix</code><span class="sig-paren">(</span><span class="sig-paren">)</span><a class="reference internal" href="_modules/agiprobot_measurement/view.html#View.get_orientation_matrix"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#agiprobot_measurement.view.View.get_orientation_matrix" title="Permalink to this definition">¶</a></dt>
-<dd><p>Gets the orientation of the laser_emitter_frame of this view. The orientation (not the position) remains the same for every point on the assigned measurement-trajectory</p>
+<dt id="agiprobot_measurement.viewpoint.ViewPoint.get_orientation_matrix">
+<code class="descname">get_orientation_matrix</code><span class="sig-paren">(</span><span class="sig-paren">)</span><a class="reference internal" href="_modules/agiprobot_measurement/viewpoint.html#ViewPoint.get_orientation_matrix"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#agiprobot_measurement.viewpoint.ViewPoint.get_orientation_matrix" title="Permalink to this definition">¶</a></dt>
+<dd><p>Gets the orientation of the laser_emitter_frame of this viewpoint. The orientation (not the position) remains the same for every point on the assigned measurement-trajectory</p>
 <table class="docutils field-list" frame="void" rules="none">
 <col class="field-name" />
 <col class="field-body" />
@@ -296,9 +296,9 @@ is meant for the surface_point in the external list evaluated at index measurabl
 </dd></dl>
 
 <dl class="method">
-<dt id="agiprobot_measurement.view.View.get_surface_point">
-<code class="descname">get_surface_point</code><span class="sig-paren">(</span><em>as_matrix=False</em><span class="sig-paren">)</span><a class="reference internal" href="_modules/agiprobot_measurement/view.html#View.get_surface_point"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#agiprobot_measurement.view.View.get_surface_point" title="Permalink to this definition">¶</a></dt>
-<dd><p>Gets the position of the surface point this view is based on. This is not the same as the view_anchor-point.</p>
+<dt id="agiprobot_measurement.viewpoint.ViewPoint.get_surface_point">
+<code class="descname">get_surface_point</code><span class="sig-paren">(</span><em>as_matrix=False</em><span class="sig-paren">)</span><a class="reference internal" href="_modules/agiprobot_measurement/viewpoint.html#ViewPoint.get_surface_point"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#agiprobot_measurement.viewpoint.ViewPoint.get_surface_point" title="Permalink to this definition">¶</a></dt>
+<dd><p>Gets the position of the surface point this viewpoint is based on. This is not the same as the view_anchor-point.</p>
 <table class="docutils field-list" frame="void" rules="none">
 <col class="field-name" />
 <col class="field-body" />
@@ -314,9 +314,9 @@ is meant for the surface_point in the external list evaluated at index measurabl
 </dd></dl>
 
 <dl class="method">
-<dt id="agiprobot_measurement.view.View.get_trajectory_for_measurement">
-<code class="descname">get_trajectory_for_measurement</code><span class="sig-paren">(</span><span class="sig-paren">)</span><a class="reference internal" href="_modules/agiprobot_measurement/view.html#View.get_trajectory_for_measurement"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#agiprobot_measurement.view.View.get_trajectory_for_measurement" title="Permalink to this definition">¶</a></dt>
-<dd><p>Returns trajectory that is performed to execute the measurement corresponding to this view.
+<dt id="agiprobot_measurement.viewpoint.ViewPoint.get_trajectory_for_measurement">
+<code class="descname">get_trajectory_for_measurement</code><span class="sig-paren">(</span><span class="sig-paren">)</span><a class="reference internal" href="_modules/agiprobot_measurement/viewpoint.html#ViewPoint.get_trajectory_for_measurement"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#agiprobot_measurement.viewpoint.ViewPoint.get_trajectory_for_measurement" title="Permalink to this definition">¶</a></dt>
+<dd><p>Returns trajectory that is performed to execute the measurement corresponding to this viewpoint.
 This measurement-trajectory is a straight line in cartesian space.</p>
 <table class="docutils field-list" frame="void" rules="none">
 <col class="field-name" />
@@ -331,8 +331,8 @@ This measurement-trajectory is a straight line in cartesian space.</p>
 </dd></dl>
 
 <dl class="method">
-<dt id="agiprobot_measurement.view.View.get_trajectory_to_view">
-<code class="descname">get_trajectory_to_view</code><span class="sig-paren">(</span><span class="sig-paren">)</span><a class="reference internal" href="_modules/agiprobot_measurement/view.html#View.get_trajectory_to_view"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#agiprobot_measurement.view.View.get_trajectory_to_view" title="Permalink to this definition">¶</a></dt>
+<dt id="agiprobot_measurement.viewpoint.ViewPoint.get_trajectory_to_view">
+<code class="descname">get_trajectory_to_view</code><span class="sig-paren">(</span><span class="sig-paren">)</span><a class="reference internal" href="_modules/agiprobot_measurement/viewpoint.html#ViewPoint.get_trajectory_to_view"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#agiprobot_measurement.viewpoint.ViewPoint.get_trajectory_to_view" title="Permalink to this definition">¶</a></dt>
 <dd><p>Returns the stored trajectory from a former state (might be robot’s current_state or the end point of a previously executed trajectory) to
 the start state of this views’s measurement trajectory. This is useful to connect multiple views into an execution plan.</p>
 <table class="docutils field-list" frame="void" rules="none">
@@ -348,9 +348,9 @@ the start state of this views’s measurement trajectory. This is useful to conn
 </dd></dl>
 
 <dl class="method">
-<dt id="agiprobot_measurement.view.View.reverse_trajectory_for_measurement">
-<code class="descname">reverse_trajectory_for_measurement</code><span class="sig-paren">(</span><span class="sig-paren">)</span><a class="reference internal" href="_modules/agiprobot_measurement/view.html#View.reverse_trajectory_for_measurement"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#agiprobot_measurement.view.View.reverse_trajectory_for_measurement" title="Permalink to this definition">¶</a></dt>
-<dd><p>Flips the measurement-trajectory of this view. The start-pose becomes the end-pose and vice versa. The execution time stays the same.</p>
+<dt id="agiprobot_measurement.viewpoint.ViewPoint.reverse_trajectory_for_measurement">
+<code class="descname">reverse_trajectory_for_measurement</code><span class="sig-paren">(</span><span class="sig-paren">)</span><a class="reference internal" href="_modules/agiprobot_measurement/viewpoint.html#ViewPoint.reverse_trajectory_for_measurement"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#agiprobot_measurement.viewpoint.ViewPoint.reverse_trajectory_for_measurement" title="Permalink to this definition">¶</a></dt>
+<dd><p>Flips the measurement-trajectory of this viewpoint. The start-pose becomes the end-pose and vice versa. The execution time stays the same.</p>
 <table class="docutils field-list" frame="void" rules="none">
 <col class="field-name" />
 <col class="field-body" />
@@ -364,8 +364,8 @@ the start state of this views’s measurement trajectory. This is useful to conn
 </dd></dl>
 
 <dl class="method">
-<dt id="agiprobot_measurement.view.View.set_measurable_surface_point_indices_and_scores">
-<code class="descname">set_measurable_surface_point_indices_and_scores</code><span class="sig-paren">(</span><em>measurable_point_indices</em>, <em>uncertainty_scores</em><span class="sig-paren">)</span><a class="reference internal" href="_modules/agiprobot_measurement/view.html#View.set_measurable_surface_point_indices_and_scores"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#agiprobot_measurement.view.View.set_measurable_surface_point_indices_and_scores" title="Permalink to this definition">¶</a></dt>
+<dt id="agiprobot_measurement.viewpoint.ViewPoint.set_measurable_surface_point_indices_and_uncertainties">
+<code class="descname">set_measurable_surface_point_indices_and_uncertainties</code><span class="sig-paren">(</span><em>measurable_point_indices</em>, <em>uncertainties</em><span class="sig-paren">)</span><a class="reference internal" href="_modules/agiprobot_measurement/viewpoint.html#ViewPoint.set_measurable_surface_point_indices_and_uncertainties"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#agiprobot_measurement.viewpoint.ViewPoint.set_measurable_surface_point_indices_and_uncertainties" title="Permalink to this definition">¶</a></dt>
 <dd><p>Sets the indices of surface points measurable by this view’s measurement-trajectory as well as their model-predicted uncertainties. 
 The indices are abstract and only meaningful when connected to a concrete surface-point-list which is maintained externally of the View-scope.
 Both lists must have the same length.</p>
@@ -375,7 +375,7 @@ Both lists must have the same length.</p>
 <tbody valign="top">
 <tr class="field-odd field"><th class="field-name">Parameters:</th><td class="field-body"><ul class="first last simple">
 <li><strong>measurable_point_indices</strong> (<em>list</em><em>[</em><em>int</em><em>]</em>) – List of the indices of points in an external surface_point-list that can be measured by this view</li>
-<li><strong>uncertainty_scores</strong> (<em>list</em><em>[</em><em>float</em><em>]</em>) – List of uncertainty-score values for the measured surface_point masked through the index at the same position</li>
+<li><strong>uncertainties</strong> (<em>list</em><em>[</em><em>float</em><em>]</em>) – List of uncertainty values for the measured surface_point masked through the index at the same position</li>
 </ul>
 </td>
 </tr>
@@ -384,9 +384,9 @@ Both lists must have the same length.</p>
 </dd></dl>
 
 <dl class="method">
-<dt id="agiprobot_measurement.view.View.set_trajectory_for_measurement">
-<code class="descname">set_trajectory_for_measurement</code><span class="sig-paren">(</span><em>trajectory_for_measurement</em><span class="sig-paren">)</span><a class="reference internal" href="_modules/agiprobot_measurement/view.html#View.set_trajectory_for_measurement"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#agiprobot_measurement.view.View.set_trajectory_for_measurement" title="Permalink to this definition">¶</a></dt>
-<dd><p>Trajectory that is performed to execute the measurement corresponding to this view.
+<dt id="agiprobot_measurement.viewpoint.ViewPoint.set_trajectory_for_measurement">
+<code class="descname">set_trajectory_for_measurement</code><span class="sig-paren">(</span><em>trajectory_for_measurement</em><span class="sig-paren">)</span><a class="reference internal" href="_modules/agiprobot_measurement/viewpoint.html#ViewPoint.set_trajectory_for_measurement"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#agiprobot_measurement.viewpoint.ViewPoint.set_trajectory_for_measurement" title="Permalink to this definition">¶</a></dt>
+<dd><p>Trajectory that is performed to execute the measurement corresponding to this viewpoint.
 This measurement-trajectory is a straight line in cartesian space.</p>
 <table class="docutils field-list" frame="void" rules="none">
 <col class="field-name" />
@@ -399,8 +399,8 @@ This measurement-trajectory is a straight line in cartesian space.</p>
 </dd></dl>
 
 <dl class="method">
-<dt id="agiprobot_measurement.view.View.set_trajectory_to_view">
-<code class="descname">set_trajectory_to_view</code><span class="sig-paren">(</span><em>trajectory_to_view</em><span class="sig-paren">)</span><a class="reference internal" href="_modules/agiprobot_measurement/view.html#View.set_trajectory_to_view"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#agiprobot_measurement.view.View.set_trajectory_to_view" title="Permalink to this definition">¶</a></dt>
+<dt id="agiprobot_measurement.viewpoint.ViewPoint.set_trajectory_to_view">
+<code class="descname">set_trajectory_to_view</code><span class="sig-paren">(</span><em>trajectory_to_view</em><span class="sig-paren">)</span><a class="reference internal" href="_modules/agiprobot_measurement/viewpoint.html#ViewPoint.set_trajectory_to_view"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#agiprobot_measurement.viewpoint.ViewPoint.set_trajectory_to_view" title="Permalink to this definition">¶</a></dt>
 <dd><p>Sets a trajectory that moves the robot to the start of the view’s measurement trajectory.
 The trajectory can be arbitrary but must end at this start point. This is useful to connect multiple views into an execution plan.</p>
 <table class="docutils field-list" frame="void" rules="none">

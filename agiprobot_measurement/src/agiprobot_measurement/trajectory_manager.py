@@ -19,14 +19,15 @@ import itertools
 from moveit_msgs.srv import GetPositionIK, GetPositionIKRequest, GetPositionIKResponse
 import array
 from multiprocessing import Process, Array
-from agiprobot_measurement.view import View
+from agiprobot_measurement.viewpoint import ViewPoint
 from agiprobot_measurement.sensor_model import SensorModel
 import yaml
 from rospy_message_converter import message_converter
 import click
+import os
+import rospkg
 
-
-OFFSET = np.array([500, -600, 1300])
+OFFSET = np.array([450, -550, 1200])
 
 class TrajectoryManager:
     """
@@ -125,21 +126,21 @@ class TrajectoryManager:
             yaml.safe_dump(plan_to_store, plan_file, default_flow_style=False)
         return True
     
-    def convert_viewlist_to_execution_plan(self, viewlist):
+    def convert_viewpointlist_to_execution_plan(self, viewpointlist):
         """
-        Convert a list of View-objects into a list of moveit_msgs/RobotTrajectory-entries so that the views can be executed consecutively.
+        Convert a list of ViewPoint-objects into a list of moveit_msgs/RobotTrajectory-entries so that the viewpoints can be executed consecutively.
         
-        :param viewlist: List of View-objects with set trajectories for steering-to-view and measurement
+        :param viewpointlist: List of ViewPoint-objects with set trajectories for steering-to-viewpoint and measurement
         :type vievlist: list
-        :returns: List of moveit_msgs/RobotTrajectory with 2 entries per provided View-object (first = steering-to-view-trajectory, second = measurement-trajectory)
+        :returns: List of moveit_msgs/RobotTrajectory with 2 entries per provided ViewPoint-object (first = steering-to-viewpoint-trajectory, second = measurement-trajectory)
         :rtype: list
         """
-        assert isinstance(viewlist, list)
+        assert isinstance(viewpointlist, list)
         execution_plan = []
-        for view in viewlist:
-            assert isinstance(view, View)
-            execution_plan.append(view.get_trajectory_to_view())
-            execution_plan.append(view.get_trajectory_for_measurement())
+        for viewpoint in viewpointlist:
+            assert isinstance(viewpoint, ViewPoint)
+            execution_plan.append(viewpointpoint.get_trajectory_to_viewpoint())
+            execution_plan.append(viewpoint.get_trajectory_for_measurement())
         return execution_plan
 
 
@@ -147,7 +148,7 @@ class TrajectoryManager:
     
     def load_target_mesh(self, file_name, transform = np.eye(4), add_wbk_mirrors=True, remove_downside=True, remove_threshold_angle_deg=20):
         """
-        Loads the mesh-to-measure from file into the instance's target_mesh-member (to generate and evaluate view-trajectories) and into
+        Loads the mesh-to-measure from file into the instance's target_mesh-member (to generate and evaluate viewpoint-trajectories) and into
         MoveIt (for collision-prevention). To move the mesh into a feasible measurement-pose, a transform may be applied to set the mesh's
         reference frame specified in CAD with respect to the 'world' frame
 
@@ -214,30 +215,30 @@ class TrajectoryManager:
             self.scene.add_box("mirror2", box_pose, size=(2, 0.1, 3))
         return True
 
-    def generate_samples_and_views(self, sampling_density, uncertainty_threshold, orientations_around_boresight, view_tilt_mode="full", plan_path_to_check_reachability = False, minimum_trajectory_length = 25, trajectory_sample_step = 2):
+    def generate_samples_and_viewpoints(self, sampling_density, uncertainty_threshold, orientations_around_boresight, viewpoint_tilt_mode="full", plan_path_to_check_reachability = False, minimum_trajectory_length = 25, trajectory_sample_step = 2):
         """
-        Samples the mesh's surface into discrete points, generates views for each sample and processes these views metrologically and mechanically.
-        Only views that do meet the contraints specified in the method's parameters and in MoveIt (collision, reachability, ...) will be returned. This method allows to generate
-        multiple View-objects for a single surface-point by varying the anchor-pose (the boresight is always focused on the corresponding surface_point).
+        Samples the mesh's surface into discrete points, generates viewpoints for each sample and processes these viewpoints metrologically and mechanically.
+        Only viewpoints that do meet the contraints specified in the method's parameters and in MoveIt (collision, reachability, ...) will be returned. This method allows to generate
+        multiple ViewPoint-objects for a single surface-point by varying the anchor-pose (the boresight is always focused on the corresponding surface_point).
 
-        :param sampling_density: Density of sampling to generate the points for measurement-calculations and view-generation in points per mm^2
+        :param sampling_density: Density of sampling to generate the points for measurement-calculations and viewpoint-generation in points per mm^2
         :type sampling_density: float
         :param orientations_around_boresight: Number of orientations around the sensor's boresight to be considered per sampled_surface_point
         :type orientations_around_boresight: int
-        :param view_tilt_mode: For each orientation, deviate the gamma- and theta-values of the view-anchor-pose slightly from the optimum according to (one deviation-step per angle and orientation available right now):\n
+        :param viewpoint_tilt_mode: For each orientation, deviate the psi- and theta-values of the viewpoint-anchor-pose slightly from the optimum according to (one deviation-step per angle and orientation available right now):\n
             - "none": Do not perform any tilting.\n
             - "limited": When the optimal angle-configuration did not work, try deviations and stop after finding the first valid solution.\n
-            - "full": Calculation for every possible angle-calculation. Every boresight orientation has 9 sub-views.
+            - "full": Calculation for every possible angle-calculation. Every boresight orientation has 9 sub-viewpoints.
             , defaults to "full"
-        :type view_tilt_mode: str, optional
-        :param plan_path_to_check_reachability: Do not use one inverse-kinematics-request to check view-reachability but try to create complete plan from the current-state to the view's anchor-pose, defaults to False
+        :type viewpoint_tilt_mode: str, optional
+        :param plan_path_to_check_reachability: Do not use one inverse-kinematics-request to check viewpoint-reachability but try to create complete plan from the current-state to the viewpoint's anchor-pose, defaults to False
         :type plan_path_to_check_reachability: bool, optional
         :param minimum_trajectory_length: Minimum length a generated trajectory has to have so that it is accepted in mm, defaults to 50
         :type minimum_trajectory_length: float, optional
         :param trajectory_sample_step: Euclidian distance between 2 trajectory-points in cartesian sapce in mm, defaults to 2
         :type trajectory_sample_step: float, optional
-        :return: 2 lists with the first containing all sampled_surface_points and the second containing all views that were processed successfully
-        :rtype: list[numpy.array], list[View]
+        :return: 2 lists with the first containing all sampled_surface_points and the second containing all viewpoints that were processed successfully
+        :rtype: list[numpy.array], list[ViewPoint]
         """
         # Sample points on the target mesh's surface based on the given density through rejection sampling
         sampled_surface_points, sampled_face_indices = trimesh.sample.sample_surface_even(self.target_mesh, int(self.target_mesh.area * sampling_density))
@@ -251,7 +252,7 @@ class TrajectoryManager:
         # Use the sampling results to set the processing context of the sensor model
         self.sensor_model.set_processing_context(self.target_mesh, sampled_surface_points, sampled_face_indices)
         # Very conservative limit of the maximum length in and againts trajectory_direction of 
-        # the each view's measurement-trajectory so that the target-object is covered for sure
+        # the each viewpoint's measurement-trajectory so that the target-object is covered for sure
         self.max_edge = max(self.target_mesh.bounding_box_oriented.edges_unique_length)
 
         # Publish the sampled_surface_points via ROS so that they can be visualized in RVIZ for user feedback
@@ -278,61 +279,61 @@ class TrajectoryManager:
             ik_service = rospy.ServiceProxy("/compute_ik", GetPositionIK, persistent=True)
         
         # Set variables to organize the iteration
-        valid_views = []
+        valid_viewpoints = []
         processed = 0
     
         START =time.time()
-        # For every sampled_surface_point: Generate view with anchor_point in normal-direction of the surface-point's face-triangle.
-        # Then, rotate the orientation of the view's laser_emitter_frame around the z-Axis (= boresight) with respect to the anchor point (-> Changes only orientation).
-        # If specified, apply tilting to the view for every orientation, so that the view's anchor point is turned around the laser_emitter_frame's x-/y-axis but 
-        # with respect to the corresponding surface point (-> Changes orientation and position of view-anchor).
+        # For every sampled_surface_point: Generate viewpoint with anchor_point in normal-direction of the surface-point's face-triangle.
+        # Then, rotate the orientation of the viewpoint's laser_emitter_frame around the z-Axis (= boresight) with respect to the anchor point (-> Changes only orientation).
+        # If specified, apply tilting to the viewpoint for every orientation, so that the viewpoint's anchor point is turned around the laser_emitter_frame's x-/y-axis but 
+        # with respect to the corresponding surface point (-> Changes orientation and position of viewpoint-anchor).
         for (surface_point, face_index) in zip(sampled_surface_points, sampled_face_indices):
             for angle in np.linspace(0, 360, orientations_around_boresight + 1)[:-1]:
-                new_view = View(surface_point, self.target_mesh.face_normals[face_index], np.deg2rad(angle), self.sensor_model.get_optimal_standoff())
-                if view_tilt_mode == "none":
-                    if self.process_view(new_view, ik_service, uncertainty_threshold, minimum_required_overmeasure):
-                        valid_views.append(new_view)
-                elif view_tilt_mode == "limited":
+                new_viewpoint = ViewPoint(surface_point, self.target_mesh.face_normals[face_index], np.deg2rad(angle), self.sensor_model.get_optimal_standoff())
+                if viewpoint_tilt_mode == "none":
+                    if self.process_viewpoint(new_viewpoint, ik_service, uncertainty_threshold, minimum_required_overmeasure):
+                        valid_viewpoints.append(new_viewpoint)
+                elif viewpoint_tilt_mode == "limited":
                     # angle_config = tuple describing (tilt around x-axis, tilt around y-axis) from the set of 2-element permutations with repitions of all valid tilt-angles
                     for angle_config in itertools.product([0, self.sensor_model.get_median_deviation_angle(), -1 * self.sensor_model.get_median_deviation_angle()], repeat=2):
-                        new_view = View(surface_point, self.target_mesh.face_normals[face_index], np.deg2rad(angle), self.sensor_model.get_optimal_standoff(), angle_config[0], angle_config[1])
-                        # When valid view could be obtained through tilting -> Continue to next orientation
-                        if self.process_view(new_view, ik_service, uncertainty_threshold, minimum_required_overmeasure):
-                            valid_views.append(new_view)
+                        new_viewpoint = ViewPoint(surface_point, self.target_mesh.face_normals[face_index], np.deg2rad(angle), self.sensor_model.get_optimal_standoff(), angle_config[0], angle_config[1])
+                        # When valid viewpoint could be obtained through tilting -> Continue to next orientation
+                        if self.process_viewpoint(new_viewpoint, ik_service, uncertainty_threshold, minimum_required_overmeasure):
+                            valid_viewpoints.append(new_viewpoint)
                             break
-                elif view_tilt_mode == "full":
+                elif viewpoint_tilt_mode == "full":
                     # angle_config = tuple describing (tilt around x-axis, tilt around y-axis) from the set of 2-element permutations with repitions of all valid tilt-angles
                     for angle_config in itertools.product([0, self.sensor_model.get_median_deviation_angle(), -1 * self.sensor_model.get_median_deviation_angle()], repeat=2):
-                        new_view = View(surface_point, self.target_mesh.face_normals[face_index], np.deg2rad(angle), self.sensor_model.get_optimal_standoff(), angle_config[0], angle_config[1])
-                        if self.process_view(new_view, ik_service, uncertainty_threshold, minimum_required_overmeasure):
-                            valid_views.append(new_view)
+                        new_viewpoint = ViewPoint(surface_point, self.target_mesh.face_normals[face_index], np.deg2rad(angle), self.sensor_model.get_optimal_standoff(), angle_config[0], angle_config[1])
+                        if self.process_viewpoint(new_viewpoint, ik_service, uncertainty_threshold, minimum_required_overmeasure):
+                            valid_viewpoints.append(new_viewpoint)
                 else:
-                    raise ValueError("view_tilt_mode has to be 'none', 'limited' or 'full'. You entered: '{}'".format(view_tilt_mode))
+                    raise ValueError("viewpoint_tilt_mode has to be 'none', 'limited' or 'full'. You entered: '{}'".format(viewpoint_tilt_mode))
                 processed += 1
-                print("Processed view {} of {} ({} %, {} of them are usable for measurement)".format(
+                print("Processed viewpoint {} of {} ({} %, {} of them are usable for measurement)".format(
                     processed, 
                     len(sampled_surface_points) * orientations_around_boresight, 
                     np.round(100.0 * processed / (len(sampled_surface_points) * orientations_around_boresight), 2),
-                    len(valid_views)
+                    len(valid_viewpoints)
                 ))
                 
         # Because the service was created "persistent", it must be closed properly
         if not plan_path_to_check_reachability:
             ik_service.close()
 
-        print("\n" + "*" * 20 + "\nGenerated {} valid views with fully evaluated measurement-trajectory/-ies".format(len(valid_views)))
+        print("\n" + "*" * 20 + "\nGenerated {} valid viewpoints with fully evaluated measurement-trajectory/-ies".format(len(valid_viewpoints)))
         print("DURATION WAS ", time.time() - START)
-        return sampled_surface_points, valid_views
+        return sampled_surface_points, valid_viewpoints
 
 
-    def process_view(self, view, ik_service, uncertainty_threshold, minimum_required_overmeasure = 5, trajectory_sample_step = 2, joint_jump_threshold = 1.5, minimum_trajectory_length = 50):
+    def process_viewpoint(self, viewpoint, ik_service, uncertainty_threshold, minimum_required_overmeasure = 5, trajectory_sample_step = 2, joint_jump_threshold = 1.5, minimum_trajectory_length = 50):
         """
-        Processes a single view entirely. Starting on a simple reachability-analysis of the anchor-pose, a metrological evaluation is performed using the sensor_model to
-        review the measurement-gain this view can contribute in theory. Then, the actual meausrement-trajectories are calculated and examined regarding the
-        provided contraints. In the end, the processing-result (trajectory and metrological values) are stored in the view object
+        Processes a single viewpoint entirely. Starting on a simple reachability-analysis of the anchor-pose, a metrological evaluation is performed using the sensor_model to
+        reviewpoint the measurement-gain this viewpoint can contribute in theory. Then, the actual meausrement-trajectories are calculated and examined regarding the
+        provided contraints. In the end, the processing-result (trajectory and metrological values) are stored in the viewpoint object
 
-        :param view: View to be processed (if processing was successful, members of this view-object will be changed)
-        :type view: View
+        :param viewpoint: ViewPoint to be processed (if processing was successful, members of this viewpoint-object will be changed)
+        :type viewpoint: ViewPoint
         :param ik_service: ROS-Serviceproxy that can resolve inverse-kinematics via moveit_msgs/GetPositionIK 
         :type ik_service: rospy.ServiceProxy
         :param minimum_required_overmeasure: How much to add to the trajectory in trajectory-direction in mm after the last measurable sample_point is measured (as samples usually do not occur exactly at edges), defaults to 5
@@ -343,49 +344,49 @@ class TrajectoryManager:
         :type joint_jump_threshold: float, optional
         :param minimum_trajectory_length: Minimum length a generated trajectory has to have so that it is accepted in mm, defaults to 50
         :type minimum_trajectory_length: float, optional
-        :return: Boolean value that is true, if the view could be processed and all contraints were met, and false otherwise
+        :return: Boolean value that is true, if the viewpoint could be processed and all contraints were met, and false otherwise
         :rtype: bool
         """
 
-        assert isinstance(view, View)
+        assert isinstance(viewpoint, ViewPoint)
         
 
         # Build a mathematical model of the trajectory (= straight line)
-        trajectory_origin = view.get_anchor_position()
+        trajectory_origin = viewpoint.get_anchor_position()
         # The scanner moves along the x-axis of the laser_emitter_frame
-        trajectory_direction = view.get_orientation_matrix().dot([1, 0, 0, 1])[0:3]
+        trajectory_direction = viewpoint.get_orientation_matrix().dot([1, 0, 0, 1])[0:3]
 
         # Implementation of a line equation (t is in mm, but result is in m)
         trajectory_in_m = lambda t: (trajectory_origin + trajectory_direction * t) / 1000
         
-        # Check if anchor of view is reachable
+        # Check if anchor of viewpoint is reachable
 
-        q = trimesh.transformations.quaternion_from_matrix(view.get_orientation_matrix())
-        view_anchor_pose = geometry_msgs.msg.PoseStamped()
-        view_anchor_pose.pose.orientation.w = q[0]
-        view_anchor_pose.pose.orientation.x = q[1]
-        view_anchor_pose.pose.orientation.y = q[2]
-        view_anchor_pose.pose.orientation.z = q[3]
-        view_anchor_pose.header.frame_id = "world"
-        view_anchor_pose.pose.position.x = trajectory_in_m(0)[0]
-        view_anchor_pose.pose.position.y = trajectory_in_m(0)[1]
-        view_anchor_pose.pose.position.z = trajectory_in_m(0)[2]
+        q = trimesh.transformations.quaternion_from_matrix(viewpoint.get_orientation_matrix())
+        viewpoint_anchor_pose = geometry_msgs.msg.PoseStamped()
+        viewpoint_anchor_pose.pose.orientation.w = q[0]
+        viewpoint_anchor_pose.pose.orientation.x = q[1]
+        viewpoint_anchor_pose.pose.orientation.y = q[2]
+        viewpoint_anchor_pose.pose.orientation.z = q[3]
+        viewpoint_anchor_pose.header.frame_id = "world"
+        viewpoint_anchor_pose.pose.position.x = trajectory_in_m(0)[0]
+        viewpoint_anchor_pose.pose.position.y = trajectory_in_m(0)[1]
+        viewpoint_anchor_pose.pose.position.z = trajectory_in_m(0)[2]
         if ik_service is None:
             self.group.set_start_state_to_current_state()
-            self.group.set_pose_target(view_anchor_pose)
+            self.group.set_pose_target(viewpoint_anchor_pose)
             initial_plan = self.group.plan()
             if not initial_plan[0]:
                 return False
-            # Use final joint-values (= joint values, where the sensor's frame is in the viewpoint)
+            # Use final joint-values (= joint values, where the sensor's frame is in the viewpointpoint)
             # as planning-start-point for the trajectory calculations
-            view_anchor_state = moveit_msgs.msg.RobotState()
-            view_anchor_state.joint_state.position = initial_plan[1].joint_trajectory.points[-1].positions
-            view_anchor_state.joint_state.name = initial_plan[1].joint_trajectory.joint_names
+            viewpoint_anchor_state = moveit_msgs.msg.RobotState()
+            viewpoint_anchor_state.joint_state.position = initial_plan[1].joint_trajectory.points[-1].positions
+            viewpoint_anchor_state.joint_state.name = initial_plan[1].joint_trajectory.joint_names
         else:
             req = GetPositionIKRequest()
             req.ik_request.group_name = "manipulator"
             req.ik_request.avoid_collisions = True
-            req.ik_request.pose_stamped = view_anchor_pose   
+            req.ik_request.pose_stamped = viewpoint_anchor_pose   
             # Perform 20 calls as inverse_kinematics is a stochastic process to improve chances of finding an
             for _ in range(20):
                 resp = ik_service.call(req)
@@ -393,13 +394,13 @@ class TrajectoryManager:
                     break
             if not resp.error_code.val == GetPositionIKResponse().error_code.SUCCESS:
                 return False
-            view_anchor_state= resp.solution
+            viewpoint_anchor_state= resp.solution
         
         # Use the computed joint-values as basis for joint-trajectory-planning
-        self.group.set_start_state(view_anchor_state)
+        self.group.set_start_state(viewpoint_anchor_state)
 
         # Perform metrological evaluation
-        measurable_surface_point_indices, uncertainties, trajectory_line_arguments_selected = self.sensor_model.process_view_metrologically(view, uncertainty_threshold, self.max_edge)
+        measurable_surface_point_indices, uncertainties, trajectory_line_arguments_selected = self.sensor_model.process_viewpoint_metrologically(viewpoint, uncertainty_threshold, self.max_edge)
         if len(measurable_surface_point_indices) == 0:
             return False
 
@@ -409,27 +410,27 @@ class TrajectoryManager:
         if max_deflection - min_deflection < minimum_trajectory_length:
             return False
         
-        # Compute cartesian path into the view's trajectory_direction from the previously found start 'anchor'-state to the cartesian pose
+        # Compute cartesian path into the viewpoint's trajectory_direction from the previously found start 'anchor'-state to the cartesian pose
         # of the laser_emitter_frame where the last surface point can be measured (+ tiny overmeasure) at pose_a
-        view_deflection_pose_a = geometry_msgs.msg.Pose()
-        view_deflection_pose_a.orientation = view_anchor_pose.pose.orientation
-        view_deflection_pose_a.position = geometry_msgs.msg.Point(*trajectory_in_m(max_deflection))
+        viewpoint_deflection_pose_a = geometry_msgs.msg.Pose()
+        viewpoint_deflection_pose_a.orientation = viewpoint_anchor_pose.pose.orientation
+        viewpoint_deflection_pose_a.position = geometry_msgs.msg.Point(*trajectory_in_m(max_deflection))
         # Info: fraction is the portion of the request to be executable by the returned trajectory
         # (e.g. 0.5 means that the trajectory only covers half the euklidian distance between the start and endpose)
-        (trajectory, fraction_a) = self.group.compute_cartesian_path([view_anchor_pose.pose, view_deflection_pose_a], trajectory_sample_step * 1e-3, joint_jump_threshold)
+        (trajectory, fraction_a) = self.group.compute_cartesian_path([viewpoint_anchor_pose.pose, viewpoint_deflection_pose_a], trajectory_sample_step * 1e-3, joint_jump_threshold)
         
         # Use the end-state of this trajectory as a start state of the trajectory to plan a trajectory against the trajectory direction to where the last
         # surface point can be measured (+ tiny overmeasure) at pose_b
-        view_deflection_state_a = moveit_msgs.msg.RobotState()
-        view_deflection_state_a.joint_state.name = trajectory.joint_trajectory.joint_names
-        view_deflection_state_a.joint_state.position = trajectory.joint_trajectory.points[-1].positions
-        self.group.set_start_state(view_deflection_state_a)
+        viewpoint_deflection_state_a = moveit_msgs.msg.RobotState()
+        viewpoint_deflection_state_a.joint_state.name = trajectory.joint_trajectory.joint_names
+        viewpoint_deflection_state_a.joint_state.position = trajectory.joint_trajectory.points[-1].positions
+        self.group.set_start_state(viewpoint_deflection_state_a)
         # pose_a has to adapted to be the last actually reachable pose in trajectory direction
-        view_deflection_pose_a.position = geometry_msgs.msg.Point(*trajectory_in_m(fraction_a * max_deflection))
-        view_deflection_pose_b = geometry_msgs.msg.Pose()
-        view_deflection_pose_b.orientation = view_deflection_pose_a.orientation
-        view_deflection_pose_b.position = geometry_msgs.msg.Point(*trajectory_in_m(min_deflection))
-        (trajectory, fraction_total) = self.group.compute_cartesian_path([view_deflection_pose_a, view_deflection_pose_b], trajectory_sample_step * 1e-3, joint_jump_threshold)
+        viewpoint_deflection_pose_a.position = geometry_msgs.msg.Point(*trajectory_in_m(fraction_a * max_deflection))
+        viewpoint_deflection_pose_b = geometry_msgs.msg.Pose()
+        viewpoint_deflection_pose_b.orientation = viewpoint_deflection_pose_a.orientation
+        viewpoint_deflection_pose_b.position = geometry_msgs.msg.Point(*trajectory_in_m(min_deflection))
+        (trajectory, fraction_total) = self.group.compute_cartesian_path([viewpoint_deflection_pose_a, viewpoint_deflection_pose_b], trajectory_sample_step * 1e-3, joint_jump_threshold)
 
         # Calculate the length of the trajectory that is actual executable with respect to joint-limits, collision, ... and check if post-processing was successful
         fraction_b = (fraction_total * (fraction_a * max_deflection - min_deflection) - fraction_a * max_deflection) / abs(min_deflection)
@@ -442,9 +443,9 @@ class TrajectoryManager:
                 measurable_surface_point_indices.pop(i)
                 uncertainties.pop(i)
 
-        # If restrictions are satisfied, store the measurement-trajectory and metrological information in the view
-        view.set_trajectory_for_measurement(trajectory)
-        view.set_measurable_surface_point_indices_and_uncertainties(measurable_surface_point_indices, uncertainties)
+        # If restrictions are satisfied, store the measurement-trajectory and metrological information in the viewpoint
+        viewpoint.set_trajectory_for_measurement(trajectory)
+        viewpoint.set_measurable_surface_point_indices_and_uncertainties(measurable_surface_point_indices, uncertainties)
         return True
 
     def postprocess_trajectory(self, trajectory):
@@ -502,84 +503,84 @@ class TrajectoryManager:
 
         return True
 
-    def solve_scp(self, provided_views, solver_type="greedy"):
+    def solve_scp(self, provided_viewpoints, solver_type="greedy"):
         """
-        Solve Set Covering Problem to cover all measurable surface_points with a fraction of the set of provided views.
+        Solve Set Covering Problem to cover all measurable surface_points with a fraction of the set of provided viewpoints.
         Possible solver_types are:\n
         -   "greedy": Fills return set at each step with the trajectory that delivers the most
             additional coverage compared to the points already in the set. If this additional coverage is
-            identical in size for several new optimal viewpoint-candidates, the one with the lowest maximum
+            identical in size for several new optimal viewpointpoint-candidates, the one with the lowest maximum
             uncertainty will be added similarly to the improvement introduced in chapter 4.4 of 
-            "View and sensor planning for multi-sensor surface inspection" (Gronle et al., 2016)  (default)\n
+            "ViewPoint and sensor planning for multi-sensor surface inspection" (Gronle et al., 2016)  (default)\n
         -   "IP_basic": Solves the SCP-Problem with integer programming (IP) using the formulation in
-            "Model-based view planning" (Scott, 2009), i.e. the objective function is the number of all
-            selected viewpoints whereas the constraint is that every surface point must be covered at least by one viewpoint\n
+            "Model-based viewpoint planning" (Scott, 2009), i.e. the objective function is the number of all
+            selected viewpointpoints whereas the constraint is that every surface point must be covered at least by one viewpointpoint\n
         -   "IP_uncertainty": Solves the SCP using IP with respect to the uncertainty. The formulas are similar to "IP_basic"
-            but in the objective, costs corresponding to the worst uncertainty are assigned to every viewpoint-trajectory.\n
+            but in the objective, costs corresponding to the worst uncertainty are assigned to every viewpointpoint-trajectory.\n
         -   "IP_time": Solves the SCP using IP with respect to the time of trajectory-execution. The formulas are similar to "IP_basic"
-            but in the objective, costs corresponding to the duration of the trajectory are assigned to every viewpoint.
+            but in the objective, costs corresponding to the duration of the trajectory are assigned to every viewpointpoint.
 
-        :param provided_views: All processed views where each has a valid measurement-trajectory and information about the measurable surface_points
-        :type provided_views: set[View] or list[View]
+        :param provided_viewpoints: All processed viewpoints where each has a valid measurement-trajectory and information about the measurable surface_points
+        :type provided_viewpoints: set[ViewPoint] or list[ViewPoint]
         :param solver_type: See function description, defaults to "greedy"
         :type solver_type: str, optional
-        :return: Set of views that can measure the union of measurable surface points of all provided views
-        :rtype: set[View]
+        :return: Set of viewpoints that can measure the union of measurable surface points of all provided viewpoints
+        :rtype: set[ViewPoint]
         """
-        # Get set of all measurable surface points by all provided_views (this is most likely smaller than the set of sampled_surface_points)
+        # Get set of all measurable surface points by all provided_viewpoints (this is most likely smaller than the set of sampled_surface_points)
         measurable_surface_point_indices = set(
                 itertools.chain.from_iterable(
-                    [view.get_measurable_surface_point_indices() for view in provided_views]
+                    [viewpoint.get_measurable_surface_point_indices() for viewpoint in provided_viewpoints]
                 ))
-        print("Can cover {} surface-points".format(len(measur)))
+        print("Can cover {} surface-points".format(len(measurable_surface_point_indices)))
         if solver_type == "greedy":
             measured_surface_point_indices = set()
-            used_views = set()
+            used_viewpoints = set()
             maximum_uncertainty = self.sensor_model.get_max_uncertainty()
-            while len(provided_views) > 0:
-                # The sort-key-function is designed as follows: Pre-decimal-point numbers indicate the amount of newly measurable surface contributed by this view.
-                # Post-decimal-point-values indicate the lowest overall uncertainty of this view (in [0,1]) scaled by 0.9. That way, when multiple views provide
+            while len(provided_viewpoints) > 0:
+                # The sort-key-function is designed as follows: Pre-decimal-point numbers indicate the amount of newly measurable surface contributed by this viewpoint.
+                # Post-decimal-point-values indicate the lowest overall uncertainty of this viewpoint (in [0,1]) scaled by 0.9. That way, when multiple viewpoints provide
                 # the same amount of new measurements, the uncertainty will be compared as in Gronle et al.'s paper.
-                provided_views = sorted(provided_views, key = lambda view: len(measured_surface_point_indices | set(view.get_measurable_surface_point_indices())) + (maximum_uncertainty - max(view.get_measurable_surface_point_uncertainties())) / maximum_uncertainty * 0.9, reverse=True)
-                next_view = provided_views.pop(0)
-                measured_surface_point_indices |= set(next_view.get_measurable_surface_point_indices())
-                used_views.add(next_view)
+                provided_viewpoints = sorted(provided_viewpoints, key = lambda viewpoint: len(measured_surface_point_indices | set(viewpoint.get_measurable_surface_point_indices())) + (maximum_uncertainty - max(viewpoint.get_measurable_surface_point_uncertainties())) / maximum_uncertainty * 0.9, reverse=True)
+                next_viewpoint = provided_viewpoints.pop(0)
+                measured_surface_point_indices |= set(next_viewpoint.get_measurable_surface_point_indices())
+                used_viewpoints.add(next_viewpoint)
                 # Check if optimal situation is reached, i.e. all measurable surface points are covered
                 if measured_surface_point_indices == measurable_surface_point_indices:
                     print("Covered {} surface points. Continuing with this solution ...".format(len(measured_surface_point_indices)))
-                    return used_views
-            raise Exception("Greedy algorithm failed. All views were used but not all measurable points were covered!")
+                    return used_viewpoints
+            raise Exception("Greedy algorithm failed. All viewpoints were used but not all measurable points were covered!")
 
         elif solver_type[0:3] == "IP_":
             # This is an implementation of the problem stated in Scott's paper with some additions.        
-            viewpoint_indices = range(len(provided_views))
+            viewpointpoint_indices = range(len(provided_viewpoints))
             
             # Create problem
             ip_problem = pulp.LpProblem(sense=pulp.const.LpMinimize)
             
-            # Create IP-Variables (viewpoint_variables[i] is 1, if provided_view[i] is part of the solution and 0 otherwise)
-            viewpoint_variables = pulp.LpVariable.dicts(name="viewpoint_variables", indexs=viewpoint_indices, cat=pulp.const.LpInteger)
+            # Create IP-Variables (viewpointpoint_variables[i] is 1, if provided_viewpoint[i] is part of the solution and 0 otherwise)
+            viewpointpoint_variables = pulp.LpVariable.dicts(name="viewpointpoint_variables", indexs=viewpointpoint_indices, cat=pulp.const.LpInteger)
             
             # Add objective function
             if solver_type == "IP_basic":
-                # Optimize only for the total amount of viewpoints
-                ip_problem += pulp.lpSum([viewpoint_variables[i] for i in viewpoint_indices])
+                # Optimize only for the total amount of viewpointpoints
+                ip_problem += pulp.lpSum([viewpointpoint_variables[i] for i in viewpointpoint_indices])
             elif solver_type == "IP_time":
                 # Goal is that the combined measurement-trajectory-execution-time of all measurement-trajectories becomes minimal
-                ip_problem += pulp.lpSum([viewpoint_variables[i] * provided_views[i].get_trajectory_for_measurement().joint_trajectory.points[-1].time_from_start.to_sec() for i in viewpoint_indices])
+                ip_problem += pulp.lpSum([viewpointpoint_variables[i] * provided_viewpoints[i].get_trajectory_for_measurement().joint_trajectory.points[-1].time_from_start.to_sec() for i in viewpointpoint_indices])
             elif solver_type == "IP_uncertainty":
                 # Goal is that the sum of 
-                ip_problem += pulp.lpSum([viewpoint_variables[i] * sum(provided_views[i].get_measurable_surface_point_uncertainties()) / len(provided_views[i].get_measurable_surface_point_uncertainties()) for i in viewpoint_indices])
+                ip_problem += pulp.lpSum([viewpointpoint_variables[i] * sum(provided_viewpoints[i].get_measurable_surface_point_uncertainties()) / len(provided_viewpoints[i].get_measurable_surface_point_uncertainties()) for i in viewpointpoint_indices])
         
             
-            # Add constraints: Viewpoint_variable's elements are either 1 or 0
-            for i in viewpoint_indices:
-                ip_problem += viewpoint_variables[i] <= 1
-                ip_problem += viewpoint_variables[i] >= 0
+            # Add constraints: ViewPointpoint_variable's elements are either 1 or 0
+            for i in viewpointpoint_indices:
+                ip_problem += viewpointpoint_variables[i] <= 1
+                ip_problem += viewpointpoint_variables[i] >= 0
             
             # Add constraints: Every surface point must be covered
             for surface_point_index in measurable_surface_point_indices:
-                ip_problem += pulp.lpSum([(surface_point_index in provided_views[viewpoint_index].get_measurable_surface_point_indices()) * viewpoint_variables[viewpoint_index] for viewpoint_index in viewpoint_indices]) >= 1
+                ip_problem += pulp.lpSum([(surface_point_index in provided_viewpoints[viewpointpoint_index].get_measurable_surface_point_indices()) * viewpointpoint_variables[viewpointpoint_index] for viewpointpoint_index in viewpointpoint_indices]) >= 1
             
             print("Constructed integer programming problem. Start solving...")
             ip_problem.solve()
@@ -587,61 +588,61 @@ class TrajectoryManager:
             # Process IP result
             if not ip_problem.status == pulp.const.LpSolutionOptimal:
                 raise Exception("Could not find optimal solution.")
-            print("Found optimal solution consisting of {} viewpoints".format(pulp.value(ip_problem.objective)))
+            print("Found optimal solution consisting of {} viewpointpoints".format(pulp.value(ip_problem.objective)))
             output = set()
-            for solved_viewpoint_variable in ip_problem.variables():
-                if solved_viewpoint_variable.varValue == 1:  
-                    output.add(provided_views[int(solved_viewpoint_variable.name.split("_")[-1])])
+            for solved_viewpointpoint_variable in ip_problem.variables():
+                if solved_viewpointpoint_variable.varValue == 1:  
+                    output.add(provided_viewpoints[int(solved_viewpointpoint_variable.name.split("_")[-1])])
             return output           
         
-    def connect_views(self, unordered_views, min_planning_time=0.2):
+    def connect_viewpoints(self, unordered_viewpoints, min_planning_time=0.2):
         """
-        Connect a set of unordered views with the current state and in between greedily so that they can be executed as fast as possible.
-        Until all views are enqueued, do: From the end-point of the last enqueued trajetory, motion plans are calculated to the start-/end-poses
-        of all unenqueued view's measurement-trajectories and the shortest (in time domain) will be selected. 
+        Connect a set of unordered viewpoints with the current state and in between greedily so that they can be executed as fast as possible.
+        Until all viewpoints are enqueued, do: From the end-point of the last enqueued trajetory, motion plans are calculated to the start-/end-poses
+        of all unenqueued viewpoint's measurement-trajectories and the shortest (in time domain) will be selected. 
 
-        :param unordered_views: Set of views to be connected where each has a stored measurement-trajectory 
-        :type unordered_views: set[view]
+        :param unordered_viewpoints: Set of viewpoints to be connected where each has a stored measurement-trajectory 
+        :type unordered_viewpoints: set[viewpoint]
         :param min_planning_time: Planning time that is used for connection-path-planning (will be increased automatically if no plan was found at first), defaults to 0.2
         :type min_planning_time: float, optional
-        :return: List of ordered and execution-ready views
-        :rtype: list[View]
+        :return: List of ordered and execution-ready viewpoints
+        :rtype: list[ViewPoint]
         """
-        if len(unordered_views) == 0:
+        if len(unordered_viewpoints) == 0:
             return
         # Convert to list to make 'pop' easier
-        unenqueued_views = list(unordered_views)
+        unenqueued_viewpoints = list(unordered_viewpoints)
 
-        # Output list = Views with stored shortest inter-view-paths
-        enqueud_views = []
+        # Output list = ViewPoints with stored shortest inter-viewpoint-paths
+        enqueud_viewpoints = []
         
-        # Introduce initial robot pose as pseudo "view"
+        # Introduce initial robot pose as pseudo "viewpoint"
         # (it has a trajectory with the current pose as its only (end-)point)
-        initial_pseudo_view = View(np.array([1,0,0]), np.array([1,0,0]), 0, 0)
+        initial_pseudo_viewpoint = ViewPoint(np.array([1,0,0]), np.array([1,0,0]), 0, 0)
         pseudo_trajectory = moveit_msgs.msg.RobotTrajectory()
         pseudo_end_point = trajectory_msgs.msg.JointTrajectoryPoint()
         pseudo_end_point.positions = self.group.get_current_joint_values()
         pseudo_end_point.time_from_start = rospy.Duration(1e9)
-        pseudo_trajectory.joint_trajectory.joint_names = unenqueued_views[0].get_trajectory_for_measurement().joint_trajectory.joint_names
+        pseudo_trajectory.joint_trajectory.joint_names = unenqueued_viewpoints[0].get_trajectory_for_measurement().joint_trajectory.joint_names
         pseudo_trajectory.joint_trajectory.points.append(pseudo_end_point)
-        initial_pseudo_view.set_trajectory_for_measurement(pseudo_trajectory)       
-        enqueud_views.append(initial_pseudo_view)
+        initial_pseudo_viewpoint.set_trajectory_for_measurement(pseudo_trajectory)       
+        enqueud_viewpoints.append(initial_pseudo_viewpoint)
 
-        while len(unenqueued_views) != 0:
+        while len(unenqueued_viewpoints) != 0:
             # Set start state for planning to the last pose of the previously enqueued trajectory
             temporary_start_state = moveit_msgs.msg.RobotState()
-            temporary_start_state.joint_state.position = enqueud_views[-1].get_trajectory_for_measurement().joint_trajectory.points[-1].positions
-            temporary_start_state.joint_state.name = enqueud_views[-1].get_trajectory_for_measurement().joint_trajectory.joint_names
+            temporary_start_state.joint_state.position = enqueud_viewpoints[-1].get_trajectory_for_measurement().joint_trajectory.points[-1].positions
+            temporary_start_state.joint_state.name = enqueud_viewpoints[-1].get_trajectory_for_measurement().joint_trajectory.joint_names
             self.group.set_start_state(temporary_start_state)
             self.group.set_planning_time(min_planning_time)
             
-            # For each unenqueued view: Calculate a path to the start- and end-point of its measurement trajectory and remember the time-shortest
+            # For each unenqueued viewpoint: Calculate a path to the start- and end-point of its measurement trajectory and remember the time-shortest
             # trajectory by index in the unenqueued-list (as well as the corresponding trajectory and if the path was calculated to the end-point -> reverse_flag)
             min_index = None
             reverse_flag = False
             min_plan = pseudo_trajectory
-            for index, view in enumerate(unenqueued_views):
-                self.group.set_joint_value_target(view.get_trajectory_for_measurement().joint_trajectory.points[0].positions)
+            for index, viewpoint in enumerate(unenqueued_viewpoints):
+                self.group.set_joint_value_target(viewpoint.get_trajectory_for_measurement().joint_trajectory.points[0].positions)
                 
                 plan_result = self.group.plan()
                 if plan_result[0] and (min_plan.joint_trajectory.points[-1].time_from_start > plan_result[1].joint_trajectory.points[-1].time_from_start or min_index is None):
@@ -649,7 +650,7 @@ class TrajectoryManager:
                     min_index = index
                     reverse_flag = False
                 
-                self.group.set_joint_value_target(view.get_trajectory_for_measurement().joint_trajectory.points[-1].positions)
+                self.group.set_joint_value_target(viewpoint.get_trajectory_for_measurement().joint_trajectory.points[-1].positions)
                 
                 plan_result = self.group.plan()
                 if plan_result[0] and (min_plan.joint_trajectory.points[-1].time_from_start > plan_result[1].joint_trajectory.points[-1].time_from_start or min_index is None):
@@ -658,29 +659,29 @@ class TrajectoryManager:
                     reverse_flag = True
             if min_index is not None:
                 # Shortest connection-plan found -> Enqueuing (and if necessary reverting)
-                next_view = unenqueued_views.pop(min_index)
+                next_viewpoint = unenqueued_viewpoints.pop(min_index)
                 if reverse_flag:
-                    next_view.reverse_trajectory_for_measurement()   
-                next_view.set_trajectory_to_view(min_plan)
-                enqueud_views.append(next_view)
+                    next_viewpoint.reverse_trajectory_for_measurement()   
+                next_viewpoint.set_trajectory_to_viewpoint(min_plan)
+                enqueud_viewpoints.append(next_viewpoint)
                 # Reset planning time
                 self.group.set_planning_time(min_planning_time)
-                print("Enqueued viewpoint-trajectory ({} left)".format(len(unenqueued_views)))
+                print("Enqueued viewpointpoint-trajectory ({} left)".format(len(unenqueued_viewpoints)))
             else:
                 # No solution has been found -> Increase planning time to improve success-chances for the next iteration
                 self.group.set_planning_time(min_planning_time + self.group.get_planning_time())
-        return enqueud_views[1:]
+        return enqueud_viewpoints[1:]
 
 
 
     def execute(self, execution_list, surface_points=None):
         """
-        Execute a list of RobotTrajectories or Views via MoveIt. When problems occur during execution,
-        the robot will be stopped and an exception will be raised. When executing from a list of views, the currently measured surface_points
+        Execute a list of RobotTrajectories or ViewPoints via MoveIt. When problems occur during execution,
+        the robot will be stopped and an exception will be raised. When executing from a list of viewpoints, the currently measured surface_points
         are published in "/currently_measured_points" during execution.
 
-        :param execution_list: List of RobotTrajectories or views that can be executed consecutively (the next segment's start point is the last segment's end point)
-        :type execution_list: list[moveit_msgs/RobotTrajectory] or list[View]
+        :param execution_list: List of RobotTrajectories or viewpoints that can be executed consecutively (the next segment's start point is the last segment's end point)
+        :type execution_list: list[moveit_msgs/RobotTrajectory] or list[ViewPoint]
         :param surface_points: List of the actual sampled surface points, defaults to None
         :type surface_points: list[numpy.array], optional
         """
@@ -699,18 +700,18 @@ class TrajectoryManager:
         # they shifting between steering-to-measurement-segment [False] and measurement-trajectory-segment [True])
         trajectory_flag = False
         
-        # Consecutively execute segments/Views with short breaks between every trajectory-execution to enure nothing is moving anymore
+        # Consecutively execute segments/ViewPoints with short breaks between every trajectory-execution to enure nothing is moving anymore
         for i, execution_segment in enumerate(execution_list):
-            if isinstance(execution_segment, View):
+            if isinstance(execution_segment, ViewPoint):
                 # Publish surface points, when given
                 if surface_points is not None:
                     point_message.points = []
-                    for point_index in view.get_measurable_surface_point_indices():
+                    for point_index in execution_segment.get_measurable_surface_point_indices():
                         point_message.points.append(geometry_msgs.msg.Point(*(surface_points[point_index] / 1000)))
                     measurement_pub.publish(point_message)
                 
                 # Firstly, steer to the start point of the measurement-trajectory
-                trajectory = view.get_trajectory_to_view()
+                trajectory = execution_segment.get_trajectory_to_viewpoint()
                 print("Steering to next measurement-trajectory (time: {}s)...".format(trajectory.joint_trajectory.points[-1].time_from_start.to_sec()))
                 stitch_service.call(SetBoolRequest(data=False))
                 if not self.group.execute(trajectory):
@@ -719,7 +720,7 @@ class TrajectoryManager:
                 rospy.sleep(0.1)
 
                 # Secondly, execute the measurement-trajectory
-                trajectory = view.get_trajectory_for_measurement()
+                trajectory = execution_segment.get_trajectory_for_measurement()
                 print("Executing measurement-trajectory (time: {}s)...".format(trajectory.joint_trajectory.points[-1].time_from_start.to_sec()))
                 stitch_service.call(SetBoolRequest(data=True))
                 if not self.group.execute(trajectory):
@@ -727,7 +728,7 @@ class TrajectoryManager:
                     raise Exception("Failed to execute trajectory")
                 rospy.sleep(0.1)
 
-                print("Executed view {} of {}".format(i + 1, len(execution_list)))
+                print("Executed viewpoint {} of {}".format(i + 1, len(execution_list)))
                 
                 
             if isinstance(execution_segment, moveit_msgs.msg.RobotTrajectory):
@@ -749,13 +750,13 @@ class TrajectoryManager:
 
     def perform_all(self, target_mesh_filename, density, orientations_around_boresight, uncertainty_threshold):
         self.load_target_mesh(target_mesh_filename, transform=trimesh.transformations.translation_matrix(OFFSET))
-        surface_pts, views  = self.generate_samples_and_views(density, uncertainty_threshold, orientations_around_boresight)
-        scp_views = self.solve_scp(views, "IP_basic")
-        connected_views = self.connect_views(scp_views)
-        execution_plan = self.convert_viewlist_to_execution_plan(connected_views)
-        self.store_execution_plan("/home/svenbecker/Bachelorarbeit/test/stored_plans/TEST1.yaml", execution_plan, {"Time of calculation": "Jetzt"})
-        raw_input("JETZT")
-        #execution_plan = self.load_execution_plan("/home/svenbecker/Bachelorarbeit/test/stored_plans/TEST1.yaml")
+        # surface_pts, viewpoints  = self.generate_samples_and_viewpoints(density, uncertainty_threshold, orientations_around_boresight)
+        # scp_viewpoints = self.solve_scp(viewpoints, "greedy")
+        # connected_viewpoints = self.connect_viewpoints(scp_viewpoints)
+        #execution_plan = self.convert_viewpointlist_to_execution_plan(connected_viewpoints)
+        #self.store_execution_plan("/home/svenbecker/Bachelorarbeit/test/stored_plans/motor_high_res.yaml", execution_plan, {"Time of calculation": "Jetzt"})
+        # raw_input("JETZT")
+        execution_plan = self.load_execution_plan(os.path.join(rospkg.RosPack().get_path("agiprobot_measurement"), "benchmark_results/execution_plan_objectA_wuerfel_rho_001_solver_IP_basic_angels_around_boresight_3.yaml"))
         self.execute(execution_plan)
         
 if __name__ == "__main__":
@@ -763,9 +764,7 @@ if __name__ == "__main__":
         exit()
     signal.signal(signal.SIGINT, signal_handler)
     tm = TrajectoryManager()
-    while True:
-        #tm.perform_all("/home/svenbecker/Desktop/test6.stl", 0.0001, 16)
-        tm.perform_all("/home/svenbecker/Bachelorarbeit/test/motor_without_internals_upright.stl", 0.001, 6, 0.1)
-        rospy.sleep(1)
+    tm.perform_all(os.path.join(rospkg.RosPack().get_path("agiprobot_measurement"), "benchmark_meshes/objectA_wuerfel.stl"), 0.01, 3, 100e-3)
+    rospy.sleep(1)
     rospy.spin()
     

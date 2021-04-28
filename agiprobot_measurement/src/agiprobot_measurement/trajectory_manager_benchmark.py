@@ -29,7 +29,7 @@ import os
 import yaml
 
 
-OFFSET = np.array([450, -550, 1200])
+OFFSET = np.array([450, -550, 1400])
 
 class TimeoutException(Exception):
     pass
@@ -261,6 +261,7 @@ class TrajectoryManager:
             print(float(i) / len(sampled_surface_points))
         
         trimesh.Scene(scene).show()
+        return None, None
         # Use the sampling results to set the processing context of the sensor model
         self.sensor_model.set_processing_context(self.target_mesh, sampled_surface_points, sampled_face_indices)
         # Very conservative limit of the maximum length in and againts trajectory_direction of 
@@ -295,7 +296,7 @@ class TrajectoryManager:
             "12": {"angles":np.linspace(0, 360, 13)[:-1], "time_gen_and_ana_full":0, "time_gen_and_ana_none":0, "valid_views_none":[], "valid_views_full":[]},
             "9": {"angles":np.linspace(0, 360, 10)[:-1], "time_gen_and_ana_full":0, "time_gen_and_ana_none":0, "valid_views_none":[], "valid_views_full":[]},
             "6": {"angles":np.linspace(0, 360, 7)[:-1], "time_gen_and_ana_full":0, "time_gen_and_ana_none":0, "valid_views_none":[], "valid_views_full":[]},
-            "3": {"angles":np.linspace(0, 360, 3)[:-1], "time_gen_and_ana_full":0, "time_gen_and_ana_none":0, "valid_views_none":[], "valid_views_full":[]},
+            "3": {"angles":np.linspace(0, 360, 4)[:-1], "time_gen_and_ana_full":0, "time_gen_and_ana_none":0, "valid_views_none":[], "valid_views_full":[]},
         }
         # For every sampled_surface_point: Generate view with anchor_point in normal-direction of the surface-point's face-triangle.
         # Then, rotate the orientation of the view's laser_emitter_frame around the z-Axis (= boresight) with respect to the anchor point (-> Changes only orientation).
@@ -802,7 +803,7 @@ if __name__ == "__main__":
     object_name = "objectA_wuerfel"
     
     tm = TrajectoryManager()
-    densities = [0.005, 0.001, 0.0005]
+    densities = [0.01, 0.005, 0.001]
     solvers = ["greedy", "IP_basic", "IP_uncertainty", "IP_time"]
     
     total_result = {}
@@ -810,6 +811,7 @@ if __name__ == "__main__":
     total_result.update({"area_full_sq_mm": str(area_full), "area_red_sq_mm": str(area_red)})
     for density in densities:
         surface_points, results = tm.generate_samples_and_views(density, 0.1, 0)
+        continue
         partial_result = {"sampled_surface_points": len(surface_points)}
         for result in results.keys():
             partial_result.update(
@@ -827,18 +829,32 @@ if __name__ == "__main__":
                     partial_result[str(result)]["full"]["selection_results"].update({solver:"Timeout exceeded (30min)"})
                     print("Cought timeout exception")
                     break
-                else:
-                    signal.alarm(0)
+                signal.alarm(0)
                 stop_time = time.time()
-                views_ordered = tm.connect_views(views_unordered)
-                temp = {
-                    "solve_time": stop_time - start_time,
-                    "number_of_selected_VPs": len(views_unordered),
-                    "max_uncertainty": max([max(view.get_measurable_surface_point_uncertainties()) for view in views_ordered]),
-                    "avg_uncertainty": sum([sum(view.get_measurable_surface_point_uncertainties()) / len(view.get_measurable_surface_point_uncertainties()) for view in views_ordered]) / len(views_ordered),
-                    "estimated_inspection_duration": sum([view.get_trajectory_to_view().joint_trajectory.points[-1].time_from_start.to_sec() for view in views_ordered]) + sum([view.get_trajectory_for_measurement().joint_trajectory.points[-1].time_from_start.to_sec() for view in views_ordered]),
-                    "estimated_measurement_duration": sum([view.get_trajectory_for_measurement().joint_trajectory.points[-1].time_from_start.to_sec() for view in views_ordered])
-                }
+                signal.alarm(600)
+                try:
+                    views_ordered = tm.connect_views(views_unordered)    
+                except TimeoutException:
+                    views_ordered = []
+                signal.alarm(0)
+                try:
+                    temp = {
+                        "solve_time": stop_time - start_time,
+                        "number_of_selected_VPs": len(views_unordered),
+                        "max_uncertainty": max([max(view.get_measurable_surface_point_uncertainties()) for view in views_unordered]),
+                        "avg_uncertainty": sum([sum(view.get_measurable_surface_point_uncertainties()) / len(view.get_measurable_surface_point_uncertainties()) for view in views_unordered]) / len(views_unordered),
+                        "estimated_inspection_duration": sum([view.get_trajectory_to_view().joint_trajectory.points[-1].time_from_start.to_sec() for view in views_ordered]) + sum([view.get_trajectory_for_measurement().joint_trajectory.points[-1].time_from_start.to_sec() for view in views_ordered]),
+                        "estimated_measurement_duration": sum([view.get_trajectory_for_measurement().joint_trajectory.points[-1].time_from_start.to_sec() for view in views_unordered])
+                    }
+                except:
+                    temp = {
+                        "solve_time": stop_time - start_time,
+                        "number_of_selected_VPs": len(views_unordered),
+                        "max_uncertainty": max([max(view.get_measurable_surface_point_uncertainties()) for view in views_unordered]),
+                        "avg_uncertainty": sum([sum(view.get_measurable_surface_point_uncertainties()) / len(view.get_measurable_surface_point_uncertainties()) for view in views_unordered]) / len(views_unordered),
+                        "estimated_inspection_duration": -1,
+                        "estimated_measurement_duration": sum([view.get_trajectory_for_measurement().joint_trajectory.points[-1].time_from_start.to_sec() for view in views_unordered])
+                    }
                 partial_result[str(result)]["none"]["coverable_surface_points"] = int(amount_coverable)
                 partial_result[str(result)]["none"]["selection_results"].update({solver:temp})
                 exec_plan = []
@@ -852,27 +868,44 @@ if __name__ == "__main__":
                 start_time = time.time()
                 signal.alarm(1800)
                 try:
-                    amount_coverable, views_unordered = tm.solve_scp(results[result]["valid_views_none"], solver)
-                    continue
+                    amount_coverable, views_unordered = tm.solve_scp(results[result]["valid_views_full"], solver)    
                 except TimeoutException:
                     partial_result[str(result)]["full"]["selection_results"].update({solver:"Timeout exceeded (30min)"})
                     print("Cought timeout exception")
-                else:
-                    signal.alarm(0)
+                    continue
+                signal.alarm(0)
                 stop_time = time.time()
-                views_ordered = tm.connect_views(views_unordered)
-                temp = {
-                    "solve_time": stop_time - start_time,
-                    "number_of_selected_VPs": len(views_unordered),
-                    "max_uncertainty": max([max(view.get_measurable_surface_point_uncertainties()) for view in views_ordered]),
-                    "avg_uncertainty": sum([sum(view.get_measurable_surface_point_uncertainties()) / len(view.get_measurable_surface_point_uncertainties()) for view in views_ordered]) / len(views_ordered),
-                    "estimated_inspection_duration": sum([view.get_trajectory_to_view().joint_trajectory.points[-1].time_from_start.to_sec() for view in views_ordered]) + sum([view.get_trajectory_for_measurement().joint_trajectory.points[-1].time_from_start.to_sec() for view in views_ordered]),
-                    "estimated_measurement_duration": sum([view.get_trajectory_for_measurement().joint_trajectory.points[-1].time_from_start.to_sec() for view in views_ordered])
-                }
+                signal.alarm(600)
+                try:
+                    views_ordered = tm.connect_views(views_unordered)    
+                except TimeoutException:
+                    views_ordered = []
+                signal.alarm(0)
+                try:
+                    temp = {
+                        "solve_time": stop_time - start_time,
+                        "number_of_selected_VPs": len(views_unordered),
+                        "max_uncertainty": max([max(view.get_measurable_surface_point_uncertainties()) for view in views_unordered]),
+                        "avg_uncertainty": sum([sum(view.get_measurable_surface_point_uncertainties()) / len(view.get_measurable_surface_point_uncertainties()) for view in views_unordered]) / len(views_unordered),
+                        "estimated_inspection_duration": sum([view.get_trajectory_to_view().joint_trajectory.points[-1].time_from_start.to_sec() for view in views_ordered]) + sum([view.get_trajectory_for_measurement().joint_trajectory.points[-1].time_from_start.to_sec() for view in views_ordered]),
+                        "estimated_measurement_duration": sum([view.get_trajectory_for_measurement().joint_trajectory.points[-1].time_from_start.to_sec() for view in views_unordered])
+                    }
+                except:
+                    temp = {
+                        "solve_time": stop_time - start_time,
+                        "number_of_selected_VPs": len(views_unordered),
+                        "max_uncertainty": max([max(view.get_measurable_surface_point_uncertainties()) for view in views_unordered]),
+                        "avg_uncertainty": sum([sum(view.get_measurable_surface_point_uncertainties()) / len(view.get_measurable_surface_point_uncertainties()) for view in views_unordered]) / len(views_unordered),
+                        "estimated_inspection_duration": -1,
+                        "estimated_measurement_duration": sum([view.get_trajectory_for_measurement().joint_trajectory.points[-1].time_from_start.to_sec() for view in views_unordered])
+                    }
 
                 partial_result[str(result)]["full"]["coverable_surface_points"] = amount_coverable
                 partial_result[str(result)]["full"]["selection_results"].update({solver:temp})
-
+                tm.store_execution_plan(
+                    os.path.join(RosPack().get_path("agiprobot_measurement"), "benchmark_results/execution_plan_{}_rho_{}_solver_{}_angels_around_boresight_{}_FULL.yaml".format(object_name, str(density)[2:], solver, result)),
+                    exec_plan
+                    )
                 
                 
         total_result.update({str(density):partial_result})

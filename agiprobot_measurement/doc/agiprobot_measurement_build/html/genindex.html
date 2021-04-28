@@ -101,13 +101,13 @@
               <p class="caption"><span class="caption-text">Explanation</span></p>
 <ul>
 <li class="toctree-l1"><a class="reference internal" href="overview.html">Overview</a></li>
-<li class="toctree-l1"><a class="reference internal" href="view_planning_detailed.html">View Planning Detailed</a></li>
+<li class="toctree-l1"><a class="reference internal" href="view_planning_detailed.html">Path Planning Detailed</a></li>
 </ul>
 <p class="caption"><span class="caption-text">Components</span></p>
 <ul>
 <li class="toctree-l1"><a class="reference internal" href="module_trajectory_manager.html">Trajectory Manager</a></li>
 <li class="toctree-l1"><a class="reference internal" href="module_sensor_model.html">Sensor Model</a></li>
-<li class="toctree-l1"><a class="reference internal" href="module_view.html">View</a></li>
+<li class="toctree-l1"><a class="reference internal" href="module_view.html">ViewPoint</a></li>
 </ul>
 
             
@@ -200,7 +200,9 @@
   <td style="width: 33%; vertical-align: top;"><ul>
       <li><a href="agiprobot_measurement.html#module-agiprobot_measurement.trajectory_manager">agiprobot_measurement.trajectory_manager (module)</a>, <a href="module_trajectory_manager.html#module-agiprobot_measurement.trajectory_manager">[1]</a>
 </li>
-      <li><a href="agiprobot_measurement.html#module-agiprobot_measurement.view">agiprobot_measurement.view (module)</a>, <a href="module_view.html#module-agiprobot_measurement.view">[1]</a>
+      <li><a href="agiprobot_measurement.html#module-agiprobot_measurement.view">agiprobot_measurement.view (module)</a>
+</li>
+      <li><a href="module_view.html#module-agiprobot_measurement.viewpoint">agiprobot_measurement.viewpoint (module)</a>
 </li>
   </ul></td>
 </tr></table>
@@ -208,11 +210,11 @@
 <h2 id="C">C</h2>
 <table style="width: 100%" class="indextable genindextable"><tr>
   <td style="width: 33%; vertical-align: top;"><ul>
-      <li><a href="agiprobot_measurement.html#agiprobot_measurement.trajectory_manager.TrajectoryManager.connect_views">connect_views() (agiprobot_measurement.trajectory_manager.TrajectoryManager method)</a>, <a href="module_trajectory_manager.html#agiprobot_measurement.trajectory_manager.TrajectoryManager.connect_views">[1]</a>
+      <li><a href="agiprobot_measurement.html#agiprobot_measurement.trajectory_manager.TrajectoryManager.connect_viewpoints">connect_viewpoints() (agiprobot_measurement.trajectory_manager.TrajectoryManager method)</a>, <a href="module_trajectory_manager.html#agiprobot_measurement.trajectory_manager.TrajectoryManager.connect_viewpoints">[1]</a>
 </li>
   </ul></td>
   <td style="width: 33%; vertical-align: top;"><ul>
-      <li><a href="agiprobot_measurement.html#agiprobot_measurement.trajectory_manager.TrajectoryManager.convert_viewlist_to_execution_plan">convert_viewlist_to_execution_plan() (agiprobot_measurement.trajectory_manager.TrajectoryManager method)</a>, <a href="module_trajectory_manager.html#agiprobot_measurement.trajectory_manager.TrajectoryManager.convert_viewlist_to_execution_plan">[1]</a>
+      <li><a href="agiprobot_measurement.html#agiprobot_measurement.trajectory_manager.TrajectoryManager.convert_viewpointlist_to_execution_plan">convert_viewpointlist_to_execution_plan() (agiprobot_measurement.trajectory_manager.TrajectoryManager method)</a>, <a href="module_trajectory_manager.html#agiprobot_measurement.trajectory_manager.TrajectoryManager.convert_viewpointlist_to_execution_plan">[1]</a>
 </li>
   </ul></td>
 </tr></table>
@@ -234,34 +236,62 @@
 <h2 id="G">G</h2>
 <table style="width: 100%" class="indextable genindextable"><tr>
   <td style="width: 33%; vertical-align: top;"><ul>
-      <li><a href="agiprobot_measurement.html#agiprobot_measurement.trajectory_manager.TrajectoryManager.generate_samples_and_views">generate_samples_and_views() (agiprobot_measurement.trajectory_manager.TrajectoryManager method)</a>, <a href="module_trajectory_manager.html#agiprobot_measurement.trajectory_manager.TrajectoryManager.generate_samples_and_views">[1]</a>
+      <li><a href="agiprobot_measurement.html#agiprobot_measurement.trajectory_manager.TrajectoryManager.generate_samples_and_viewpoints">generate_samples_and_viewpoints() (agiprobot_measurement.trajectory_manager.TrajectoryManager method)</a>, <a href="module_trajectory_manager.html#agiprobot_measurement.trajectory_manager.TrajectoryManager.generate_samples_and_viewpoints">[1]</a>
 </li>
-      <li><a href="agiprobot_measurement.html#agiprobot_measurement.view.View.get_anchor_position">get_anchor_position() (agiprobot_measurement.view.View method)</a>, <a href="module_view.html#agiprobot_measurement.view.View.get_anchor_position">[1]</a>
+      <li><a href="agiprobot_measurement.html#agiprobot_measurement.view.View.get_anchor_position">get_anchor_position() (agiprobot_measurement.view.View method)</a>
+
+      <ul>
+        <li><a href="module_view.html#agiprobot_measurement.viewpoint.ViewPoint.get_anchor_position">(agiprobot_measurement.viewpoint.ViewPoint method)</a>
 </li>
+      </ul></li>
       <li><a href="agiprobot_measurement.html#agiprobot_measurement.sensor_model.SensorModel.get_max_uncertainty">get_max_uncertainty() (agiprobot_measurement.sensor_model.SensorModel method)</a>, <a href="module_sensor_model.html#agiprobot_measurement.sensor_model.SensorModel.get_max_uncertainty">[1]</a>
 </li>
-      <li><a href="agiprobot_measurement.html#agiprobot_measurement.view.View.get_measurable_surface_point_indices">get_measurable_surface_point_indices() (agiprobot_measurement.view.View method)</a>, <a href="module_view.html#agiprobot_measurement.view.View.get_measurable_surface_point_indices">[1]</a>
+      <li><a href="agiprobot_measurement.html#agiprobot_measurement.view.View.get_measurable_surface_point_indices">get_measurable_surface_point_indices() (agiprobot_measurement.view.View method)</a>
+
+      <ul>
+        <li><a href="module_view.html#agiprobot_measurement.viewpoint.ViewPoint.get_measurable_surface_point_indices">(agiprobot_measurement.viewpoint.ViewPoint method)</a>
 </li>
-      <li><a href="agiprobot_measurement.html#agiprobot_measurement.view.View.get_measurable_surface_point_scores">get_measurable_surface_point_scores() (agiprobot_measurement.view.View method)</a>, <a href="module_view.html#agiprobot_measurement.view.View.get_measurable_surface_point_scores">[1]</a>
+      </ul></li>
+      <li><a href="agiprobot_measurement.html#agiprobot_measurement.view.View.get_measurable_surface_point_uncertainties">get_measurable_surface_point_uncertainties() (agiprobot_measurement.view.View method)</a>
+
+      <ul>
+        <li><a href="module_view.html#agiprobot_measurement.viewpoint.ViewPoint.get_measurable_surface_point_uncertainties">(agiprobot_measurement.viewpoint.ViewPoint method)</a>
 </li>
+      </ul></li>
       <li><a href="agiprobot_measurement.html#agiprobot_measurement.sensor_model.SensorModel.get_median_deviation_angle">get_median_deviation_angle() (agiprobot_measurement.sensor_model.SensorModel method)</a>, <a href="module_sensor_model.html#agiprobot_measurement.sensor_model.SensorModel.get_median_deviation_angle">[1]</a>
+</li>
+      <li><a href="agiprobot_measurement.html#agiprobot_measurement.sensor_model.SensorModel.get_min_uncertainty">get_min_uncertainty() (agiprobot_measurement.sensor_model.SensorModel method)</a>, <a href="module_sensor_model.html#agiprobot_measurement.sensor_model.SensorModel.get_min_uncertainty">[1]</a>
 </li>
   </ul></td>
   <td style="width: 33%; vertical-align: top;"><ul>
-      <li><a href="agiprobot_measurement.html#agiprobot_measurement.sensor_model.SensorModel.get_min_uncertainty">get_min_uncertainty() (agiprobot_measurement.sensor_model.SensorModel method)</a>, <a href="module_sensor_model.html#agiprobot_measurement.sensor_model.SensorModel.get_min_uncertainty">[1]</a>
-</li>
       <li><a href="agiprobot_measurement.html#agiprobot_measurement.sensor_model.SensorModel.get_optimal_standoff">get_optimal_standoff() (agiprobot_measurement.sensor_model.SensorModel method)</a>, <a href="module_sensor_model.html#agiprobot_measurement.sensor_model.SensorModel.get_optimal_standoff">[1]</a>
 </li>
-      <li><a href="agiprobot_measurement.html#agiprobot_measurement.view.View.get_orientation_matrix">get_orientation_matrix() (agiprobot_measurement.view.View method)</a>, <a href="module_view.html#agiprobot_measurement.view.View.get_orientation_matrix">[1]</a>
+      <li><a href="agiprobot_measurement.html#agiprobot_measurement.view.View.get_orientation_matrix">get_orientation_matrix() (agiprobot_measurement.view.View method)</a>
+
+      <ul>
+        <li><a href="module_view.html#agiprobot_measurement.viewpoint.ViewPoint.get_orientation_matrix">(agiprobot_measurement.viewpoint.ViewPoint method)</a>
 </li>
+      </ul></li>
       <li><a href="agiprobot_measurement.html#agiprobot_measurement.sensor_model.SensorModel.get_scanning_frustum">get_scanning_frustum() (agiprobot_measurement.sensor_model.SensorModel method)</a>, <a href="module_sensor_model.html#agiprobot_measurement.sensor_model.SensorModel.get_scanning_frustum">[1]</a>
 </li>
-      <li><a href="agiprobot_measurement.html#agiprobot_measurement.view.View.get_surface_point">get_surface_point() (agiprobot_measurement.view.View method)</a>, <a href="module_view.html#agiprobot_measurement.view.View.get_surface_point">[1]</a>
+      <li><a href="agiprobot_measurement.html#agiprobot_measurement.view.View.get_surface_point">get_surface_point() (agiprobot_measurement.view.View method)</a>
+
+      <ul>
+        <li><a href="module_view.html#agiprobot_measurement.viewpoint.ViewPoint.get_surface_point">(agiprobot_measurement.viewpoint.ViewPoint method)</a>
 </li>
-      <li><a href="agiprobot_measurement.html#agiprobot_measurement.view.View.get_trajectory_for_measurement">get_trajectory_for_measurement() (agiprobot_measurement.view.View method)</a>, <a href="module_view.html#agiprobot_measurement.view.View.get_trajectory_for_measurement">[1]</a>
+      </ul></li>
+      <li><a href="agiprobot_measurement.html#agiprobot_measurement.view.View.get_trajectory_for_measurement">get_trajectory_for_measurement() (agiprobot_measurement.view.View method)</a>
+
+      <ul>
+        <li><a href="module_view.html#agiprobot_measurement.viewpoint.ViewPoint.get_trajectory_for_measurement">(agiprobot_measurement.viewpoint.ViewPoint method)</a>
 </li>
-      <li><a href="agiprobot_measurement.html#agiprobot_measurement.view.View.get_trajectory_to_view">get_trajectory_to_view() (agiprobot_measurement.view.View method)</a>, <a href="module_view.html#agiprobot_measurement.view.View.get_trajectory_to_view">[1]</a>
+      </ul></li>
+      <li><a href="agiprobot_measurement.html#agiprobot_measurement.view.View.get_trajectory_to_view">get_trajectory_to_view() (agiprobot_measurement.view.View method)</a>
+
+      <ul>
+        <li><a href="module_view.html#agiprobot_measurement.viewpoint.ViewPoint.get_trajectory_to_view">(agiprobot_measurement.viewpoint.ViewPoint method)</a>
 </li>
+      </ul></li>
   </ul></td>
 </tr></table>
 
@@ -284,9 +314,9 @@
 </li>
   </ul></td>
   <td style="width: 33%; vertical-align: top;"><ul>
-      <li><a href="agiprobot_measurement.html#agiprobot_measurement.trajectory_manager.TrajectoryManager.process_view">process_view() (agiprobot_measurement.trajectory_manager.TrajectoryManager method)</a>, <a href="module_trajectory_manager.html#agiprobot_measurement.trajectory_manager.TrajectoryManager.process_view">[1]</a>
+      <li><a href="agiprobot_measurement.html#agiprobot_measurement.trajectory_manager.TrajectoryManager.process_viewpoint">process_viewpoint() (agiprobot_measurement.trajectory_manager.TrajectoryManager method)</a>, <a href="module_trajectory_manager.html#agiprobot_measurement.trajectory_manager.TrajectoryManager.process_viewpoint">[1]</a>
 </li>
-      <li><a href="agiprobot_measurement.html#agiprobot_measurement.sensor_model.SensorModel.process_view_metrologically">process_view_metrologically() (agiprobot_measurement.sensor_model.SensorModel method)</a>, <a href="module_sensor_model.html#agiprobot_measurement.sensor_model.SensorModel.process_view_metrologically">[1]</a>
+      <li><a href="agiprobot_measurement.html#agiprobot_measurement.sensor_model.SensorModel.process_viewpoint_metrologically">process_viewpoint_metrologically() (agiprobot_measurement.sensor_model.SensorModel method)</a>, <a href="module_sensor_model.html#agiprobot_measurement.sensor_model.SensorModel.process_viewpoint_metrologically">[1]</a>
 </li>
   </ul></td>
 </tr></table>
@@ -294,8 +324,12 @@
 <h2 id="R">R</h2>
 <table style="width: 100%" class="indextable genindextable"><tr>
   <td style="width: 33%; vertical-align: top;"><ul>
-      <li><a href="agiprobot_measurement.html#agiprobot_measurement.view.View.reverse_trajectory_for_measurement">reverse_trajectory_for_measurement() (agiprobot_measurement.view.View method)</a>, <a href="module_view.html#agiprobot_measurement.view.View.reverse_trajectory_for_measurement">[1]</a>
+      <li><a href="agiprobot_measurement.html#agiprobot_measurement.view.View.reverse_trajectory_for_measurement">reverse_trajectory_for_measurement() (agiprobot_measurement.view.View method)</a>
+
+      <ul>
+        <li><a href="module_view.html#agiprobot_measurement.viewpoint.ViewPoint.reverse_trajectory_for_measurement">(agiprobot_measurement.viewpoint.ViewPoint method)</a>
 </li>
+      </ul></li>
   </ul></td>
 </tr></table>
 
@@ -304,16 +338,28 @@
   <td style="width: 33%; vertical-align: top;"><ul>
       <li><a href="agiprobot_measurement.html#agiprobot_measurement.sensor_model.SensorModel">SensorModel (class in agiprobot_measurement.sensor_model)</a>, <a href="module_sensor_model.html#agiprobot_measurement.sensor_model.SensorModel">[1]</a>
 </li>
-      <li><a href="agiprobot_measurement.html#agiprobot_measurement.view.View.set_measurable_surface_point_indices_and_scores">set_measurable_surface_point_indices_and_scores() (agiprobot_measurement.view.View method)</a>, <a href="module_view.html#agiprobot_measurement.view.View.set_measurable_surface_point_indices_and_scores">[1]</a>
+      <li><a href="agiprobot_measurement.html#agiprobot_measurement.view.View.set_measurable_surface_point_indices_and_uncertainties">set_measurable_surface_point_indices_and_uncertainties() (agiprobot_measurement.view.View method)</a>
+
+      <ul>
+        <li><a href="module_view.html#agiprobot_measurement.viewpoint.ViewPoint.set_measurable_surface_point_indices_and_uncertainties">(agiprobot_measurement.viewpoint.ViewPoint method)</a>
 </li>
+      </ul></li>
       <li><a href="agiprobot_measurement.html#agiprobot_measurement.sensor_model.SensorModel.set_processing_context">set_processing_context() (agiprobot_measurement.sensor_model.SensorModel method)</a>, <a href="module_sensor_model.html#agiprobot_measurement.sensor_model.SensorModel.set_processing_context">[1]</a>
 </li>
+      <li><a href="agiprobot_measurement.html#agiprobot_measurement.view.View.set_trajectory_for_measurement">set_trajectory_for_measurement() (agiprobot_measurement.view.View method)</a>
+
+      <ul>
+        <li><a href="module_view.html#agiprobot_measurement.viewpoint.ViewPoint.set_trajectory_for_measurement">(agiprobot_measurement.viewpoint.ViewPoint method)</a>
+</li>
+      </ul></li>
   </ul></td>
   <td style="width: 33%; vertical-align: top;"><ul>
-      <li><a href="agiprobot_measurement.html#agiprobot_measurement.view.View.set_trajectory_for_measurement">set_trajectory_for_measurement() (agiprobot_measurement.view.View method)</a>, <a href="module_view.html#agiprobot_measurement.view.View.set_trajectory_for_measurement">[1]</a>
+      <li><a href="agiprobot_measurement.html#agiprobot_measurement.view.View.set_trajectory_to_view">set_trajectory_to_view() (agiprobot_measurement.view.View method)</a>
+
+      <ul>
+        <li><a href="module_view.html#agiprobot_measurement.viewpoint.ViewPoint.set_trajectory_to_view">(agiprobot_measurement.viewpoint.ViewPoint method)</a>
 </li>
-      <li><a href="agiprobot_measurement.html#agiprobot_measurement.view.View.set_trajectory_to_view">set_trajectory_to_view() (agiprobot_measurement.view.View method)</a>, <a href="module_view.html#agiprobot_measurement.view.View.set_trajectory_to_view">[1]</a>
-</li>
+      </ul></li>
       <li><a href="agiprobot_measurement.html#agiprobot_measurement.trajectory_manager.TrajectoryManager.solve_scp">solve_scp() (agiprobot_measurement.trajectory_manager.TrajectoryManager method)</a>, <a href="module_trajectory_manager.html#agiprobot_measurement.trajectory_manager.TrajectoryManager.solve_scp">[1]</a>
 </li>
       <li><a href="agiprobot_measurement.html#agiprobot_measurement.trajectory_manager.TrajectoryManager.store_execution_plan">store_execution_plan() (agiprobot_measurement.trajectory_manager.TrajectoryManager method)</a>, <a href="module_trajectory_manager.html#agiprobot_measurement.trajectory_manager.TrajectoryManager.store_execution_plan">[1]</a>
@@ -332,7 +378,11 @@
 <h2 id="V">V</h2>
 <table style="width: 100%" class="indextable genindextable"><tr>
   <td style="width: 33%; vertical-align: top;"><ul>
-      <li><a href="agiprobot_measurement.html#agiprobot_measurement.view.View">View (class in agiprobot_measurement.view)</a>, <a href="module_view.html#agiprobot_measurement.view.View">[1]</a>
+      <li><a href="agiprobot_measurement.html#agiprobot_measurement.view.View">View (class in agiprobot_measurement.view)</a>
+</li>
+  </ul></td>
+  <td style="width: 33%; vertical-align: top;"><ul>
+      <li><a href="module_view.html#agiprobot_measurement.viewpoint.ViewPoint">ViewPoint (class in agiprobot_measurement.viewpoint)</a>
 </li>
   </ul></td>
 </tr></table>

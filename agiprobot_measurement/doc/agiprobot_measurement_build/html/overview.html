@@ -108,7 +108,7 @@
 <ul>
 <li class="toctree-l1"><a class="reference internal" href="module_trajectory_manager.html">Trajectory Manager</a></li>
 <li class="toctree-l1"><a class="reference internal" href="module_sensor_model.html">Sensor Model</a></li>
-<li class="toctree-l1"><a class="reference internal" href="module_view.html">View</a></li>
+<li class="toctree-l1"><a class="reference internal" href="module_view.html">ViewPoint</a></li>
 </ul>
 
             
@@ -182,14 +182,14 @@
 <div class="figure">
 <img alt="_images/overview.png" src="_images/overview.png" />
 </div>
-<p>The important module is <a class="reference internal" href="module_trajectory_manager.html#trajectory-manager"><span class="std std-ref">Trajectory Manager</span></a>. It performs the motion planning pipeline with assistance by using the other modules <a class="reference internal" href="module_view.html#view"><span class="std std-ref">View</span></a> and <a class="reference internal" href="module_sensor_model.html#sensor-model"><span class="std std-ref">Sensor Model</span></a>.</p>
+<p>The important module is <a class="reference internal" href="module_trajectory_manager.html#trajectory-manager"><span class="std std-ref">Trajectory Manager</span></a>. It performs the motion planning pipeline with assistance by using the other modules <a class="reference internal" href="module_view.html#viewpoint"><span class="std std-ref">ViewPoint</span></a> and <a class="reference internal" href="module_sensor_model.html#sensor-model"><span class="std std-ref">Sensor Model</span></a>.</p>
 <p>During planning, <a class="reference internal" href="module_trajectory_manager.html#trajectory-manager"><span class="std std-ref">Trajectory Manager</span></a> samples the surface of the target-mesh into discrete surface points and generates straight measurement-trajectories based on those points.
 Starting at each surface point, the program places the <em>anchor</em> of a possible trajectory above this sample point and then processes the corresponding straight trajectory metrologically and mechanically.
 To do so, the <a class="reference internal" href="module_sensor_model.html#sensor-model"><span class="std std-ref">Sensor Model</span></a> is used to determine which other sample-points would be visible during this trajectory and how their uncertainties are. <a class="reference external" href="https://moveit.ros.org/">MoveIt</a> is used to
 review, if and how the trajectory-candidate is actually executable in the modeled scene (collision-awareness, reachablility, …). Both information - the sensor-evaluation and the kinematics - are then stored
-into a <a class="reference internal" href="module_view.html#view"><span class="std std-ref">View</span></a>-object. An algorithm is used to determine from the set of all views one subset, that covers all sampled surface points with an adjustable objective (like “minimize amount of views”), i.e. solves
+into a <a class="reference internal" href="module_view.html#viewpoint"><span class="std std-ref">ViewPoint</span></a>-object. An algorithm is used to determine from the set of all viewpoints one subset, that covers all sampled surface points with an adjustable objective (like “minimize amount of viewpoints”), i.e. solves
 the Set Covering Problem.
-Afterwards, the chosen <a class="reference internal" href="module_view.html#view"><span class="std std-ref">View</span></a>-objects are connected in a time-optimal way and the combined trajectory by connecting all view-trajectories and their in-between-segments can be executed or stored for later execution.</p>
+Afterwards, the chosen <a class="reference internal" href="module_view.html#viewpoint"><span class="std std-ref">ViewPoint</span></a>-objects are connected in a time-optimal way and the combined trajectory by connecting all viewpoint-trajectories and their in-between-segments can be executed or stored for later execution.</p>
 </div>
 
 

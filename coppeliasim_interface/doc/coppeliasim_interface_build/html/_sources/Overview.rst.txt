@@ -4,7 +4,7 @@ Overview
 .. figure:: images/Coppeliasim_interface_overview.png
 
 
-**This package is the nexus between ROS and CoppeliaSim.** The :ref:`simulation-synchronizer` ensures that the time in ROS (available through '/clock'-topic) increases with the same rate as in CoppeliaSim.
+**This package is the nexus between ROS and CoppeliaSim.**  The :ref:`simulation-synchronizer` ensures that the time in ROS (available through '/clock'-topic) increases with the same rate as in CoppeliaSim.
 This is crucial for hard-timed tasks, like simulated real-time-control. This module also calls specified services at each simulation-step to for example read-out the Laser-Scanner or perform one control-cycle.
 For the latter, :ref:`hardware-interface` mimics a real ros_control-interface but instead of controlling actual motors, the controller output is forwarded to the joints in CoppeliaSim's UR10e and
 the simulated joint-values are used as feedback for the ROS-controllers. This package was designed similarly to the drivers of the real UR-robots, which means that it works

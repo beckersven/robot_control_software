@@ -1,0 +1,96 @@
+\begin{sphinxtheindex}
+\def\bigletter#1{{\Large\sffamily#1}\nopagebreak\vspace{1mm}}
+
+  \bigletter A
+  \item agiprobot\_measurement.sensor\_model (module), \hyperpage{15}
+  \item agiprobot\_measurement.trajectory\_manager (module), \hyperpage{9}
+  \item agiprobot\_measurement.viewpoint (module), \hyperpage{21}
+
+  \indexspace
+  \bigletter C
+  \item connect\_viewpoints() (agiprobot\_measurement.trajectory\_manager.TrajectoryManager method), 
+		\hyperpage{9}
+  \item convert\_viewpointlist\_to\_execution\_plan() (agiprobot\_measurement.trajectory\_manager.TrajectoryManager method), 
+		\hyperpage{9}
+
+  \indexspace
+  \bigletter E
+  \item evaluate\_score() (agiprobot\_measurement.sensor\_model.SensorModel method), \hyperpage{15}
+  \item evaluate\_uncertainty() (agiprobot\_measurement.sensor\_model.SensorModel method), 
+		\hyperpage{18}
+  \item execute() (agiprobot\_measurement.trajectory\_manager.TrajectoryManager method), 
+		\hyperpage{10}
+
+  \indexspace
+  \bigletter G
+  \item generate\_samples\_and\_viewpoints() (agiprobot\_measurement.trajectory\_manager.TrajectoryManager method), 
+		\hyperpage{10}
+  \item get\_anchor\_position() (agiprobot\_measurement.viewpoint.ViewPoint method), \hyperpage{21}
+  \item get\_max\_uncertainty() (agiprobot\_measurement.sensor\_model.SensorModel method), 
+		\hyperpage{18}
+  \item get\_measurable\_surface\_point\_indices() (agiprobot\_measurement.viewpoint.ViewPoint method), 
+		\hyperpage{23}
+  \item get\_measurable\_surface\_point\_uncertainties() (agiprobot\_measurement.viewpoint.ViewPoint method), 
+		\hyperpage{23}
+  \item get\_median\_deviation\_angle() (agiprobot\_measurement.sensor\_model.SensorModel method), 
+		\hyperpage{18}
+  \item get\_min\_uncertainty() (agiprobot\_measurement.sensor\_model.SensorModel method), 
+		\hyperpage{18}
+  \item get\_optimal\_standoff() (agiprobot\_measurement.sensor\_model.SensorModel method), 
+		\hyperpage{18}
+  \item get\_orientation\_matrix() (agiprobot\_measurement.viewpoint.ViewPoint method), 
+		\hyperpage{23}
+  \item get\_scanning\_frustum() (agiprobot\_measurement.sensor\_model.SensorModel method), 
+		\hyperpage{19}
+  \item get\_surface\_point() (agiprobot\_measurement.viewpoint.ViewPoint method), \hyperpage{23}
+  \item get\_trajectory\_for\_measurement() (agiprobot\_measurement.viewpoint.ViewPoint method), 
+		\hyperpage{23}
+  \item get\_trajectory\_to\_view() (agiprobot\_measurement.viewpoint.ViewPoint method), 
+		\hyperpage{23}
+
+  \indexspace
+  \bigletter L
+  \item load\_execution\_plan() (agiprobot\_measurement.trajectory\_manager.TrajectoryManager method), 
+		\hyperpage{11}
+  \item load\_target\_mesh() (agiprobot\_measurement.trajectory\_manager.TrajectoryManager method), 
+		\hyperpage{11}
+
+  \indexspace
+  \bigletter P
+  \item postprocess\_trajectory() (agiprobot\_measurement.trajectory\_manager.TrajectoryManager method), 
+		\hyperpage{11}
+  \item process\_viewpoint() (agiprobot\_measurement.trajectory\_manager.TrajectoryManager method), 
+		\hyperpage{12}
+  \item process\_viewpoint\_metrologically() (agiprobot\_measurement.sensor\_model.SensorModel method), 
+		\hyperpage{19}
+
+  \indexspace
+  \bigletter R
+  \item reverse\_trajectory\_for\_measurement() (agiprobot\_measurement.viewpoint.ViewPoint method), 
+		\hyperpage{24}
+
+  \indexspace
+  \bigletter S
+  \item SensorModel (class in agiprobot\_measurement.sensor\_model), \hyperpage{15}
+  \item set\_measurable\_surface\_point\_indices\_and\_uncertainties() (agiprobot\_measurement.viewpoint.ViewPoint method), 
+		\hyperpage{24}
+  \item set\_processing\_context() (agiprobot\_measurement.sensor\_model.SensorModel method), 
+		\hyperpage{19}
+  \item set\_trajectory\_for\_measurement() (agiprobot\_measurement.viewpoint.ViewPoint method), 
+		\hyperpage{24}
+  \item set\_trajectory\_to\_view() (agiprobot\_measurement.viewpoint.ViewPoint method), 
+		\hyperpage{24}
+  \item solve\_scp() (agiprobot\_measurement.trajectory\_manager.TrajectoryManager method), 
+		\hyperpage{12}
+  \item store\_execution\_plan() (agiprobot\_measurement.trajectory\_manager.TrajectoryManager method), 
+		\hyperpage{13}
+
+  \indexspace
+  \bigletter T
+  \item TrajectoryManager (class in agiprobot\_measurement.trajectory\_manager), \hyperpage{9}
+
+  \indexspace
+  \bigletter V
+  \item ViewPoint (class in agiprobot\_measurement.viewpoint), \hyperpage{21}
+
+\end{sphinxtheindex}

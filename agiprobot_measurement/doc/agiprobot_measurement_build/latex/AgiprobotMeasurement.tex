@@ -55,7 +55,7 @@
 
 
 \title{Agiprobot Measurement Documentation}
-\date{Feb 11, 2021}
+\date{Apr 27, 2021}
 \release{1.0}
 \author{Sven Becker}
 \newcommand{\sphinxlogo}{\vbox{}}
@@ -80,19 +80,19 @@ This package provides a pipeline to plan, execute and handle a measurement-traje
 \noindent\sphinxincludegraphics{{overview}.png}
 \end{figure}
 
-The important module is {\hyperref[\detokenize{module_trajectory_manager:trajectory-manager}]{\sphinxcrossref{\DUrole{std,std-ref}{Trajectory Manager}}}}. It performs the motion planning pipeline with assistance by using the other modules {\hyperref[\detokenize{module_view:view}]{\sphinxcrossref{\DUrole{std,std-ref}{View}}}} and {\hyperref[\detokenize{module_sensor_model:sensor-model}]{\sphinxcrossref{\DUrole{std,std-ref}{Sensor Model}}}}.
+The important module is {\hyperref[\detokenize{module_trajectory_manager:trajectory-manager}]{\sphinxcrossref{\DUrole{std,std-ref}{Trajectory Manager}}}}. It performs the motion planning pipeline with assistance by using the other modules {\hyperref[\detokenize{module_view:viewpoint}]{\sphinxcrossref{\DUrole{std,std-ref}{ViewPoint}}}} and {\hyperref[\detokenize{module_sensor_model:sensor-model}]{\sphinxcrossref{\DUrole{std,std-ref}{Sensor Model}}}}.
 
 During planning, {\hyperref[\detokenize{module_trajectory_manager:trajectory-manager}]{\sphinxcrossref{\DUrole{std,std-ref}{Trajectory Manager}}}} samples the surface of the target-mesh into discrete surface points and generates straight measurement-trajectories based on those points.
 Starting at each surface point, the program places the \sphinxstyleemphasis{anchor} of a possible trajectory above this sample point and then processes the corresponding straight trajectory metrologically and mechanically.
 To do so, the {\hyperref[\detokenize{module_sensor_model:sensor-model}]{\sphinxcrossref{\DUrole{std,std-ref}{Sensor Model}}}} is used to determine which other sample-points would be visible during this trajectory and how their uncertainties are. \sphinxhref{https://moveit.ros.org/}{MoveIt} is used to
 review, if and how the trajectory-candidate is actually executable in the modeled scene (collision-awareness, reachablility, …). Both information - the sensor-evaluation and the kinematics - are then stored
-into a {\hyperref[\detokenize{module_view:view}]{\sphinxcrossref{\DUrole{std,std-ref}{View}}}}-object. An algorithm is used to determine from the set of all views one subset, that covers all sampled surface points with an adjustable objective (like “minimize amount of views”), i.e. solves
+into a {\hyperref[\detokenize{module_view:viewpoint}]{\sphinxcrossref{\DUrole{std,std-ref}{ViewPoint}}}}-object. An algorithm is used to determine from the set of all viewpoints one subset, that covers all sampled surface points with an adjustable objective (like “minimize amount of viewpoints”), i.e. solves
 the Set Covering Problem.
-Afterwards, the chosen {\hyperref[\detokenize{module_view:view}]{\sphinxcrossref{\DUrole{std,std-ref}{View}}}}-objects are connected in a time-optimal way and the combined trajectory by connecting all view-trajectories and their in-between-segments can be executed or stored for later execution.
+Afterwards, the chosen {\hyperref[\detokenize{module_view:viewpoint}]{\sphinxcrossref{\DUrole{std,std-ref}{ViewPoint}}}}-objects are connected in a time-optimal way and the combined trajectory by connecting all viewpoint-trajectories and their in-between-segments can be executed or stored for later execution.
 
 
-\chapter{View Planning Detailed}
-\label{\detokenize{view_planning_detailed::doc}}\label{\detokenize{view_planning_detailed:view-planning-detailed}}\label{\detokenize{view_planning_detailed:id1}}
+\chapter{Path Planning Detailed}
+\label{\detokenize{view_planning_detailed:path-planning-detailed}}\label{\detokenize{view_planning_detailed::doc}}\label{\detokenize{view_planning_detailed:view-planning-detailed}}
 
 \section{0. Load the Task}
 \label{\detokenize{view_planning_detailed:load-the-task}}
@@ -106,9 +106,10 @@ Read in the given CAD-file of the target-object as well as its pose. The mesh is
 \end{figure}
 
 
-\section{1. Sampling}
-\label{\detokenize{view_planning_detailed:sampling}}
-Use trimesh to sample the mesh’s surface into discrete surface-points depending on a specified sampling-density. The samples, corresponding face-normals and the target-mesh are
+\section{1. Preprocessing and Sampling}
+\label{\detokenize{view_planning_detailed:preprocessing-and-sampling}}
+Removes all downward facing surface faces since they are not considered measurable. This is based on the common assumption that the fixture holds the target object from below.
+Use \sphinxhref{https://trimsh.org/}{trimesh} to sample the mesh’s surface into discrete surface-points depending on a specified sampling-density. The samples, corresponding face-normals and the target-mesh are
 set as context in a {\hyperref[\detokenize{module_sensor_model:sensor-model}]{\sphinxcrossref{\DUrole{std,std-ref}{Sensor Model}}}}-instance.
 
 \begin{figure}[htbp]
@@ -118,10 +119,10 @@ set as context in a {\hyperref[\detokenize{module_sensor_model:sensor-model}]{\s
 \end{figure}
 
 
-\section{2. View-Generation and -Evaluation}
-\label{\detokenize{view_planning_detailed:view-generation-and-evaluation}}
-For each-sample, generate {\hyperref[\detokenize{module_view:view}]{\sphinxcrossref{\DUrole{std,std-ref}{View}}}}-objects by moving into the points face-normal and then applying rotations to get a variety of candidates per sampled surface point.
-The resulting point is the anchor of the view. Each view is assigned a straight trajectory-line.
+\section{2. ViewPoint-Generation and -Evaluation}
+\label{\detokenize{view_planning_detailed:viewpoint-generation-and-evaluation}}
+For each-sample, generate {\hyperref[\detokenize{module_view:viewpoint}]{\sphinxcrossref{\DUrole{std,std-ref}{ViewPoint}}}}-objects by moving into the points face-normal and then applying rotations to get a variety of candidates per sampled surface point.
+The resulting point is the anchor of the viewpoint. Each viewpoint is assigned a straight trajectory-line.
 
 \begin{figure}[htbp]
 \centering
@@ -138,7 +139,7 @@ After that, 2 main evaluations are executed:
 Use the {\hyperref[\detokenize{module_sensor_model:sensor-model}]{\sphinxcrossref{\DUrole{std,std-ref}{Sensor Model}}}}-instance to analyze, which other sample-points are visible from this trajectory, and at what uncertainty
 
 \item {} 
-Result = Visibilities and uncertainties (will be stored in the {\hyperref[\detokenize{module_view:view}]{\sphinxcrossref{\DUrole{std,std-ref}{View}}}}-object)
+Result = Visibilities and uncertainties (will be stored in the {\hyperref[\detokenize{module_view:viewpoint}]{\sphinxcrossref{\DUrole{std,std-ref}{ViewPoint}}}}-object)
 
 \end{itemize}
 
@@ -147,7 +148,7 @@ Result = Visibilities and uncertainties (will be stored in the {\hyperref[\detok
 \capstart
 
 \noindent\sphinxincludegraphics{{measurement_example}.png}
-\caption{Higher sampling density than previously for vividness. Red points are immeasurable; Green points are measurable at low uncertainty, blue ones at high uncertainty.}\label{\detokenize{view_planning_detailed:id6}}\end{figure}
+\caption{Higher sampling density than previously for vividness. Red points are immeasurable; Green points are measurable at low uncertainty, blue ones at high uncertainty.}\label{\detokenize{view_planning_detailed:id3}}\end{figure}
 
 
 \subsection{Mechanical Evaluation}
@@ -156,11 +157,13 @@ Result = Visibilities and uncertainties (will be stored in the {\hyperref[\detok
 Utilize \sphinxhref{https://moveit.ros.org}{MoveIt} to examine, if this trajectory is actually executable in the scene (collision, reacability, …).
 
 \item {} 
-\sphinxstylestrong{Critical}: If the mechanical evaluation fails, the view will not be considered any further
-* Can also consider trajectory-parts: If e.g. 80\% of the trajectory are be executable, this {\hyperref[\detokenize{module_view:view}]{\sphinxcrossref{\DUrole{std,std-ref}{View}}}}-object might not be rejected
+\sphinxstylestrong{Critical}: If the mechanical evaluation fails, the viewpoint will not be considered any further
 
 \item {} 
-Result = List of actual joint-values (will be stored in the {\hyperref[\detokenize{module_view:view}]{\sphinxcrossref{\DUrole{std,std-ref}{View}}}}-object)
+Can also consider trajectory-parts: If e.g. 80\% of the trajectory are be executable, this {\hyperref[\detokenize{module_view:viewpoint}]{\sphinxcrossref{\DUrole{std,std-ref}{ViewPoint}}}}-object might not be rejected
+
+\item {} 
+Result = List of actual joint-values (will be stored in the {\hyperref[\detokenize{module_view:viewpoint}]{\sphinxcrossref{\DUrole{std,std-ref}{ViewPoint}}}}-object)
 
 \end{itemize}
 
@@ -173,28 +176,28 @@ Result = List of actual joint-values (will be stored in the {\hyperref[\detokeni
 The sequence of these evaluations is implemented in a way to minimize compute-time.
 
 
-\section{3. View-Selection (Set Covering Problem)}
-\label{\detokenize{view_planning_detailed:view-selection-set-covering-problem}}
-When a set of valid \DUrole{xref,std,std-ref}{view{}`s has been found, not all :ref:{}`view}-elements must be executed for a valid result: A subset must be found that
-covers the same surface-points as all the found :ref:{\color{red}\bfseries{}{}`}view{}`s (= \sphinxstyleemphasis{Set Covering Problem}). This subset is in general much smaller than the original set and can be built using different algorithms:
+\section{3. ViewPoint-Selection (Set Covering Problem)}
+\label{\detokenize{view_planning_detailed:viewpoint-selection-set-covering-problem}}
+When a set of valid {\hyperref[\detokenize{module_view:viewpoint}]{\sphinxcrossref{\DUrole{std,std-ref}{ViewPoint}}}} s has been found, not all {\hyperref[\detokenize{module_view:viewpoint}]{\sphinxcrossref{\DUrole{std,std-ref}{ViewPoint}}}} -elements must be executed for a valid result: A subset must be found that
+covers the same surface-points as all the found {\hyperref[\detokenize{module_view:viewpoint}]{\sphinxcrossref{\DUrole{std,std-ref}{ViewPoint}}}} s (= \sphinxstyleemphasis{Set Covering Problem}). This subset is in general much smaller than the original set and can be built using different algorithms:
 
-As the first option, ‘Greedy’ implementation (both used in the papers) selects in each iteration that new {\hyperref[\detokenize{module_view:view}]{\sphinxcrossref{\DUrole{std,std-ref}{View}}}} from the original set, that can contribute the most
-not-yet-visible surface-sample-points to the subset. If 2 or more {\hyperref[\detokenize{module_view:view}]{\sphinxcrossref{\DUrole{std,std-ref}{View}}}}-objects can contribute the same amount, the one with the lowest uncertainty will be selected.
+As the first option, ‘Greedy’ implementation (both used in the papers) selects in each iteration that new {\hyperref[\detokenize{module_view:viewpoint}]{\sphinxcrossref{\DUrole{std,std-ref}{ViewPoint}}}} from the original set, that can contribute the most
+not-yet-visible surface-sample-points to the subset. If 2 or more {\hyperref[\detokenize{module_view:viewpoint}]{\sphinxcrossref{\DUrole{std,std-ref}{ViewPoint}}}} -objects can contribute the same amount, the one with the lowest uncertainty will be selected.
 
 Another option is Integer Programming (IP):
 
-Minimize \(\sum_{\forall i} c_i v_i\) subject to \(\sum_{\forall i} m_{ij} v_i \ge 1~~~~\forall j\)
+Minimize \(\sum_{\forall i} c_j v_j\) subject to \(\sum_{\forall j} m_{i,j} v_j \ge 1~~~~\forall i\)
 
-where \(v_i \in \{0,1\}\) indicates if view i is element of the subset and \(m_{ij} \in \{0, 1\}\), if the sampled surface point j is measurable by the trajectory of view i.
-\(c_{i}\) is a cost-term. If it is constant, the IP-problems is identically to the Greedy approach. However, by assigning \(c_{i}\) the time of the measurement-trajectory
-of view i or its uncertainty, a bigger variety of solutions becomes possible than in the first option.
+where \(v_j \in \{0,1\}\) indicates if viewpoint j is element of the subset and \(m_{i,j} \in \{0, 1\}\), if the sampled surface point i is measurable by the trajectory of viewpoint j.
+\(c_{j}\) is a cost-term. If it is constant, the IP-problems is identically to the Greedy approach. However, by assigning \(c_{i}\) the time of the measurement-trajectory
+of viewpoint i or its uncertainty, a bigger variety of solutions becomes possible than in the first option.
 
 
-\section{4. Connecting the Views}
-\label{\detokenize{view_planning_detailed:connecting-the-views}}
-Lastly, the determined set of {\hyperref[\detokenize{module_view:view}]{\sphinxcrossref{\DUrole{std,std-ref}{View}}}}-objects must be ordered for optimal execution. To do so, the current robot-pose is enqueued in an ‘execution-list’.
-Paths from the endpoint of the last element of execution-list are calculated to every non-enqueued view’s trajectory-start- and -endpoint. The {\hyperref[\detokenize{module_view:view}]{\sphinxcrossref{\DUrole{std,std-ref}{View}}}} with the shortest path-time becomes enqueued.
-Also, the inter-view path will be stored in that {\hyperref[\detokenize{module_view:view}]{\sphinxcrossref{\DUrole{std,std-ref}{View}}}} so that it will perform the exact same path during execution (if the path would get planned again dynamically,
+\section{4. Connecting the ViewPoints}
+\label{\detokenize{view_planning_detailed:connecting-the-viewpoints}}
+Lastly, the determined set of {\hyperref[\detokenize{module_view:viewpoint}]{\sphinxcrossref{\DUrole{std,std-ref}{ViewPoint}}}}-objects must be ordered for optimal execution. To do so, the current robot-pose is enqueued in an ‘execution-list’.
+Paths from the endpoint of the last element of execution-list are calculated to every non-enqueued viewpoint’s trajectory-start- and -endpoint. The {\hyperref[\detokenize{module_view:viewpoint}]{\sphinxcrossref{\DUrole{std,std-ref}{ViewPoint}}}} with the shortest path-time becomes enqueued.
+Also, the inter-viewpoint path will be stored in that {\hyperref[\detokenize{module_view:viewpoint}]{\sphinxcrossref{\DUrole{std,std-ref}{ViewPoint}}}} so that it will perform the exact same path during execution (if the path would get planned again dynamically,
 it might be completely different due to the stochastic nature of path-planning). This step relies again on \sphinxhref{https://moveit.ros.org}{MoveIt}.
 
 
@@ -209,7 +212,7 @@ The planning is heavily inspired by \sphinxhref{https://iopscience.iop.org/artic
 and \sphinxhref{https://link.springer.com/article/10.1007/s00138-007-0110-2}{“Model-based view planning” (Scott, 2009)}, however this module was adapted to fit this use-case and general improvements were incorporated.
 
 For a given task, the user can specifiy the mesh-to-measure, properties of the trajectory-segments (like lenght) and other parameters.
-Then, the planning-pipeline discussed in section {\hyperref[\detokenize{view_planning_detailed:view-planning-detailed}]{\sphinxcrossref{\DUrole{std,std-ref}{View Planning Detailed}}}}, will be performed. Afterwards, the generated total trajectory can be executed via
+Then, the planning-pipeline discussed in section {\hyperref[\detokenize{view_planning_detailed:view-planning-detailed}]{\sphinxcrossref{\DUrole{std,std-ref}{Path Planning Detailed}}}}, will be performed. Afterwards, the generated total trajectory can be executed via
 \sphinxhref{https://moveit.ros.org}{MoveIt} on the real robot or in a simulation (see CoppeliaSim-Interface’s documentation in that case). The trajectory can also be
 written to disk for later or repetitive execution. As ‘good’ trajectories currently require long calculations (\textgreater{}30min),
 this module enables users to load and execute previously computed trajectories.
@@ -222,17 +225,17 @@ this module enables users to load and execute previously computed trajectories.
 \phantomsection\label{\detokenize{module_trajectory_manager:agiprobot_measurement.trajectory_manager.TrajectoryManager}}\pysigline{\sphinxbfcode{class }\sphinxcode{agiprobot\_measurement.trajectory\_manager.}\sphinxbfcode{TrajectoryManager}}
 Completely integrated system for high-coverage and uncertainty-minimal scanning of given objects with an optical scanner. An instance can perform
 the entire planning pipeline - from the CAD-file and pose to a list of consecutively executable trajectories.
-\index{connect\_views() (agiprobot\_measurement.trajectory\_manager.TrajectoryManager method)}
+\index{connect\_viewpoints() (agiprobot\_measurement.trajectory\_manager.TrajectoryManager method)}
 
 \begin{fulllineitems}
-\phantomsection\label{\detokenize{module_trajectory_manager:agiprobot_measurement.trajectory_manager.TrajectoryManager.connect_views}}\pysiglinewithargsret{\sphinxbfcode{connect\_views}}{\emph{unordered\_views}, \emph{min\_planning\_time=0.2}}{}
-Connect a set of unordered views with the current state and in between greedily so that they can be executed as fast as possible.
-Until all views are enqueued, do: From the end-point of the last enqueued trajetory, motion plans are calculated to the start-/end-poses
-of all unenqueued view’s measurement-trajectories and the shortest (in time domain) will be selected.
+\phantomsection\label{\detokenize{module_trajectory_manager:agiprobot_measurement.trajectory_manager.TrajectoryManager.connect_viewpoints}}\pysiglinewithargsret{\sphinxbfcode{connect\_viewpoints}}{\emph{unordered\_viewpoints}, \emph{min\_planning\_time=0.2}}{}
+Connect a set of unordered viewpoints with the current state and in between greedily so that they can be executed as fast as possible.
+Until all viewpoints are enqueued, do: From the end-point of the last enqueued trajetory, motion plans are calculated to the start-/end-poses
+of all unenqueued viewpoint’s measurement-trajectories and the shortest (in time domain) will be selected.
 \begin{quote}\begin{description}
 \item[{Parameters}] \leavevmode\begin{itemize}
 \item {} 
-\sphinxstyleliteralstrong{unordered\_views} (\sphinxstyleliteralemphasis{set}\sphinxstyleliteralemphasis{{[}}\sphinxstyleliteralemphasis{view}\sphinxstyleliteralemphasis{{]}}) \textendash{} Set of views to be connected where each has a stored measurement-trajectory
+\sphinxstyleliteralstrong{unordered\_viewpoints} (\sphinxstyleliteralemphasis{set}\sphinxstyleliteralemphasis{{[}}{\hyperref[\detokenize{module_view:module-agiprobot_measurement.viewpoint}]{\sphinxcrossref{\sphinxstyleliteralemphasis{viewpoint}}}}\sphinxstyleliteralemphasis{{]}}) \textendash{} Set of viewpoints to be connected where each has a stored measurement-trajectory
 
 \item {} 
 \sphinxstyleliteralstrong{min\_planning\_time} (\sphinxstyleliteralemphasis{float}\sphinxstyleliteralemphasis{, }\sphinxstyleliteralemphasis{optional}) \textendash{} Planning time that is used for connection-path-planning (will be increased automatically if no plan was found at first), defaults to 0.2
@@ -240,26 +243,26 @@ of all unenqueued view’s measurement-trajectories and the shortest (in time do
 \end{itemize}
 
 \item[{Returns}] \leavevmode
-List of ordered and execution-ready views
+List of ordered and execution-ready viewpoints
 
 \item[{Return type}] \leavevmode
-list{[}View{]}
+list{[}{\hyperref[\detokenize{module_view:agiprobot_measurement.viewpoint.ViewPoint}]{\sphinxcrossref{ViewPoint}}}{]}
 
 \end{description}\end{quote}
 
 \end{fulllineitems}
 
-\index{convert\_viewlist\_to\_execution\_plan() (agiprobot\_measurement.trajectory\_manager.TrajectoryManager method)}
+\index{convert\_viewpointlist\_to\_execution\_plan() (agiprobot\_measurement.trajectory\_manager.TrajectoryManager method)}
 
 \begin{fulllineitems}
-\phantomsection\label{\detokenize{module_trajectory_manager:agiprobot_measurement.trajectory_manager.TrajectoryManager.convert_viewlist_to_execution_plan}}\pysiglinewithargsret{\sphinxbfcode{convert\_viewlist\_to\_execution\_plan}}{\emph{viewlist}}{}
-Convert a list of View-objects into a list of moveit\_msgs/RobotTrajectory-entries so that the views can be executed consecutively.
+\phantomsection\label{\detokenize{module_trajectory_manager:agiprobot_measurement.trajectory_manager.TrajectoryManager.convert_viewpointlist_to_execution_plan}}\pysiglinewithargsret{\sphinxbfcode{convert\_viewpointlist\_to\_execution\_plan}}{\emph{viewpointlist}}{}
+Convert a list of ViewPoint-objects into a list of moveit\_msgs/RobotTrajectory-entries so that the viewpoints can be executed consecutively.
 \begin{quote}\begin{description}
 \item[{Parameters}] \leavevmode
-\sphinxstyleliteralstrong{viewlist} \textendash{} List of View-objects with set trajectories for steering-to-view and measurement
+\sphinxstyleliteralstrong{viewpointlist} \textendash{} List of ViewPoint-objects with set trajectories for steering-to-viewpoint and measurement
 
 \item[{Returns}] \leavevmode
-List of moveit\_msgs/RobotTrajectory with 2 entries per provided View-object (first = steering-to-view-trajectory, second = measurement-trajectory)
+List of moveit\_msgs/RobotTrajectory with 2 entries per provided ViewPoint-object (first = steering-to-viewpoint-trajectory, second = measurement-trajectory)
 
 \item[{Return type}] \leavevmode
 list
@@ -272,13 +275,13 @@ list
 
 \begin{fulllineitems}
 \phantomsection\label{\detokenize{module_trajectory_manager:agiprobot_measurement.trajectory_manager.TrajectoryManager.execute}}\pysiglinewithargsret{\sphinxbfcode{execute}}{\emph{execution\_list}, \emph{surface\_points=None}}{}
-Execute a list of RobotTrajectories or Views via MoveIt. When problems occur during execution,
-the robot will be stopped and an exception will be raised. When executing from a list of views, the currently measured surface\_points
+Execute a list of RobotTrajectories or ViewPoints via MoveIt. When problems occur during execution,
+the robot will be stopped and an exception will be raised. When executing from a list of viewpoints, the currently measured surface\_points
 are published in “/currently\_measured\_points” during execution.
 \begin{quote}\begin{description}
 \item[{Parameters}] \leavevmode\begin{itemize}
 \item {} 
-\sphinxstyleliteralstrong{execution\_list} (\sphinxstyleliteralemphasis{list}\sphinxstyleliteralemphasis{{[}}\sphinxstyleliteralemphasis{moveit\_msgs/RobotTrajectory}\sphinxstyleliteralemphasis{{]} or }\sphinxstyleliteralemphasis{list}\sphinxstyleliteralemphasis{{[}}\sphinxstyleliteralemphasis{View}\sphinxstyleliteralemphasis{{]}}) \textendash{} List of RobotTrajectories or views that can be executed consecutively (the next segment’s start point is the last segment’s end point)
+\sphinxstyleliteralstrong{execution\_list} (\sphinxstyleliteralemphasis{list}\sphinxstyleliteralemphasis{{[}}\sphinxstyleliteralemphasis{moveit\_msgs/RobotTrajectory}\sphinxstyleliteralemphasis{{]} or }\sphinxstyleliteralemphasis{list}\sphinxstyleliteralemphasis{{[}}{\hyperref[\detokenize{module_view:agiprobot_measurement.viewpoint.ViewPoint}]{\sphinxcrossref{\sphinxstyleliteralemphasis{ViewPoint}}}}\sphinxstyleliteralemphasis{{]}}) \textendash{} List of RobotTrajectories or viewpoints that can be executed consecutively (the next segment’s start point is the last segment’s end point)
 
 \item {} 
 \sphinxstyleliteralstrong{surface\_points} (\sphinxstyleliteralemphasis{list}\sphinxstyleliteralemphasis{{[}}\sphinxstyleliteralemphasis{numpy.array}\sphinxstyleliteralemphasis{{]}}\sphinxstyleliteralemphasis{, }\sphinxstyleliteralemphasis{optional}) \textendash{} List of the actual sampled surface points, defaults to None
@@ -289,24 +292,24 @@ are published in “/currently\_measured\_points” during execution.
 
 \end{fulllineitems}
 
-\index{generate\_samples\_and\_views() (agiprobot\_measurement.trajectory\_manager.TrajectoryManager method)}
+\index{generate\_samples\_and\_viewpoints() (agiprobot\_measurement.trajectory\_manager.TrajectoryManager method)}
 
 \begin{fulllineitems}
-\phantomsection\label{\detokenize{module_trajectory_manager:agiprobot_measurement.trajectory_manager.TrajectoryManager.generate_samples_and_views}}\pysiglinewithargsret{\sphinxbfcode{generate\_samples\_and\_views}}{\emph{sampling\_density}, \emph{orientations\_around\_boresight}, \emph{view\_tilt\_mode='full'}, \emph{plan\_path\_to\_check\_reachability=False}, \emph{minimum\_trajectory\_length=25}, \emph{trajectory\_sample\_step=2}}{}
-Samples the mesh’s surface into discrete points, generates views for each sample and processes these views metrologically and mechanically.
-Only views that do meet the contraints specified in the method’s parameters and in MoveIt (collision, reachability, …) will be returned. This method allows to generate
-multiple View-objects for a single surface-point by varying the anchor-pose (the boresight is always focused on the corresponding surface\_point).
+\phantomsection\label{\detokenize{module_trajectory_manager:agiprobot_measurement.trajectory_manager.TrajectoryManager.generate_samples_and_viewpoints}}\pysiglinewithargsret{\sphinxbfcode{generate\_samples\_and\_viewpoints}}{\emph{sampling\_density}, \emph{uncertainty\_threshold}, \emph{orientations\_around\_boresight}, \emph{viewpoint\_tilt\_mode='full'}, \emph{plan\_path\_to\_check\_reachability=False}, \emph{minimum\_trajectory\_length=25}, \emph{trajectory\_sample\_step=2}}{}
+Samples the mesh’s surface into discrete points, generates viewpoints for each sample and processes these viewpoints metrologically and mechanically.
+Only viewpoints that do meet the contraints specified in the method’s parameters and in MoveIt (collision, reachability, …) will be returned. This method allows to generate
+multiple ViewPoint-objects for a single surface-point by varying the anchor-pose (the boresight is always focused on the corresponding surface\_point).
 \begin{quote}\begin{description}
 \item[{Parameters}] \leavevmode\begin{itemize}
 \item {} 
-\sphinxstyleliteralstrong{sampling\_density} (\sphinxstyleliteralemphasis{float}) \textendash{} Density of sampling to generate the points for measurement-calculations and view-generation in points per mm\textasciicircum{}2
+\sphinxstyleliteralstrong{sampling\_density} (\sphinxstyleliteralemphasis{float}) \textendash{} Density of sampling to generate the points for measurement-calculations and viewpoint-generation in points per mm\textasciicircum{}2
 
 \item {} 
 \sphinxstyleliteralstrong{orientations\_around\_boresight} (\sphinxstyleliteralemphasis{int}) \textendash{} Number of orientations around the sensor’s boresight to be considered per sampled\_surface\_point
 
 \item {} 
-\sphinxstyleliteralstrong{view\_tilt\_mode} (\sphinxstyleliteralemphasis{str}\sphinxstyleliteralemphasis{, }\sphinxstyleliteralemphasis{optional}) \textendash{} 
-For each orientation, deviate the gamma- and theta-values of the view-anchor-pose slightly from the optimum according to (one deviation-step per angle and orientation available right now):
+\sphinxstyleliteralstrong{viewpoint\_tilt\_mode} (\sphinxstyleliteralemphasis{str}\sphinxstyleliteralemphasis{, }\sphinxstyleliteralemphasis{optional}) \textendash{} 
+For each orientation, deviate the psi- and theta-values of the viewpoint-anchor-pose slightly from the optimum according to (one deviation-step per angle and orientation available right now):
 \begin{itemize}
 \item {} 
 ”none”: Do not perform any tilting.
@@ -315,7 +318,7 @@ For each orientation, deviate the gamma- and theta-values of the view-anchor-pos
 ”limited”: When the optimal angle-configuration did not work, try deviations and stop after finding the first valid solution.
 
 \item {} 
-”full”: Calculation for every possible angle-calculation. Every boresight orientation has 9 sub-views.
+”full”: Calculation for every possible angle-calculation. Every boresight orientation has 9 sub-viewpoints.
 
 \end{itemize}
 
@@ -323,7 +326,7 @@ For each orientation, deviate the gamma- and theta-values of the view-anchor-pos
 
 
 \item {} 
-\sphinxstyleliteralstrong{plan\_path\_to\_check\_reachability} (\sphinxstyleliteralemphasis{bool}\sphinxstyleliteralemphasis{, }\sphinxstyleliteralemphasis{optional}) \textendash{} Do not use one inverse-kinematics-request to check view-reachability but try to create complete plan from the current-state to the view’s anchor-pose, defaults to False
+\sphinxstyleliteralstrong{plan\_path\_to\_check\_reachability} (\sphinxstyleliteralemphasis{bool}\sphinxstyleliteralemphasis{, }\sphinxstyleliteralemphasis{optional}) \textendash{} Do not use one inverse-kinematics-request to check viewpoint-reachability but try to create complete plan from the current-state to the viewpoint’s anchor-pose, defaults to False
 
 \item {} 
 \sphinxstyleliteralstrong{minimum\_trajectory\_length} (\sphinxstyleliteralemphasis{float}\sphinxstyleliteralemphasis{, }\sphinxstyleliteralemphasis{optional}) \textendash{} Minimum length a generated trajectory has to have so that it is accepted in mm, defaults to 50
@@ -334,10 +337,10 @@ For each orientation, deviate the gamma- and theta-values of the view-anchor-pos
 \end{itemize}
 
 \item[{Returns}] \leavevmode
-2 lists with the first containing all sampled\_surface\_points and the second containing all views that were processed successfully
+2 lists with the first containing all sampled\_surface\_points and the second containing all viewpoints that were processed successfully
 
 \item[{Return type}] \leavevmode
-list{[}numpy.array{]}, list{[}View{]}
+list{[}numpy.array{]}, list{[}{\hyperref[\detokenize{module_view:agiprobot_measurement.viewpoint.ViewPoint}]{\sphinxcrossref{ViewPoint}}}{]}
 
 \end{description}\end{quote}
 
@@ -377,8 +380,8 @@ list
 \index{load\_target\_mesh() (agiprobot\_measurement.trajectory\_manager.TrajectoryManager method)}
 
 \begin{fulllineitems}
-\phantomsection\label{\detokenize{module_trajectory_manager:agiprobot_measurement.trajectory_manager.TrajectoryManager.load_target_mesh}}\pysiglinewithargsret{\sphinxbfcode{load\_target\_mesh}}{\emph{file\_name, transform=array({[}{[}1., 0., 0., 0.{]},        {[}0., 1., 0., 0.{]},        {[}0., 0., 1., 0.{]},        {[}0., 0., 0., 1.{]}{]}), add\_wbk\_mirrors=True}}{}
-Loads the mesh-to-measure from file into the instance’s target\_mesh-member (to generate and evaluate view-trajectories) and into
+\phantomsection\label{\detokenize{module_trajectory_manager:agiprobot_measurement.trajectory_manager.TrajectoryManager.load_target_mesh}}\pysiglinewithargsret{\sphinxbfcode{load\_target\_mesh}}{\emph{file\_name, transform=array({[}{[}1., 0., 0., 0.{]},        {[}0., 1., 0., 0.{]},        {[}0., 0., 1., 0.{]},        {[}0., 0., 0., 1.{]}{]}), add\_wbk\_mirrors=True, remove\_downside=True, remove\_threshold\_angle\_deg=20}}{}
+Loads the mesh-to-measure from file into the instance’s target\_mesh-member (to generate and evaluate viewpoint-trajectories) and into
 MoveIt (for collision-prevention). To move the mesh into a feasible measurement-pose, a transform may be applied to set the mesh’s
 reference frame specified in CAD with respect to the ‘world’ frame
 \begin{quote}\begin{description}
@@ -426,17 +429,17 @@ bool
 
 \end{fulllineitems}
 
-\index{process\_view() (agiprobot\_measurement.trajectory\_manager.TrajectoryManager method)}
+\index{process\_viewpoint() (agiprobot\_measurement.trajectory\_manager.TrajectoryManager method)}
 
 \begin{fulllineitems}
-\phantomsection\label{\detokenize{module_trajectory_manager:agiprobot_measurement.trajectory_manager.TrajectoryManager.process_view}}\pysiglinewithargsret{\sphinxbfcode{process\_view}}{\emph{view}, \emph{ik\_service}, \emph{minimum\_required\_overmeasure=5}, \emph{trajectory\_sample\_step=2}, \emph{joint\_jump\_threshold=1.5}, \emph{minimum\_trajectory\_length=50}}{}
-Processes a single view entirely. Starting on a simple reachability-analysis of the anchor-pose, a metrological evaluation is performed using the sensor\_model to
-review the measurement-gain this view can contribute in theory. Then, the actual meausrement-trajectories are calculated and examined regarding the
-provided contraints. In the end, the processing-result (trajectory and metrological values) are stored in the view object
+\phantomsection\label{\detokenize{module_trajectory_manager:agiprobot_measurement.trajectory_manager.TrajectoryManager.process_viewpoint}}\pysiglinewithargsret{\sphinxbfcode{process\_viewpoint}}{\emph{viewpoint}, \emph{ik\_service}, \emph{uncertainty\_threshold}, \emph{minimum\_required\_overmeasure=5}, \emph{trajectory\_sample\_step=2}, \emph{joint\_jump\_threshold=1.5}, \emph{minimum\_trajectory\_length=50}}{}
+Processes a single viewpoint entirely. Starting on a simple reachability-analysis of the anchor-pose, a metrological evaluation is performed using the sensor\_model to
+reviewpoint the measurement-gain this viewpoint can contribute in theory. Then, the actual meausrement-trajectories are calculated and examined regarding the
+provided contraints. In the end, the processing-result (trajectory and metrological values) are stored in the viewpoint object
 \begin{quote}\begin{description}
 \item[{Parameters}] \leavevmode\begin{itemize}
 \item {} 
-\sphinxstyleliteralstrong{view} (\sphinxstyleliteralemphasis{View}) \textendash{} View to be processed (if processing was successful, members of this view-object will be changed)
+\sphinxstyleliteralstrong{viewpoint} ({\hyperref[\detokenize{module_view:agiprobot_measurement.viewpoint.ViewPoint}]{\sphinxcrossref{\sphinxstyleliteralemphasis{ViewPoint}}}}) \textendash{} ViewPoint to be processed (if processing was successful, members of this viewpoint-object will be changed)
 
 \item {} 
 \sphinxstyleliteralstrong{ik\_service} (\sphinxstyleliteralemphasis{rospy.ServiceProxy}) \textendash{} ROS-Serviceproxy that can resolve inverse-kinematics via moveit\_msgs/GetPositionIK
@@ -456,7 +459,7 @@ provided contraints. In the end, the processing-result (trajectory and metrologi
 \end{itemize}
 
 \item[{Returns}] \leavevmode
-Boolean value that is true, if the view could be processed and all contraints were met, and false otherwise
+Boolean value that is true, if the viewpoint could be processed and all contraints were met, and false otherwise
 
 \item[{Return type}] \leavevmode
 bool
@@ -468,35 +471,35 @@ bool
 \index{solve\_scp() (agiprobot\_measurement.trajectory\_manager.TrajectoryManager method)}
 
 \begin{fulllineitems}
-\phantomsection\label{\detokenize{module_trajectory_manager:agiprobot_measurement.trajectory_manager.TrajectoryManager.solve_scp}}\pysiglinewithargsret{\sphinxbfcode{solve\_scp}}{\emph{provided\_views}, \emph{solver\_type='greedy'}}{}
-Solve Set Covering Problem to cover all measurable surface\_points with a fraction of the set of provided views.
+\phantomsection\label{\detokenize{module_trajectory_manager:agiprobot_measurement.trajectory_manager.TrajectoryManager.solve_scp}}\pysiglinewithargsret{\sphinxbfcode{solve\_scp}}{\emph{provided\_viewpoints}, \emph{solver\_type='greedy'}}{}
+Solve Set Covering Problem to cover all measurable surface\_points with a fraction of the set of provided viewpoints.
 Possible solver\_types are:
 \begin{itemize}
 \item {} 
 “greedy”: Fills return set at each step with the trajectory that delivers the most
 additional coverage compared to the points already in the set. If this additional coverage is
-identical in size for several new optimal viewpoint-candidates, the one with the lowest maximum
+identical in size for several new optimal viewpointpoint-candidates, the one with the lowest maximum
 uncertainty will be added similarly to the improvement introduced in chapter 4.4 of 
-“View and sensor planning for multi-sensor surface inspection” (Gronle et al., 2016)  (default)
+“ViewPoint and sensor planning for multi-sensor surface inspection” (Gronle et al., 2016)  (default)
 
 \item {} 
 “IP\_basic”: Solves the SCP-Problem with integer programming (IP) using the formulation in
-“Model-based view planning” (Scott, 2009), i.e. the objective function is the number of all
-selected viewpoints whereas the constraint is that every surface point must be covered at least by one viewpoint
+“Model-based viewpoint planning” (Scott, 2009), i.e. the objective function is the number of all
+selected viewpointpoints whereas the constraint is that every surface point must be covered at least by one viewpointpoint
 
 \item {} 
 “IP\_uncertainty”: Solves the SCP using IP with respect to the uncertainty. The formulas are similar to “IP\_basic”
-but in the objective, costs corresponding to the worst uncertainty are assigned to every viewpoint-trajectory.
+but in the objective, costs corresponding to the worst uncertainty are assigned to every viewpointpoint-trajectory.
 
 \item {} 
 “IP\_time”: Solves the SCP using IP with respect to the time of trajectory-execution. The formulas are similar to “IP\_basic”
-but in the objective, costs corresponding to the duration of the trajectory are assigned to every viewpoint.
+but in the objective, costs corresponding to the duration of the trajectory are assigned to every viewpointpoint.
 
 \end{itemize}
 \begin{quote}\begin{description}
 \item[{Parameters}] \leavevmode\begin{itemize}
 \item {} 
-\sphinxstyleliteralstrong{provided\_views} (\sphinxstyleliteralemphasis{set}\sphinxstyleliteralemphasis{{[}}\sphinxstyleliteralemphasis{View}\sphinxstyleliteralemphasis{{]} or }\sphinxstyleliteralemphasis{list}\sphinxstyleliteralemphasis{{[}}\sphinxstyleliteralemphasis{View}\sphinxstyleliteralemphasis{{]}}) \textendash{} All processed views where each has a valid measurement-trajectory and information about the measurable surface\_points
+\sphinxstyleliteralstrong{provided\_viewpoints} (\sphinxstyleliteralemphasis{set}\sphinxstyleliteralemphasis{{[}}{\hyperref[\detokenize{module_view:agiprobot_measurement.viewpoint.ViewPoint}]{\sphinxcrossref{\sphinxstyleliteralemphasis{ViewPoint}}}}\sphinxstyleliteralemphasis{{]} or }\sphinxstyleliteralemphasis{list}\sphinxstyleliteralemphasis{{[}}{\hyperref[\detokenize{module_view:agiprobot_measurement.viewpoint.ViewPoint}]{\sphinxcrossref{\sphinxstyleliteralemphasis{ViewPoint}}}}\sphinxstyleliteralemphasis{{]}}) \textendash{} All processed viewpoints where each has a valid measurement-trajectory and information about the measurable surface\_points
 
 \item {} 
 \sphinxstyleliteralstrong{solver\_type} (\sphinxstyleliteralemphasis{str}\sphinxstyleliteralemphasis{, }\sphinxstyleliteralemphasis{optional}) \textendash{} See function description, defaults to “greedy”
@@ -504,10 +507,10 @@ but in the objective, costs corresponding to the duration of the trajectory are 
 \end{itemize}
 
 \item[{Returns}] \leavevmode
-Set of views that can measure the union of measurable surface points of all provided views
+Set of viewpoints that can measure the union of measurable surface points of all provided viewpoints
 
 \item[{Return type}] \leavevmode
-set{[}View{]}
+set{[}{\hyperref[\detokenize{module_view:agiprobot_measurement.viewpoint.ViewPoint}]{\sphinxcrossref{ViewPoint}}}{]}
 
 \end{description}\end{quote}
 
@@ -556,7 +559,7 @@ The Sensor Model is a utility-module to perform metrological evaluations on a gi
 The mathematical foundation of the model is derived in the corresponding
 Bachelor’s Thesis, however the theoretical understanding is not needed to work with this module. One task is to make qualified predictions about the uncertainty
 of a given point within the scanners visibility, when certain spatial information (see below) is given. Within the {\hyperref[\detokenize{module_trajectory_manager:trajectory-manager}]{\sphinxcrossref{\DUrole{std,std-ref}{Trajectory Manager}}}}’s pipeline, this module
-can also be used to determine which points can be measured and how ‘uncertain’ this measure for a {\hyperref[\detokenize{module_view:view}]{\sphinxcrossref{\DUrole{std,std-ref}{View}}}}-object’s trajectory given the occluding target-mesh,
+can also be used to determine which points can be measured and how ‘uncertain’ this measure for a {\hyperref[\detokenize{module_view:viewpoint}]{\sphinxcrossref{\DUrole{std,std-ref}{ViewPoint}}}}-object’s trajectory given the occluding target-mesh,
 possible sampled surface points, … (‘context’).
 
 
@@ -565,19 +568,19 @@ possible sampled surface points, … (‘context’).
 See the image below for additional context.
 \begin{itemize}
 \item {} 
-laser\_emitter\_frame: See {\hyperref[\detokenize{module_view:view}]{\sphinxcrossref{\DUrole{std,std-ref}{View}}}}
+laser\_emitter\_frame: See {\hyperref[\detokenize{module_view:viewpoint}]{\sphinxcrossref{\DUrole{std,std-ref}{ViewPoint}}}}
 
 \item {} 
-gamma/\(\gamma\): Angle between the laser\_emitter\_frame’s z-y-plane and the surface-normal of the sample + \(\frac{\pi}{2}\) (for historic reasons)
+psi/\(\psi\): Angle between the laser\_emitter\_frame’s z-y-plane and the surface-normal of the sample
 
 \item {} 
-theta/\(\theta\):  Angle between the in normal-vector and the laser-emitter-ray-direction towards the sample, projected on the y-z-plane
+theta/\(\vartheta\):  Angle between the in normal-vector and the laser-emitter-ray-direction towards the sample, projected on the y-z-plane
 
 \item {} 
-z: Distance of the sample-point projected onto the z-axis of the laser\_emitter\_frame = Distance from the x-y-plane of the laser\_emitter\_frame
+\(z\): Distance of the sample-point projected onto the z-axis of the laser\_emitter\_frame = Distance from the x-y-plane of the laser\_emitter\_frame
 
 \item {} 
-\(\beta, u_{0}, \alpha, m_{L}\): Symbols of the uncertainty-formular (not important to use the sensor-model, detailed description in accompanying Bachelor’s Thesis)
+\(\alpha, K_{u}, u_{0}\): Symbols of the uncertainty-formular (not important to use the sensor-model, detailed description in accompanying Bachelor’s Thesis)
 
 \end{itemize}
 
@@ -614,18 +617,18 @@ Computional representation of an laser triangulation sensor under influence of u
 \index{evaluate\_score() (agiprobot\_measurement.sensor\_model.SensorModel method)}
 
 \begin{fulllineitems}
-\phantomsection\label{\detokenize{module_sensor_model:agiprobot_measurement.sensor_model.SensorModel.evaluate_score}}\pysiglinewithargsret{\sphinxbfcode{evaluate\_score}}{\emph{z}, \emph{gamma}}{}
-Calculates a score of uncertainty \(\in [0,1]\) for the given z and gamma (higher score means lower uncertainty). The score
-is linear affine in the uncertainty based on z and gamma - It is 1 if the provided values match the best possible case (lowest
+\phantomsection\label{\detokenize{module_sensor_model:agiprobot_measurement.sensor_model.SensorModel.evaluate_score}}\pysiglinewithargsret{\sphinxbfcode{evaluate\_score}}{\emph{z}, \emph{psi}}{}
+Calculates a score of uncertainty \(\in [0,1]\) for the given z and psi (higher score means lower uncertainty). The score
+is linear affine in the uncertainty based on z and psi - It is 1 if the provided values match the best possible case (lowest
 possible uncertainty of the sensor model) and 0 when both values are right at the rejection limit (i.e. are equal to {\color{red}\bfseries{}max\_deviation\_}…):
-\(\frac{u_{max} - u(z, \gamma)}{u_{max} - u_{min}}\)
+\(\frac{u_{max} - u(z, \psi)}{u_{max} - u_{min}}\)
 \begin{quote}\begin{description}
 \item[{Parameters}] \leavevmode\begin{itemize}
 \item {} 
 \sphinxstyleliteralstrong{z} (\sphinxstyleliteralemphasis{float}) \textendash{} z-coordinate of the point to evaluate in the laser\_emitter\_frame in mm
 
 \item {} 
-\sphinxstyleliteralstrong{gamma} (\sphinxstyleliteralemphasis{float}) \textendash{} Angle of the laser\_emitter\_frame’s z-y-plane with the surface-triangle of the point to evaluate in rad
+\sphinxstyleliteralstrong{psi} (\sphinxstyleliteralemphasis{float}) \textendash{} Angle of the laser\_emitter\_frame’s z-y-plane with the surface-triangle of the point to evaluate in rad
 
 \end{itemize}
 
@@ -642,20 +645,20 @@ float
 \index{evaluate\_uncertainty() (agiprobot\_measurement.sensor\_model.SensorModel method)}
 
 \begin{fulllineitems}
-\phantomsection\label{\detokenize{module_sensor_model:agiprobot_measurement.sensor_model.SensorModel.evaluate_uncertainty}}\pysiglinewithargsret{\sphinxbfcode{evaluate\_uncertainty}}{\emph{z}, \emph{gamma}}{}
-Computes the uncertainty of a surface point with given z and gamma using the specified geometric sensor parameters.
+\phantomsection\label{\detokenize{module_sensor_model:agiprobot_measurement.sensor_model.SensorModel.evaluate_uncertainty}}\pysiglinewithargsret{\sphinxbfcode{evaluate\_uncertainty}}{\emph{z}, \emph{psi}}{}
+Computes the uncertainty of a surface point with given z and psi using the specified geometric sensor parameters.
 \begin{quote}\begin{description}
 \item[{Parameters}] \leavevmode\begin{itemize}
 \item {} 
 \sphinxstyleliteralstrong{z} (\sphinxstyleliteralemphasis{float}) \textendash{} z-coordinate of the point to evaluate in the laser\_emitter\_frame in mm
 
 \item {} 
-\sphinxstyleliteralstrong{gamma} (\sphinxstyleliteralemphasis{float}) \textendash{} Angle of the laser\_emitter\_frame’s z-y-plane with the surface-triangle of the point to evaluate in rad
+\sphinxstyleliteralstrong{psi} (\sphinxstyleliteralemphasis{float}) \textendash{} Angle of the laser\_emitter\_frame’s z-y-plane with the surface-triangle of the point to evaluate in rad
 
 \end{itemize}
 
 \item[{Returns}] \leavevmode
-Uncertainty based on the z, gamma, and the geometric sensor parameters, or ‘NaN’ if z and gamma are invalid
+Uncertainty based on the z, psi, and the geometric sensor parameters, or ‘NaN’ if z and psi are invalid
 
 \item[{Return type}] \leavevmode
 float
@@ -669,7 +672,7 @@ float
 \begin{fulllineitems}
 \phantomsection\label{\detokenize{module_sensor_model:agiprobot_measurement.sensor_model.SensorModel.get_max_uncertainty}}\pysiglinewithargsret{\sphinxbfcode{get\_max\_uncertainty}}{}{}
 Computes maximum possible uncertainty of a measured point that is not rejected using geometric sensor parameters. 
-The uncertainty-formula is evaluated at z- and gamma-values that are at rejection-limits for a surface point, so that this value corresponds
+The uncertainty-formula is evaluated at z- and psi-values that are at rejection-limits for a surface point, so that this value corresponds
 to the worst uncertainty assignable to a measurable point.
 \begin{quote}\begin{description}
 \item[{Returns}] \leavevmode
@@ -686,7 +689,7 @@ float
 
 \begin{fulllineitems}
 \phantomsection\label{\detokenize{module_sensor_model:agiprobot_measurement.sensor_model.SensorModel.get_median_deviation_angle}}\pysiglinewithargsret{\sphinxbfcode{get\_median\_deviation\_angle}}{}{}
-Get the smallest angle allowed for tilting (smallest of maximum deviations of theta and gamma devided by 2).
+Get the smallest angle allowed for tilting (smallest of maximum deviations of theta and psi devided by 2).
 \begin{quote}\begin{description}
 \item[{Returns}] \leavevmode
 Smallest angle allowed for tilting
@@ -703,7 +706,7 @@ float
 \begin{fulllineitems}
 \phantomsection\label{\detokenize{module_sensor_model:agiprobot_measurement.sensor_model.SensorModel.get_min_uncertainty}}\pysiglinewithargsret{\sphinxbfcode{get\_min\_uncertainty}}{}{}
 Computes the minimum possible uncertainty using the geometric sensor parameters. It returns the uncertainty value assignable to
-a surface point which has been measured with optimal z- and gamma-values, i.e. the best-case.
+a surface point which has been measured with optimal z- and psi-values, i.e. the best-case.
 \begin{quote}\begin{description}
 \item[{Returns}] \leavevmode
 Minimum possible uncertainty in mm
@@ -755,17 +758,20 @@ trimesh.Trimesh
 
 \end{fulllineitems}
 
-\index{process\_view\_metrologically() (agiprobot\_measurement.sensor\_model.SensorModel method)}
+\index{process\_viewpoint\_metrologically() (agiprobot\_measurement.sensor\_model.SensorModel method)}
 
 \begin{fulllineitems}
-\phantomsection\label{\detokenize{module_sensor_model:agiprobot_measurement.sensor_model.SensorModel.process_view_metrologically}}\pysiglinewithargsret{\sphinxbfcode{process\_view\_metrologically}}{\emph{view}, \emph{maximum\_deflection=500.0}}{}
-Computes all measurable surface-points by a view-object as well as uncertainties and where they are measurable on the view-measurement-trajectory.
+\phantomsection\label{\detokenize{module_sensor_model:agiprobot_measurement.sensor_model.SensorModel.process_viewpoint_metrologically}}\pysiglinewithargsret{\sphinxbfcode{process\_viewpoint\_metrologically}}{\emph{viewpoint}, \emph{uncertainty\_threshold}, \emph{maximum\_deflection=500.0}}{}
+Computes all measurable surface-points by a viewpoint-object as well as uncertainties and where they are measurable on the viewpoint-measurement-trajectory.
 Requires context to be set via set\_processing\_context(…). Checks for every sampled surface point of the given context whether it is visible and calculates the
-uncertainty-score for it eventually. Also, the deflection of the laser\_emitter\_frame along the trajectory-line from the view-center pose is evaluated.
+uncertainty for it eventually. Also, the deflection of the laser\_emitter\_frame along the trajectory-line from the viewpoint-anchor pose is evaluated.
 \begin{quote}\begin{description}
 \item[{Parameters}] \leavevmode\begin{itemize}
 \item {} 
-\sphinxstyleliteralstrong{view} (\sphinxstyleliteralemphasis{View}) \textendash{} View with set view-center-pose
+\sphinxstyleliteralstrong{viewpoint} ({\hyperref[\detokenize{module_view:agiprobot_measurement.viewpoint.ViewPoint}]{\sphinxcrossref{\sphinxstyleliteralemphasis{ViewPoint}}}}) \textendash{} ViewPoint with set viewpoint-anchor-pose
+
+\item {} 
+\sphinxstyleliteralstrong{uncertainty\_threshold} (\sphinxstyleliteralemphasis{float}) \textendash{} Maximum permissible uncertainty of a measured surface point, in mm
 
 \item {} 
 \sphinxstyleliteralstrong{maximum\_deflection} (\sphinxstyleliteralemphasis{float}\sphinxstyleliteralemphasis{, }\sphinxstyleliteralemphasis{optional}) \textendash{} Maximum deflection of the trajectory to be considered for processing in mm, defaults to 5e2
@@ -783,7 +789,7 @@ Indices of the measurable surface points in samples\_surface\_points\_list
 Corresponding uncertainty-scores
 
 \item {} 
-Metric distance in mm in trajectory-direction from the view-center where the corresponding surface point is measurable
+Metric distance in mm in trajectory-direction from the viewpoint-anchor where the corresponding surface point is measurable
 
 \end{itemize}
 
@@ -801,7 +807,7 @@ array{[}int{]}, array{[}float{]}, array{[}float{]}
 \phantomsection\label{\detokenize{module_sensor_model:agiprobot_measurement.sensor_model.SensorModel.set_processing_context}}\pysiglinewithargsret{\sphinxbfcode{set\_processing\_context}}{\emph{mesh}, \emph{sampled\_surface\_points}, \emph{sampled\_face\_indices}}{}
 Loads a context for metrological processing to the sensor model.
 This includes loading the target mesh into a ray-tracer as well as gaining awareness over the
-sampling results because they are directly used to assess a View during process\_view\_metrologically().
+sampling results because they are directly used to assess a ViewPoint during process\_viewpoint\_metrologically().
 This method must be called before any metrological processing can be performed. A previously set
 context becomes overwritten completely by calling this method again.
 \begin{quote}\begin{description}
@@ -826,12 +832,12 @@ context becomes overwritten completely by calling this method again.
 
 
 
-\chapter{View}
-\label{\detokenize{module_view:id1}}\label{\detokenize{module_view::doc}}\label{\detokenize{module_view:view}}
+\chapter{ViewPoint}
+\label{\detokenize{module_view::doc}}\label{\detokenize{module_view:viewpoint}}\label{\detokenize{module_view:id1}}
 
 \section{Introduction and Basic Ideas}
 \label{\detokenize{module_view:introduction-and-basic-ideas}}
-A View is a container of one measurement-trajectory with extra-functionality.
+A ViewPoint is a container of one measurement-trajectory with extra-functionality.
 
 It can store besides the actual measurement-trajectory another trajectory towards its
 measurement trajectory as well as quantitative metrological predictions about the measurement. A View can construct itself in a bare geometrical sense: Given a surface point,
@@ -841,10 +847,10 @@ a anchor-position as well as an orientation of the laser\_emitter\_frame are cre
 \subsection{Commonly Used Terms}
 \label{\detokenize{module_view:commonly-used-terms}}\begin{itemize}
 \item {} 
-surface-point: The sampled surface point on the target-mesh this view is based on
+surface-point: The sampled surface point on the target-mesh this viewpoint is based on
 
 \item {} 
-anchor-position: The position this view’s trajectory goes through and where its laser\_emitter\_frame’s z-axis points towards the corresponding surface-point
+anchor-position: The position this viewpoint’s trajectory goes through and where its laser\_emitter\_frame’s z-axis points towards the corresponding surface-point
 
 \item {} \begin{description}
 \item[{laser\_emitter\_frame: Frame positioned at the scanners’s laser-emitter (“where the laser leaves the scanner”) that is moved along the straight trajectory during execution}] \leavevmode\begin{itemize}
@@ -865,7 +871,7 @@ During trajectory-execution, the orientation of this frame is constant in the �
 \end{description}
 
 \item {} 
-angle-around-boresight: Angle for rotation of this views straight-trajectory around the laser\_emitter\_frame’s z-axis in anchor-position
+angle-around-boresight: Angle for rotation of this viewpoints straight-trajectory around the laser\_emitter\_frame’s z-axis in anchor-position
 
 \end{itemize}
 
@@ -880,19 +886,19 @@ angle-around-boresight: Angle for rotation of this views straight-trajectory aro
 
 
 \section{API-Specification}
-\label{\detokenize{module_view:api-specification}}\label{\detokenize{module_view:module-agiprobot_measurement.view}}\index{agiprobot\_measurement.view (module)}\index{View (class in agiprobot\_measurement.view)}
+\label{\detokenize{module_view:module-agiprobot_measurement.viewpoint}}\label{\detokenize{module_view:api-specification}}\index{agiprobot\_measurement.viewpoint (module)}\index{ViewPoint (class in agiprobot\_measurement.viewpoint)}
 
 \begin{fulllineitems}
-\phantomsection\label{\detokenize{module_view:agiprobot_measurement.view.View}}\pysiglinewithargsret{\sphinxbfcode{class }\sphinxcode{agiprobot\_measurement.view.}\sphinxbfcode{View}}{\emph{surface\_point}, \emph{surface\_normal}, \emph{angle\_around\_boresight}, \emph{standoff\_distance}, \emph{tilt\_theta=0}, \emph{tilt\_gamma=0}}{}
-Class for keeping track about one view.
-A view consists on the one hand of geometrical specifications (about location and length of the view and execution informations), on the other
-hand of metrological specifications (e.g. what can be measured by this view).
-\index{get\_anchor\_position() (agiprobot\_measurement.view.View method)}
+\phantomsection\label{\detokenize{module_view:agiprobot_measurement.viewpoint.ViewPoint}}\pysiglinewithargsret{\sphinxbfcode{class }\sphinxcode{agiprobot\_measurement.viewpoint.}\sphinxbfcode{ViewPoint}}{\emph{surface\_point}, \emph{surface\_normal}, \emph{angle\_around\_boresight}, \emph{standoff\_distance}, \emph{tilt\_theta=0}, \emph{tilt\_psi=0}}{}
+Class for keeping track about one viewpoint.
+A viewpoint consists on the one hand of geometrical specifications (about location and length of the viewpointand execution informations), on the other
+hand of metrological specifications (e.g. what can be measured by this viewpoint).
+\index{get\_anchor\_position() (agiprobot\_measurement.viewpoint.ViewPoint method)}
 
 \begin{fulllineitems}
-\phantomsection\label{\detokenize{module_view:agiprobot_measurement.view.View.get_anchor_position}}\pysiglinewithargsret{\sphinxbfcode{get\_anchor\_position}}{\emph{as\_matrix=False}}{}
+\phantomsection\label{\detokenize{module_view:agiprobot_measurement.viewpoint.ViewPoint.get_anchor_position}}\pysiglinewithargsret{\sphinxbfcode{get\_anchor\_position}}{\emph{as\_matrix=False}}{}
 Gets the laser\_emitter\_frame’s position that was generated during construction. This is the point where the z-axis of the laser\_emitter\_frame
-hits the surface\_point of the target mesh that was used to design this view. Keep in mind that ‘anchor’ does not necessarely mean ‘anchor’ of the trajectory.
+hits the surface\_point of the target mesh that was used to design this viewpoint. Keep in mind that ‘anchor’ does not necessarely mean ‘anchor’ of the trajectory.
 \begin{quote}\begin{description}
 \item[{Parameters}] \leavevmode
 \sphinxstyleliteralstrong{as\_matrix} (\sphinxstyleliteralemphasis{bool}\sphinxstyleliteralemphasis{, }\sphinxstyleliteralemphasis{optional}) \textendash{} Whether to give the translation as homogeneous 4x4-matrix or vector, defaults to False
@@ -907,10 +913,10 @@ np.array (dimensions depend on parameter as\_matrix)
 
 \end{fulllineitems}
 
-\index{get\_measurable\_surface\_point\_indices() (agiprobot\_measurement.view.View method)}
+\index{get\_measurable\_surface\_point\_indices() (agiprobot\_measurement.viewpoint.ViewPoint method)}
 
 \begin{fulllineitems}
-\phantomsection\label{\detokenize{module_view:agiprobot_measurement.view.View.get_measurable_surface_point_indices}}\pysiglinewithargsret{\sphinxbfcode{get\_measurable\_surface\_point\_indices}}{}{}
+\phantomsection\label{\detokenize{module_view:agiprobot_measurement.viewpoint.ViewPoint.get_measurable_surface_point_indices}}\pysiglinewithargsret{\sphinxbfcode{get\_measurable\_surface\_point\_indices}}{}{}
 Gets the surface\_point-indices measurable by this view’s measurement-trajectory. The indices are abstract and are only useful 
 when inserted into an externally maintained list of the actual surface points.
 \begin{quote}\begin{description}
@@ -924,16 +930,16 @@ list{[}int{]}
 
 \end{fulllineitems}
 
-\index{get\_measurable\_surface\_point\_scores() (agiprobot\_measurement.view.View method)}
+\index{get\_measurable\_surface\_point\_uncertainties() (agiprobot\_measurement.viewpoint.ViewPoint method)}
 
 \begin{fulllineitems}
-\phantomsection\label{\detokenize{module_view:agiprobot_measurement.view.View.get_measurable_surface_point_scores}}\pysiglinewithargsret{\sphinxbfcode{get\_measurable\_surface\_point\_scores}}{}{}
-Gets the uncertainty scores of each measurable surface point. The values in the returned list must be matched with the
-actual surface points in an external viewpoint list using this views measurable\_surface\_point\_indices: The uncertainty-score at index i
+\phantomsection\label{\detokenize{module_view:agiprobot_measurement.viewpoint.ViewPoint.get_measurable_surface_point_uncertainties}}\pysiglinewithargsret{\sphinxbfcode{get\_measurable\_surface\_point\_uncertainties}}{}{}
+Gets the uncertainties of each measurable surface point. The values in the returned list must be matched with the
+actual surface points in an external viewpoint list using this views measurable\_surface\_point\_indices: The uncertainty at index i
 is meant for the surface\_point in the external list evaluated at index measurable\_surface\_point\_indices{[}i{]}.
 \begin{quote}\begin{description}
 \item[{Returns}] \leavevmode
-Uncertainty scores of each measurable surface point
+uncertainties of each measurable surface point
 
 \item[{Return type}] \leavevmode
 list{[}float{]}
@@ -942,11 +948,11 @@ list{[}float{]}
 
 \end{fulllineitems}
 
-\index{get\_orientation\_matrix() (agiprobot\_measurement.view.View method)}
+\index{get\_orientation\_matrix() (agiprobot\_measurement.viewpoint.ViewPoint method)}
 
 \begin{fulllineitems}
-\phantomsection\label{\detokenize{module_view:agiprobot_measurement.view.View.get_orientation_matrix}}\pysiglinewithargsret{\sphinxbfcode{get\_orientation\_matrix}}{}{}
-Gets the orientation of the laser\_emitter\_frame of this view. The orientation (not the position) remains the same for every point on the assigned measurement-trajectory
+\phantomsection\label{\detokenize{module_view:agiprobot_measurement.viewpoint.ViewPoint.get_orientation_matrix}}\pysiglinewithargsret{\sphinxbfcode{get\_orientation\_matrix}}{}{}
+Gets the orientation of the laser\_emitter\_frame of this viewpoint. The orientation (not the position) remains the same for every point on the assigned measurement-trajectory
 \begin{quote}\begin{description}
 \item[{Returns}] \leavevmode
 Orientation of the laser\_emitter\_frame
@@ -958,11 +964,11 @@ numpy.array
 
 \end{fulllineitems}
 
-\index{get\_surface\_point() (agiprobot\_measurement.view.View method)}
+\index{get\_surface\_point() (agiprobot\_measurement.viewpoint.ViewPoint method)}
 
 \begin{fulllineitems}
-\phantomsection\label{\detokenize{module_view:agiprobot_measurement.view.View.get_surface_point}}\pysiglinewithargsret{\sphinxbfcode{get\_surface\_point}}{\emph{as\_matrix=False}}{}
-Gets the position of the surface point this view is based on. This is not the same as the view\_anchor-point.
+\phantomsection\label{\detokenize{module_view:agiprobot_measurement.viewpoint.ViewPoint.get_surface_point}}\pysiglinewithargsret{\sphinxbfcode{get\_surface\_point}}{\emph{as\_matrix=False}}{}
+Gets the position of the surface point this viewpoint is based on. This is not the same as the view\_anchor-point.
 \begin{quote}\begin{description}
 \item[{Parameters}] \leavevmode
 \sphinxstyleliteralstrong{as\_matrix} (\sphinxstyleliteralemphasis{bool}\sphinxstyleliteralemphasis{, }\sphinxstyleliteralemphasis{optional}) \textendash{} Whether to give the translation as homogeneous 4x4-matrix or vector, defaults to False
@@ -977,11 +983,11 @@ numpy.array (dimensions depend on parameter as\_matrix)
 
 \end{fulllineitems}
 
-\index{get\_trajectory\_for\_measurement() (agiprobot\_measurement.view.View method)}
+\index{get\_trajectory\_for\_measurement() (agiprobot\_measurement.viewpoint.ViewPoint method)}
 
 \begin{fulllineitems}
-\phantomsection\label{\detokenize{module_view:agiprobot_measurement.view.View.get_trajectory_for_measurement}}\pysiglinewithargsret{\sphinxbfcode{get\_trajectory\_for\_measurement}}{}{}
-Returns trajectory that is performed to execute the measurement corresponding to this view.
+\phantomsection\label{\detokenize{module_view:agiprobot_measurement.viewpoint.ViewPoint.get_trajectory_for_measurement}}\pysiglinewithargsret{\sphinxbfcode{get\_trajectory\_for\_measurement}}{}{}
+Returns trajectory that is performed to execute the measurement corresponding to this viewpoint.
 This measurement-trajectory is a straight line in cartesian space.
 \begin{quote}\begin{description}
 \item[{Returns}] \leavevmode
@@ -994,10 +1000,10 @@ moveit\_msgs/RobotTrajectory
 
 \end{fulllineitems}
 
-\index{get\_trajectory\_to\_view() (agiprobot\_measurement.view.View method)}
+\index{get\_trajectory\_to\_view() (agiprobot\_measurement.viewpoint.ViewPoint method)}
 
 \begin{fulllineitems}
-\phantomsection\label{\detokenize{module_view:agiprobot_measurement.view.View.get_trajectory_to_view}}\pysiglinewithargsret{\sphinxbfcode{get\_trajectory\_to\_view}}{}{}
+\phantomsection\label{\detokenize{module_view:agiprobot_measurement.viewpoint.ViewPoint.get_trajectory_to_view}}\pysiglinewithargsret{\sphinxbfcode{get\_trajectory\_to\_view}}{}{}
 Returns the stored trajectory from a former state (might be robot’s current\_state or the end point of a previously executed trajectory) to
 the start state of this views’s measurement trajectory. This is useful to connect multiple views into an execution plan.
 \begin{quote}\begin{description}
@@ -1011,11 +1017,11 @@ moveit\_msgs/RobotTrajectory
 
 \end{fulllineitems}
 
-\index{reverse\_trajectory\_for\_measurement() (agiprobot\_measurement.view.View method)}
+\index{reverse\_trajectory\_for\_measurement() (agiprobot\_measurement.viewpoint.ViewPoint method)}
 
 \begin{fulllineitems}
-\phantomsection\label{\detokenize{module_view:agiprobot_measurement.view.View.reverse_trajectory_for_measurement}}\pysiglinewithargsret{\sphinxbfcode{reverse\_trajectory\_for\_measurement}}{}{}
-Flips the measurement-trajectory of this view. The start-pose becomes the end-pose and vice versa. The execution time stays the same.
+\phantomsection\label{\detokenize{module_view:agiprobot_measurement.viewpoint.ViewPoint.reverse_trajectory_for_measurement}}\pysiglinewithargsret{\sphinxbfcode{reverse\_trajectory\_for\_measurement}}{}{}
+Flips the measurement-trajectory of this viewpoint. The start-pose becomes the end-pose and vice versa. The execution time stays the same.
 \begin{quote}\begin{description}
 \item[{Returns}] \leavevmode
 None
@@ -1027,10 +1033,10 @@ NoneType
 
 \end{fulllineitems}
 
-\index{set\_measurable\_surface\_point\_indices\_and\_scores() (agiprobot\_measurement.view.View method)}
+\index{set\_measurable\_surface\_point\_indices\_and\_uncertainties() (agiprobot\_measurement.viewpoint.ViewPoint method)}
 
 \begin{fulllineitems}
-\phantomsection\label{\detokenize{module_view:agiprobot_measurement.view.View.set_measurable_surface_point_indices_and_scores}}\pysiglinewithargsret{\sphinxbfcode{set\_measurable\_surface\_point\_indices\_and\_scores}}{\emph{measurable\_point\_indices}, \emph{uncertainty\_scores}}{}
+\phantomsection\label{\detokenize{module_view:agiprobot_measurement.viewpoint.ViewPoint.set_measurable_surface_point_indices_and_uncertainties}}\pysiglinewithargsret{\sphinxbfcode{set\_measurable\_surface\_point\_indices\_and\_uncertainties}}{\emph{measurable\_point\_indices}, \emph{uncertainties}}{}
 Sets the indices of surface points measurable by this view’s measurement-trajectory as well as their model-predicted uncertainties. 
 The indices are abstract and only meaningful when connected to a concrete surface-point-list which is maintained externally of the View-scope.
 Both lists must have the same length.
@@ -1040,7 +1046,7 @@ Both lists must have the same length.
 \sphinxstyleliteralstrong{measurable\_point\_indices} (\sphinxstyleliteralemphasis{list}\sphinxstyleliteralemphasis{{[}}\sphinxstyleliteralemphasis{int}\sphinxstyleliteralemphasis{{]}}) \textendash{} List of the indices of points in an external surface\_point-list that can be measured by this view
 
 \item {} 
-\sphinxstyleliteralstrong{uncertainty\_scores} (\sphinxstyleliteralemphasis{list}\sphinxstyleliteralemphasis{{[}}\sphinxstyleliteralemphasis{float}\sphinxstyleliteralemphasis{{]}}) \textendash{} List of uncertainty-score values for the measured surface\_point masked through the index at the same position
+\sphinxstyleliteralstrong{uncertainties} (\sphinxstyleliteralemphasis{list}\sphinxstyleliteralemphasis{{[}}\sphinxstyleliteralemphasis{float}\sphinxstyleliteralemphasis{{]}}) \textendash{} List of uncertainty values for the measured surface\_point masked through the index at the same position
 
 \end{itemize}
 
@@ -1048,11 +1054,11 @@ Both lists must have the same length.
 
 \end{fulllineitems}
 
-\index{set\_trajectory\_for\_measurement() (agiprobot\_measurement.view.View method)}
+\index{set\_trajectory\_for\_measurement() (agiprobot\_measurement.viewpoint.ViewPoint method)}
 
 \begin{fulllineitems}
-\phantomsection\label{\detokenize{module_view:agiprobot_measurement.view.View.set_trajectory_for_measurement}}\pysiglinewithargsret{\sphinxbfcode{set\_trajectory\_for\_measurement}}{\emph{trajectory\_for\_measurement}}{}
-Trajectory that is performed to execute the measurement corresponding to this view.
+\phantomsection\label{\detokenize{module_view:agiprobot_measurement.viewpoint.ViewPoint.set_trajectory_for_measurement}}\pysiglinewithargsret{\sphinxbfcode{set\_trajectory\_for\_measurement}}{\emph{trajectory\_for\_measurement}}{}
+Trajectory that is performed to execute the measurement corresponding to this viewpoint.
 This measurement-trajectory is a straight line in cartesian space.
 \begin{quote}\begin{description}
 \item[{Parameters}] \leavevmode
@@ -1062,10 +1068,10 @@ This measurement-trajectory is a straight line in cartesian space.
 
 \end{fulllineitems}
 
-\index{set\_trajectory\_to\_view() (agiprobot\_measurement.view.View method)}
+\index{set\_trajectory\_to\_view() (agiprobot\_measurement.viewpoint.ViewPoint method)}
 
 \begin{fulllineitems}
-\phantomsection\label{\detokenize{module_view:agiprobot_measurement.view.View.set_trajectory_to_view}}\pysiglinewithargsret{\sphinxbfcode{set\_trajectory\_to\_view}}{\emph{trajectory\_to\_view}}{}
+\phantomsection\label{\detokenize{module_view:agiprobot_measurement.viewpoint.ViewPoint.set_trajectory_to_view}}\pysiglinewithargsret{\sphinxbfcode{set\_trajectory\_to\_view}}{\emph{trajectory\_to\_view}}{}
 Sets a trajectory that moves the robot to the start of the view’s measurement trajectory.
 The trajectory can be arbitrary but must end at this start point. This is useful to connect multiple views into an execution plan.
 \begin{quote}\begin{description}
@@ -1099,7 +1105,9 @@ The trajectory can be arbitrary but must end at this start point. This is useful
 \begin{sphinxtheindex}
 \def\bigletter#1{{\Large\sffamily#1}\nopagebreak\vspace{1mm}}
 \bigletter{a}
+\item {\sphinxstyleindexentry{agiprobot\_measurement.sensor\_model}}\sphinxstyleindexpageref{module_sensor_model:\detokenize{module-agiprobot_measurement.sensor_model}}
 \item {\sphinxstyleindexentry{agiprobot\_measurement.trajectory\_manager}}\sphinxstyleindexpageref{module_trajectory_manager:\detokenize{module-agiprobot_measurement.trajectory_manager}}
+\item {\sphinxstyleindexentry{agiprobot\_measurement.viewpoint}}\sphinxstyleindexpageref{module_view:\detokenize{module-agiprobot_measurement.viewpoint}}
 \end{sphinxtheindex}
 
 \renewcommand{\indexname}{Index}

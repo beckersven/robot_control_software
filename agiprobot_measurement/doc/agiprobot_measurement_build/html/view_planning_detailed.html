@@ -7,7 +7,7 @@
   
   <meta name="viewport" content="width=device-width, initial-scale=1.0" />
   
-  <title>View Planning Detailed &mdash; Agiprobot Measurement 1.0 documentation</title>
+  <title>Path Planning Detailed &mdash; Agiprobot Measurement 1.0 documentation</title>
   
 
   
@@ -102,16 +102,16 @@
               <p class="caption"><span class="caption-text">Explanation</span></p>
 <ul class="current">
 <li class="toctree-l1"><a class="reference internal" href="overview.html">Overview</a></li>
-<li class="toctree-l1 current"><a class="current reference internal" href="#">View Planning Detailed</a><ul>
+<li class="toctree-l1 current"><a class="current reference internal" href="#">Path Planning Detailed</a><ul>
 <li class="toctree-l2"><a class="reference internal" href="#load-the-task">0. Load the Task</a></li>
-<li class="toctree-l2"><a class="reference internal" href="#sampling">1. Sampling</a></li>
-<li class="toctree-l2"><a class="reference internal" href="#view-generation-and-evaluation">2. View-Generation and -Evaluation</a><ul>
+<li class="toctree-l2"><a class="reference internal" href="#preprocessing-and-sampling">1. Preprocessing and Sampling</a></li>
+<li class="toctree-l2"><a class="reference internal" href="#viewpoint-generation-and-evaluation">2. ViewPoint-Generation and -Evaluation</a><ul>
 <li class="toctree-l3"><a class="reference internal" href="#metrological-evaluation">Metrological Evaluation</a></li>
 <li class="toctree-l3"><a class="reference internal" href="#mechanical-evaluation">Mechanical Evaluation</a></li>
 </ul>
 </li>
-<li class="toctree-l2"><a class="reference internal" href="#view-selection-set-covering-problem">3. View-Selection (Set Covering Problem)</a></li>
-<li class="toctree-l2"><a class="reference internal" href="#connecting-the-views">4. Connecting the Views</a></li>
+<li class="toctree-l2"><a class="reference internal" href="#viewpoint-selection-set-covering-problem">3. ViewPoint-Selection (Set Covering Problem)</a></li>
+<li class="toctree-l2"><a class="reference internal" href="#connecting-the-viewpoints">4. Connecting the ViewPoints</a></li>
 </ul>
 </li>
 </ul>
@@ -119,7 +119,7 @@
 <ul>
 <li class="toctree-l1"><a class="reference internal" href="module_trajectory_manager.html">Trajectory Manager</a></li>
 <li class="toctree-l1"><a class="reference internal" href="module_sensor_model.html">Sensor Model</a></li>
-<li class="toctree-l1"><a class="reference internal" href="module_view.html">View</a></li>
+<li class="toctree-l1"><a class="reference internal" href="module_view.html">ViewPoint</a></li>
 </ul>
 
             
@@ -168,7 +168,7 @@
     
       <li><a href="index.html" class="icon icon-home"></a> &raquo;</li>
         
-      <li>View Planning Detailed</li>
+      <li>Path Planning Detailed</li>
     
     
       <li class="wy-breadcrumbs-aside">
@@ -187,8 +187,8 @@
           <div role="main" class="document" itemscope="itemscope" itemtype="http://schema.org/Article">
            <div itemprop="articleBody">
             
-  <div class="section" id="view-planning-detailed">
-<span id="id1"></span><h1>View Planning Detailed<a class="headerlink" href="#view-planning-detailed" title="Permalink to this headline">¶</a></h1>
+  <div class="section" id="path-planning-detailed">
+<span id="view-planning-detailed"></span><h1>Path Planning Detailed<a class="headerlink" href="#path-planning-detailed" title="Permalink to this headline">¶</a></h1>
 <div class="section" id="load-the-task">
 <h2>0. Load the Task<a class="headerlink" href="#load-the-task" title="Permalink to this headline">¶</a></h2>
 <p>Read in the given CAD-file of the target-object as well as its pose. The mesh is made available to the local trimesh-handler and loaded into the motion-planning-framework
@@ -197,18 +197,19 @@
 <img alt="_images/moveit_collision_added.png" src="_images/moveit_collision_added.png" />
 </div>
 </div>
-<div class="section" id="sampling">
-<h2>1. Sampling<a class="headerlink" href="#sampling" title="Permalink to this headline">¶</a></h2>
-<p>Use trimesh to sample the mesh’s surface into discrete surface-points depending on a specified sampling-density. The samples, corresponding face-normals and the target-mesh are
+<div class="section" id="preprocessing-and-sampling">
+<h2>1. Preprocessing and Sampling<a class="headerlink" href="#preprocessing-and-sampling" title="Permalink to this headline">¶</a></h2>
+<p>Removes all downward facing surface faces since they are not considered measurable. This is based on the common assumption that the fixture holds the target object from below.
+Use <a class="reference external" href="https://trimsh.org/">trimesh</a> to sample the mesh’s surface into discrete surface-points depending on a specified sampling-density. The samples, corresponding face-normals and the target-mesh are
 set as context in a <a class="reference internal" href="module_sensor_model.html#sensor-model"><span class="std std-ref">Sensor Model</span></a>-instance.</p>
 <div class="figure">
 <img alt="_images/sampling_trimesh.png" src="_images/sampling_trimesh.png" />
 </div>
 </div>
-<div class="section" id="view-generation-and-evaluation">
-<h2>2. View-Generation and -Evaluation<a class="headerlink" href="#view-generation-and-evaluation" title="Permalink to this headline">¶</a></h2>
-<p>For each-sample, generate <a class="reference internal" href="module_view.html#view"><span class="std std-ref">View</span></a>-objects by moving into the points face-normal and then applying rotations to get a variety of candidates per sampled surface point.
-The resulting point is the anchor of the view. Each view is assigned a straight trajectory-line.</p>
+<div class="section" id="viewpoint-generation-and-evaluation">
+<h2>2. ViewPoint-Generation and -Evaluation<a class="headerlink" href="#viewpoint-generation-and-evaluation" title="Permalink to this headline">¶</a></h2>
+<p>For each-sample, generate <a class="reference internal" href="module_view.html#viewpoint"><span class="std std-ref">ViewPoint</span></a>-objects by moving into the points face-normal and then applying rotations to get a variety of candidates per sampled surface point.
+The resulting point is the anchor of the viewpoint. Each viewpoint is assigned a straight trajectory-line.</p>
 <div class="figure">
 <img alt="_images/trajectory_generation.png" src="_images/trajectory_generation.png" />
 </div>
@@ -217,9 +218,9 @@ The resulting point is the anchor of the view. Each view is assigned a straight 
 <h3>Metrological Evaluation<a class="headerlink" href="#metrological-evaluation" title="Permalink to this headline">¶</a></h3>
 <ul class="simple">
 <li>Use the <a class="reference internal" href="module_sensor_model.html#sensor-model"><span class="std std-ref">Sensor Model</span></a>-instance to analyze, which other sample-points are visible from this trajectory, and at what uncertainty</li>
-<li>Result = Visibilities and uncertainties (will be stored in the <a class="reference internal" href="module_view.html#view"><span class="std std-ref">View</span></a>-object)</li>
+<li>Result = Visibilities and uncertainties (will be stored in the <a class="reference internal" href="module_view.html#viewpoint"><span class="std std-ref">ViewPoint</span></a>-object)</li>
 </ul>
-<div class="figure" id="id6">
+<div class="figure" id="id3">
 <img alt="_images/measurement_example.png" src="_images/measurement_example.png" />
 <p class="caption"><span class="caption-text">Higher sampling density than previously for vividness. Red points are immeasurable; Green points are measurable at low uncertainty, blue ones at high uncertainty.</span></p>
 </div>
@@ -228,9 +229,9 @@ The resulting point is the anchor of the view. Each view is assigned a straight 
 <h3>Mechanical Evaluation<a class="headerlink" href="#mechanical-evaluation" title="Permalink to this headline">¶</a></h3>
 <ul class="simple">
 <li>Utilize <a class="reference external" href="https://moveit.ros.org">MoveIt</a> to examine, if this trajectory is actually executable in the scene (collision, reacability, …).</li>
-<li><strong>Critical</strong>: If the mechanical evaluation fails, the view will not be considered any further
-* Can also consider trajectory-parts: If e.g. 80% of the trajectory are be executable, this <a class="reference internal" href="module_view.html#view"><span class="std std-ref">View</span></a>-object might not be rejected</li>
-<li>Result = List of actual joint-values (will be stored in the <a class="reference internal" href="module_view.html#view"><span class="std std-ref">View</span></a>-object)</li>
+<li><strong>Critical</strong>: If the mechanical evaluation fails, the viewpoint will not be considered any further</li>
+<li>Can also consider trajectory-parts: If e.g. 80% of the trajectory are be executable, this <a class="reference internal" href="module_view.html#viewpoint"><span class="std std-ref">ViewPoint</span></a>-object might not be rejected</li>
+<li>Result = List of actual joint-values (will be stored in the <a class="reference internal" href="module_view.html#viewpoint"><span class="std std-ref">ViewPoint</span></a>-object)</li>
 </ul>
 <div class="figure">
 <img alt="_images/collision_check.png" src="_images/collision_check.png" />
@@ -238,23 +239,23 @@ The resulting point is the anchor of the view. Each view is assigned a straight 
 <p>The sequence of these evaluations is implemented in a way to minimize compute-time.</p>
 </div>
 </div>
-<div class="section" id="view-selection-set-covering-problem">
-<h2>3. View-Selection (Set Covering Problem)<a class="headerlink" href="#view-selection-set-covering-problem" title="Permalink to this headline">¶</a></h2>
-<p>When a set of valid <span class="xref std std-ref">view`s has been found, not all :ref:`view</span>-elements must be executed for a valid result: A subset must be found that
-covers the same surface-points as all the found :ref:<a href="#id3"><span class="problematic" id="id4">`</span></a>view`s (= <em>Set Covering Problem</em>). This subset is in general much smaller than the original set and can be built using different algorithms:</p>
-<p>As the first option, ‘Greedy’ implementation (both used in the papers) selects in each iteration that new <a class="reference internal" href="module_view.html#view"><span class="std std-ref">View</span></a> from the original set, that can contribute the most
-not-yet-visible surface-sample-points to the subset. If 2 or more <a class="reference internal" href="module_view.html#view"><span class="std std-ref">View</span></a>-objects can contribute the same amount, the one with the lowest uncertainty will be selected.</p>
+<div class="section" id="viewpoint-selection-set-covering-problem">
+<h2>3. ViewPoint-Selection (Set Covering Problem)<a class="headerlink" href="#viewpoint-selection-set-covering-problem" title="Permalink to this headline">¶</a></h2>
+<p>When a set of valid <a class="reference internal" href="module_view.html#viewpoint"><span class="std std-ref">ViewPoint</span></a> s has been found, not all <a class="reference internal" href="module_view.html#viewpoint"><span class="std std-ref">ViewPoint</span></a> -elements must be executed for a valid result: A subset must be found that
+covers the same surface-points as all the found <a class="reference internal" href="module_view.html#viewpoint"><span class="std std-ref">ViewPoint</span></a> s (= <em>Set Covering Problem</em>). This subset is in general much smaller than the original set and can be built using different algorithms:</p>
+<p>As the first option, ‘Greedy’ implementation (both used in the papers) selects in each iteration that new <a class="reference internal" href="module_view.html#viewpoint"><span class="std std-ref">ViewPoint</span></a> from the original set, that can contribute the most
+not-yet-visible surface-sample-points to the subset. If 2 or more <a class="reference internal" href="module_view.html#viewpoint"><span class="std std-ref">ViewPoint</span></a> -objects can contribute the same amount, the one with the lowest uncertainty will be selected.</p>
 <p>Another option is Integer Programming (IP):</p>
-<p>Minimize <span class="math">\(\sum_{\forall i} c_i v_i\)</span> subject to <span class="math">\(\sum_{\forall i} m_{ij} v_i \ge 1~~~~\forall j\)</span></p>
-<p>where <span class="math">\(v_i \in \{0,1\}\)</span> indicates if view i is element of the subset and <span class="math">\(m_{ij} \in \{0, 1\}\)</span>, if the sampled surface point j is measurable by the trajectory of view i.
-<span class="math">\(c_{i}\)</span> is a cost-term. If it is constant, the IP-problems is identically to the Greedy approach. However, by assigning <span class="math">\(c_{i}\)</span> the time of the measurement-trajectory
-of view i or its uncertainty, a bigger variety of solutions becomes possible than in the first option.</p>
+<p>Minimize <span class="math">\(\sum_{\forall i} c_j v_j\)</span> subject to <span class="math">\(\sum_{\forall j} m_{i,j} v_j \ge 1~~~~\forall i\)</span></p>
+<p>where <span class="math">\(v_j \in \{0,1\}\)</span> indicates if viewpoint j is element of the subset and <span class="math">\(m_{i,j} \in \{0, 1\}\)</span>, if the sampled surface point i is measurable by the trajectory of viewpoint j.
+<span class="math">\(c_{j}\)</span> is a cost-term. If it is constant, the IP-problems is identically to the Greedy approach. However, by assigning <span class="math">\(c_{i}\)</span> the time of the measurement-trajectory
+of viewpoint i or its uncertainty, a bigger variety of solutions becomes possible than in the first option.</p>
 </div>
-<div class="section" id="connecting-the-views">
-<h2>4. Connecting the Views<a class="headerlink" href="#connecting-the-views" title="Permalink to this headline">¶</a></h2>
-<p>Lastly, the determined set of <a class="reference internal" href="module_view.html#view"><span class="std std-ref">View</span></a>-objects must be ordered for optimal execution. To do so, the current robot-pose is enqueued in an ‘execution-list’.
-Paths from the endpoint of the last element of execution-list are calculated to every non-enqueued view’s trajectory-start- and -endpoint. The <a class="reference internal" href="module_view.html#view"><span class="std std-ref">View</span></a> with the shortest path-time becomes enqueued.
-Also, the inter-view path will be stored in that <a class="reference internal" href="module_view.html#view"><span class="std std-ref">View</span></a> so that it will perform the exact same path during execution (if the path would get planned again dynamically,
+<div class="section" id="connecting-the-viewpoints">
+<h2>4. Connecting the ViewPoints<a class="headerlink" href="#connecting-the-viewpoints" title="Permalink to this headline">¶</a></h2>
+<p>Lastly, the determined set of <a class="reference internal" href="module_view.html#viewpoint"><span class="std std-ref">ViewPoint</span></a>-objects must be ordered for optimal execution. To do so, the current robot-pose is enqueued in an ‘execution-list’.
+Paths from the endpoint of the last element of execution-list are calculated to every non-enqueued viewpoint’s trajectory-start- and -endpoint. The <a class="reference internal" href="module_view.html#viewpoint"><span class="std std-ref">ViewPoint</span></a> with the shortest path-time becomes enqueued.
+Also, the inter-viewpoint path will be stored in that <a class="reference internal" href="module_view.html#viewpoint"><span class="std std-ref">ViewPoint</span></a> so that it will perform the exact same path during execution (if the path would get planned again dynamically,
 it might be completely different due to the stochastic nature of path-planning). This step relies again on <a class="reference external" href="https://moveit.ros.org">MoveIt</a>.</p>
 </div>
 </div>

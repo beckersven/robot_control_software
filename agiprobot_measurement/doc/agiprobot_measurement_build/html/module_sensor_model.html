@@ -49,7 +49,7 @@
     
     <link rel="index" title="Index" href="genindex.html" />
     <link rel="search" title="Search" href="search.html" />
-    <link rel="next" title="View" href="module_view.html" />
+    <link rel="next" title="ViewPoint" href="module_view.html" />
     <link rel="prev" title="Trajectory Manager" href="module_trajectory_manager.html" /> 
 </head>
 
@@ -120,7 +120,7 @@
 <li class="toctree-l2"><a class="reference internal" href="#module-agiprobot_measurement.sensor_model">API-Specification</a></li>
 </ul>
 </li>
-<li class="toctree-l1"><a class="reference internal" href="module_view.html">View</a></li>
+<li class="toctree-l1"><a class="reference internal" href="module_view.html">ViewPoint</a></li>
 </ul>
 
             
@@ -196,17 +196,17 @@
 <p>The mathematical foundation of the model is derived in the corresponding
 Bachelor’s Thesis, however the theoretical understanding is not needed to work with this module. One task is to make qualified predictions about the uncertainty
 of a given point within the scanners visibility, when certain spatial information (see below) is given. Within the <a class="reference internal" href="module_trajectory_manager.html#trajectory-manager"><span class="std std-ref">Trajectory Manager</span></a>’s pipeline, this module
-can also be used to determine which points can be measured and how ‘uncertain’ this measure for a <a class="reference internal" href="module_view.html#view"><span class="std std-ref">View</span></a>-object’s trajectory given the occluding target-mesh,
+can also be used to determine which points can be measured and how ‘uncertain’ this measure for a <a class="reference internal" href="module_view.html#viewpoint"><span class="std std-ref">ViewPoint</span></a>-object’s trajectory given the occluding target-mesh,
 possible sampled surface points, … (‘context’).</p>
 <div class="section" id="commonly-used-geometric-terms">
 <h3>Commonly Used Geometric Terms<a class="headerlink" href="#commonly-used-geometric-terms" title="Permalink to this headline">¶</a></h3>
 <p>See the image below for additional context.</p>
 <ul class="simple">
-<li>laser_emitter_frame: See <a class="reference internal" href="module_view.html#view"><span class="std std-ref">View</span></a></li>
-<li>gamma/<span class="math">\(\gamma\)</span>: Angle between the laser_emitter_frame’s z-y-plane and the surface-normal of the sample + <span class="math">\(\frac{\pi}{2}\)</span> (for historic reasons)</li>
-<li>theta/<span class="math">\(\theta\)</span>:  Angle between the in normal-vector and the laser-emitter-ray-direction towards the sample, projected on the y-z-plane</li>
-<li>z: Distance of the sample-point projected onto the z-axis of the laser_emitter_frame = Distance from the x-y-plane of the laser_emitter_frame</li>
-<li><span class="math">\(\beta, u_{0}, \alpha, m_{L}\)</span>: Symbols of the uncertainty-formular (not important to use the sensor-model, detailed description in accompanying Bachelor’s Thesis)</li>
+<li>laser_emitter_frame: See <a class="reference internal" href="module_view.html#viewpoint"><span class="std std-ref">ViewPoint</span></a></li>
+<li>psi/<span class="math">\(\psi\)</span>: Angle between the laser_emitter_frame’s z-y-plane and the surface-normal of the sample</li>
+<li>theta/<span class="math">\(\vartheta\)</span>:  Angle between the in normal-vector and the laser-emitter-ray-direction towards the sample, projected on the y-z-plane</li>
+<li><span class="math">\(z\)</span>: Distance of the sample-point projected onto the z-axis of the laser_emitter_frame = Distance from the x-y-plane of the laser_emitter_frame</li>
+<li><span class="math">\(\alpha, K_{u}, u_{0}\)</span>: Symbols of the uncertainty-formular (not important to use the sensor-model, detailed description in accompanying Bachelor’s Thesis)</li>
 </ul>
 </div>
 <div class="section" id="visualization-of-concepts">
@@ -234,18 +234,18 @@ possible sampled surface points, … (‘context’).</p>
 <dd><p>Computional representation of an laser triangulation sensor under influence of uncertainty.</p>
 <dl class="method">
 <dt id="agiprobot_measurement.sensor_model.SensorModel.evaluate_score">
-<code class="descname">evaluate_score</code><span class="sig-paren">(</span><em>z</em>, <em>gamma</em><span class="sig-paren">)</span><a class="reference internal" href="_modules/agiprobot_measurement/sensor_model.html#SensorModel.evaluate_score"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#agiprobot_measurement.sensor_model.SensorModel.evaluate_score" title="Permalink to this definition">¶</a></dt>
-<dd><p>Calculates a score of uncertainty <span class="math">\(\in [0,1]\)</span> for the given z and gamma (higher score means lower uncertainty). The score
-is linear affine in the uncertainty based on z and gamma - It is 1 if the provided values match the best possible case (lowest
+<code class="descname">evaluate_score</code><span class="sig-paren">(</span><em>z</em>, <em>psi</em><span class="sig-paren">)</span><a class="reference internal" href="_modules/agiprobot_measurement/sensor_model.html#SensorModel.evaluate_score"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#agiprobot_measurement.sensor_model.SensorModel.evaluate_score" title="Permalink to this definition">¶</a></dt>
+<dd><p>Calculates a score of uncertainty <span class="math">\(\in [0,1]\)</span> for the given z and psi (higher score means lower uncertainty). The score
+is linear affine in the uncertainty based on z and psi - It is 1 if the provided values match the best possible case (lowest
 possible uncertainty of the sensor model) and 0 when both values are right at the rejection limit (i.e. are equal to <a href="#id2"><span class="problematic" id="id3">max_deviation_</span></a>…):
-<span class="math">\(\frac{u_{max} - u(z, \gamma)}{u_{max} - u_{min}}\)</span></p>
+<span class="math">\(\frac{u_{max} - u(z, \psi)}{u_{max} - u_{min}}\)</span></p>
 <table class="docutils field-list" frame="void" rules="none">
 <col class="field-name" />
 <col class="field-body" />
 <tbody valign="top">
 <tr class="field-odd field"><th class="field-name">Parameters:</th><td class="field-body"><ul class="first simple">
 <li><strong>z</strong> (<em>float</em>) – z-coordinate of the point to evaluate in the laser_emitter_frame in mm</li>
-<li><strong>gamma</strong> (<em>float</em>) – Angle of the laser_emitter_frame’s z-y-plane with the surface-triangle of the point to evaluate in rad</li>
+<li><strong>psi</strong> (<em>float</em>) – Angle of the laser_emitter_frame’s z-y-plane with the surface-triangle of the point to evaluate in rad</li>
 </ul>
 </td>
 </tr>
@@ -261,19 +261,19 @@ possible uncertainty of the sensor model) and 0 when both values are right at th
 
 <dl class="method">
 <dt id="agiprobot_measurement.sensor_model.SensorModel.evaluate_uncertainty">
-<code class="descname">evaluate_uncertainty</code><span class="sig-paren">(</span><em>z</em>, <em>gamma</em><span class="sig-paren">)</span><a class="reference internal" href="_modules/agiprobot_measurement/sensor_model.html#SensorModel.evaluate_uncertainty"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#agiprobot_measurement.sensor_model.SensorModel.evaluate_uncertainty" title="Permalink to this definition">¶</a></dt>
-<dd><p>Computes the uncertainty of a surface point with given z and gamma using the specified geometric sensor parameters.</p>
+<code class="descname">evaluate_uncertainty</code><span class="sig-paren">(</span><em>z</em>, <em>psi</em><span class="sig-paren">)</span><a class="reference internal" href="_modules/agiprobot_measurement/sensor_model.html#SensorModel.evaluate_uncertainty"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#agiprobot_measurement.sensor_model.SensorModel.evaluate_uncertainty" title="Permalink to this definition">¶</a></dt>
+<dd><p>Computes the uncertainty of a surface point with given z and psi using the specified geometric sensor parameters.</p>
 <table class="docutils field-list" frame="void" rules="none">
 <col class="field-name" />
 <col class="field-body" />
 <tbody valign="top">
 <tr class="field-odd field"><th class="field-name">Parameters:</th><td class="field-body"><ul class="first simple">
 <li><strong>z</strong> (<em>float</em>) – z-coordinate of the point to evaluate in the laser_emitter_frame in mm</li>
-<li><strong>gamma</strong> (<em>float</em>) – Angle of the laser_emitter_frame’s z-y-plane with the surface-triangle of the point to evaluate in rad</li>
+<li><strong>psi</strong> (<em>float</em>) – Angle of the laser_emitter_frame’s z-y-plane with the surface-triangle of the point to evaluate in rad</li>
 </ul>
 </td>
 </tr>
-<tr class="field-even field"><th class="field-name">Returns:</th><td class="field-body"><p class="first">Uncertainty based on the z, gamma, and the geometric sensor parameters, or ‘NaN’ if z and gamma are invalid</p>
+<tr class="field-even field"><th class="field-name">Returns:</th><td class="field-body"><p class="first">Uncertainty based on the z, psi, and the geometric sensor parameters, or ‘NaN’ if z and psi are invalid</p>
 </td>
 </tr>
 <tr class="field-odd field"><th class="field-name">Return type:</th><td class="field-body"><p class="first last">float</p>
@@ -287,7 +287,7 @@ possible uncertainty of the sensor model) and 0 when both values are right at th
 <dt id="agiprobot_measurement.sensor_model.SensorModel.get_max_uncertainty">
 <code class="descname">get_max_uncertainty</code><span class="sig-paren">(</span><span class="sig-paren">)</span><a class="reference internal" href="_modules/agiprobot_measurement/sensor_model.html#SensorModel.get_max_uncertainty"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#agiprobot_measurement.sensor_model.SensorModel.get_max_uncertainty" title="Permalink to this definition">¶</a></dt>
 <dd><p>Computes maximum possible uncertainty of a measured point that is not rejected using geometric sensor parameters. 
-The uncertainty-formula is evaluated at z- and gamma-values that are at rejection-limits for a surface point, so that this value corresponds
+The uncertainty-formula is evaluated at z- and psi-values that are at rejection-limits for a surface point, so that this value corresponds
 to the worst uncertainty assignable to a measurable point.</p>
 <table class="docutils field-list" frame="void" rules="none">
 <col class="field-name" />
@@ -304,7 +304,7 @@ to the worst uncertainty assignable to a measurable point.</p>
 <dl class="method">
 <dt id="agiprobot_measurement.sensor_model.SensorModel.get_median_deviation_angle">
 <code class="descname">get_median_deviation_angle</code><span class="sig-paren">(</span><span class="sig-paren">)</span><a class="reference internal" href="_modules/agiprobot_measurement/sensor_model.html#SensorModel.get_median_deviation_angle"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#agiprobot_measurement.sensor_model.SensorModel.get_median_deviation_angle" title="Permalink to this definition">¶</a></dt>
-<dd><p>Get the smallest angle allowed for tilting (smallest of maximum deviations of theta and gamma devided by 2).</p>
+<dd><p>Get the smallest angle allowed for tilting (smallest of maximum deviations of theta and psi devided by 2).</p>
 <table class="docutils field-list" frame="void" rules="none">
 <col class="field-name" />
 <col class="field-body" />
@@ -321,7 +321,7 @@ to the worst uncertainty assignable to a measurable point.</p>
 <dt id="agiprobot_measurement.sensor_model.SensorModel.get_min_uncertainty">
 <code class="descname">get_min_uncertainty</code><span class="sig-paren">(</span><span class="sig-paren">)</span><a class="reference internal" href="_modules/agiprobot_measurement/sensor_model.html#SensorModel.get_min_uncertainty"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#agiprobot_measurement.sensor_model.SensorModel.get_min_uncertainty" title="Permalink to this definition">¶</a></dt>
 <dd><p>Computes the minimum possible uncertainty using the geometric sensor parameters. It returns the uncertainty value assignable to
-a surface point which has been measured with optimal z- and gamma-values, i.e. the best-case.</p>
+a surface point which has been measured with optimal z- and psi-values, i.e. the best-case.</p>
 <table class="docutils field-list" frame="void" rules="none">
 <col class="field-name" />
 <col class="field-body" />
@@ -374,17 +374,18 @@ So points lying wthin this frustum can be touched by the laser line AND can be m
 </dd></dl>
 
 <dl class="method">
-<dt id="agiprobot_measurement.sensor_model.SensorModel.process_view_metrologically">
-<code class="descname">process_view_metrologically</code><span class="sig-paren">(</span><em>view</em>, <em>maximum_deflection=500.0</em><span class="sig-paren">)</span><a class="reference internal" href="_modules/agiprobot_measurement/sensor_model.html#SensorModel.process_view_metrologically"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#agiprobot_measurement.sensor_model.SensorModel.process_view_metrologically" title="Permalink to this definition">¶</a></dt>
-<dd><p>Computes all measurable surface-points by a view-object as well as uncertainties and where they are measurable on the view-measurement-trajectory.
+<dt id="agiprobot_measurement.sensor_model.SensorModel.process_viewpoint_metrologically">
+<code class="descname">process_viewpoint_metrologically</code><span class="sig-paren">(</span><em>viewpoint</em>, <em>uncertainty_threshold</em>, <em>maximum_deflection=500.0</em><span class="sig-paren">)</span><a class="reference internal" href="_modules/agiprobot_measurement/sensor_model.html#SensorModel.process_viewpoint_metrologically"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#agiprobot_measurement.sensor_model.SensorModel.process_viewpoint_metrologically" title="Permalink to this definition">¶</a></dt>
+<dd><p>Computes all measurable surface-points by a viewpoint-object as well as uncertainties and where they are measurable on the viewpoint-measurement-trajectory.
 Requires context to be set via set_processing_context(…). Checks for every sampled surface point of the given context whether it is visible and calculates the
-uncertainty-score for it eventually. Also, the deflection of the laser_emitter_frame along the trajectory-line from the view-center pose is evaluated.</p>
+uncertainty for it eventually. Also, the deflection of the laser_emitter_frame along the trajectory-line from the viewpoint-anchor pose is evaluated.</p>
 <table class="docutils field-list" frame="void" rules="none">
 <col class="field-name" />
 <col class="field-body" />
 <tbody valign="top">
 <tr class="field-odd field"><th class="field-name">Parameters:</th><td class="field-body"><ul class="first simple">
-<li><strong>view</strong> (<a class="reference internal" href="module_view.html#agiprobot_measurement.view.View" title="agiprobot_measurement.view.View"><em>View</em></a>) – View with set view-center-pose</li>
+<li><strong>viewpoint</strong> (<a class="reference internal" href="module_view.html#agiprobot_measurement.viewpoint.ViewPoint" title="agiprobot_measurement.viewpoint.ViewPoint"><em>ViewPoint</em></a>) – ViewPoint with set viewpoint-anchor-pose</li>
+<li><strong>uncertainty_threshold</strong> (<em>float</em>) – Maximum permissible uncertainty of a measured surface point, in mm</li>
 <li><strong>maximum_deflection</strong> (<em>float</em><em>, </em><em>optional</em>) – Maximum deflection of the trajectory to be considered for processing in mm, defaults to 5e2</li>
 </ul>
 </td>
@@ -393,7 +394,7 @@ uncertainty-score for it eventually. Also, the deflection of the laser_emitter_f
 <ul class="simple">
 <li>Indices of the measurable surface points in samples_surface_points_list</li>
 <li>Corresponding uncertainty-scores</li>
-<li>Metric distance in mm in trajectory-direction from the view-center where the corresponding surface point is measurable</li>
+<li>Metric distance in mm in trajectory-direction from the viewpoint-anchor where the corresponding surface point is measurable</li>
 </ul>
 </p>
 </td>
@@ -410,7 +411,7 @@ uncertainty-score for it eventually. Also, the deflection of the laser_emitter_f
 <code class="descname">set_processing_context</code><span class="sig-paren">(</span><em>mesh</em>, <em>sampled_surface_points</em>, <em>sampled_face_indices</em><span class="sig-paren">)</span><a class="reference internal" href="_modules/agiprobot_measurement/sensor_model.html#SensorModel.set_processing_context"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#agiprobot_measurement.sensor_model.SensorModel.set_processing_context" title="Permalink to this definition">¶</a></dt>
 <dd><p>Loads a context for metrological processing to the sensor model.
 This includes loading the target mesh into a ray-tracer as well as gaining awareness over the
-sampling results because they are directly used to assess a View during process_view_metrologically().
+sampling results because they are directly used to assess a ViewPoint during process_viewpoint_metrologically().
 This method must be called before any metrological processing can be performed. A previously set
 context becomes overwritten completely by calling this method again.</p>
 <table class="docutils field-list" frame="void" rules="none">
@@ -439,7 +440,7 @@ context becomes overwritten completely by calling this method again.</p>
           </div>
           <footer>
     <div class="rst-footer-buttons" role="navigation" aria-label="footer navigation">
-        <a href="module_view.html" class="btn btn-neutral float-right" title="View" accesskey="n" rel="next">Next <span class="fa fa-arrow-circle-right" aria-hidden="true"></span></a>
+        <a href="module_view.html" class="btn btn-neutral float-right" title="ViewPoint" accesskey="n" rel="next">Next <span class="fa fa-arrow-circle-right" aria-hidden="true"></span></a>
         <a href="module_trajectory_manager.html" class="btn btn-neutral float-left" title="Trajectory Manager" accesskey="p" rel="prev"><span class="fa fa-arrow-circle-left" aria-hidden="true"></span> Previous</a>
     </div>
 

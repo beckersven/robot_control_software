@@ -10,15 +10,15 @@ CoppeliaSim Interface's Documentation
       [1]_       
 
    .. toctree::
-      :maxdepth: 1
+      :maxdepth: 2
       :caption: Explanation
 
       Overview.rst
-   
+      Usage_Guide.rst
 
    .. toctree::
       :caption: Components
-      :maxdepth: 1
+      :maxdepth: 2
 
       HardwareInterface.rst
       point_cloud_manager.rst
