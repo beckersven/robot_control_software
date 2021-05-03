@@ -1,7 +1,7 @@
 .. _viewpoint:
 
-ViewPoint
-=========
+View Point
+==========
 
 Introduction and Basic Ideas
 ----------------------------
@@ -16,7 +16,7 @@ Commonly Used Terms
 :::::::::::::::::::
 * surface-point: The sampled surface point on the target-mesh this viewpoint is based on
 * anchor-position: The position this viewpoint's trajectory goes through and where its laser_emitter_frame's z-axis points towards the corresponding surface-point
-* laser_emitter_frame: Frame positioned at the scanners's laser-emitter ("where the laser leaves the scanner") that is moved along the straight trajectory during execution
+* laser_emitter_frame: Frame positioned at the the tip of the scanners's fan that is moved along the straight trajectory during execution
     * x-axis points in the trajectory-direction
     * z-axis points towards the corresponding surface-point when it becomes measured
     * y-axis results from the right-handedness of the coordinate-system

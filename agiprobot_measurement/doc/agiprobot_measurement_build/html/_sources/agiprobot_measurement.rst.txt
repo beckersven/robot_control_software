@@ -18,10 +18,10 @@ agiprobot\_measurement\.trajectory\_manager module
     :members:
     :show-inheritance:
 
-agiprobot\_measurement\.view module
+agiprobot\_measurement\.viewpoint module
 -----------------------------------
 
-.. automodule:: agiprobot_measurement.view
+.. automodule:: agiprobot_measurement.viewpoint
     :members:
     :undoc-members:
     :show-inheritance:

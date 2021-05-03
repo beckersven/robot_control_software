@@ -26,8 +26,9 @@ from rospy_message_converter import message_converter
 import click
 import os
 import rospkg
+import readline
 
-OFFSET = np.array([450, -550, 1200])
+OFFSET = np.array([450, -550, 1000])
 
 class TrajectoryManager:
     """
@@ -128,7 +129,7 @@ class TrajectoryManager:
     
     def convert_viewpointlist_to_execution_plan(self, viewpointlist):
         """
-        Convert a list of ViewPoint-objects into a list of moveit_msgs/RobotTrajectory-entries so that the viewpoints can be executed consecutively.
+        Convert a list of ViewPoint-objects into a list of moveit_msgs/RobotTrajectory-entries so that the viewpoints can be stored.
         
         :param viewpointlist: List of ViewPoint-objects with set trajectories for steering-to-viewpoint and measurement
         :type vievlist: list
@@ -139,7 +140,7 @@ class TrajectoryManager:
         execution_plan = []
         for viewpoint in viewpointlist:
             assert isinstance(viewpoint, ViewPoint)
-            execution_plan.append(viewpointpoint.get_trajectory_to_viewpoint())
+            execution_plan.append(viewpoint.get_trajectory_to_viewpoint())
             execution_plan.append(viewpoint.get_trajectory_for_measurement())
         return execution_plan
 
@@ -158,6 +159,10 @@ class TrajectoryManager:
         :type transform: numpy.array, optional
         :param add_wbk_mirrors: Adds hard-coded collision objects to MoveIt as the robot station at the institute is placed besides 2 fragile mirrors, defaults to True
         :type add_wbk_mirrors: bool, optional
+        :param remove_downside: Whether to remove downfacing triangles of the CAD-mesh, defaults to True
+        :type remove_downside: bool, optional
+        :param remove_threshold_angle_deg: Threshold angle to identify downfacing surface normals with respect to the world-z-axis in degree, defaults to 20
+        :type remove_threshold_angle_deg: float
         :return: Whether all operations (esp. loading from file into trimesh and MoveIt) were successful
         :rtype: bool
         """
@@ -215,16 +220,18 @@ class TrajectoryManager:
             self.scene.add_box("mirror2", box_pose, size=(2, 0.1, 3))
         return True
 
-    def generate_samples_and_viewpoints(self, sampling_density, uncertainty_threshold, orientations_around_boresight, viewpoint_tilt_mode="full", plan_path_to_check_reachability = False, minimum_trajectory_length = 25, trajectory_sample_step = 2):
+    def generate_samples_and_viewpoints(self, sampling_density, uncertainty_threshold, orientations_around_boresight, output_set, viewpoint_tilt_mode="full", plan_path_to_check_reachability = False, minimum_trajectory_length = 25, trajectory_sample_step = 2, static_overmeasure=0):
         """
         Samples the mesh's surface into discrete points, generates viewpoints for each sample and processes these viewpoints metrologically and mechanically.
-        Only viewpoints that do meet the contraints specified in the method's parameters and in MoveIt (collision, reachability, ...) will be returned. This method allows to generate
+        Only viewpoints that do meet the contraints specified in the method's parameters and in MoveIt (collision, reachability, ...) will be addet to output_set. This method allows to generate
         multiple ViewPoint-objects for a single surface-point by varying the anchor-pose (the boresight is always focused on the corresponding surface_point).
 
         :param sampling_density: Density of sampling to generate the points for measurement-calculations and viewpoint-generation in points per mm^2
         :type sampling_density: float
         :param orientations_around_boresight: Number of orientations around the sensor's boresight to be considered per sampled_surface_point
         :type orientations_around_boresight: int
+        :param output_set: Set where the generated viewpoints are stored (call by reference)
+        :type output_set: set
         :param viewpoint_tilt_mode: For each orientation, deviate the psi- and theta-values of the viewpoint-anchor-pose slightly from the optimum according to (one deviation-step per angle and orientation available right now):\n
             - "none": Do not perform any tilting.\n
             - "limited": When the optimal angle-configuration did not work, try deviations and stop after finding the first valid solution.\n
@@ -237,18 +244,13 @@ class TrajectoryManager:
         :type minimum_trajectory_length: float, optional
         :param trajectory_sample_step: Euclidian distance between 2 trajectory-points in cartesian sapce in mm, defaults to 2
         :type trajectory_sample_step: float, optional
-        :return: 2 lists with the first containing all sampled_surface_points and the second containing all viewpoints that were processed successfully
-        :rtype: list[numpy.array], list[ViewPoint]
+        :param static_overmeasure: Constant euclidian distance that is added at each end of the path in mm, defaults to 0
+        :type static_overmeasure: float
+        :yields: Progress tuple ([current processed samples], [total samples to process])
+        :rtype: Iterator[tuple]
         """
         # Sample points on the target mesh's surface based on the given density through rejection sampling
         sampled_surface_points, sampled_face_indices = trimesh.sample.sample_surface_even(self.target_mesh, int(self.target_mesh.area * sampling_density))
-        print("Sampled target mesh's surface into {} surface points".format(len(sampled_surface_points)))
-        
-       
-        orientations_around_boresight
-        print(orientations_around_boresight)
-        
-
         # Use the sampling results to set the processing context of the sensor model
         self.sensor_model.set_processing_context(self.target_mesh, sampled_surface_points, sampled_face_indices)
         # Very conservative limit of the maximum length in and againts trajectory_direction of 
@@ -267,7 +269,7 @@ class TrajectoryManager:
         
         # How much a trajctory has to be longer than the maximum defliction to reliably scan the object (as sampled_surface_points are most likely not on edges).
         # Estimated as circle radius according to density + safety offset.
-        minimum_required_overmeasure = np.sqrt(1 / (np.pi * sampling_density)) + 5
+        minimum_required_overmeasure = np.sqrt(1 / (np.pi * sampling_density)) + static_overmeasure
         
         
         if plan_path_to_check_reachability:
@@ -278,52 +280,37 @@ class TrajectoryManager:
             # Enable persistent inverse-kinematics-service to time-efficiently compute joint-values of cartesian poses
             ik_service = rospy.ServiceProxy("/compute_ik", GetPositionIK, persistent=True)
         
-        # Set variables to organize the iteration
-        valid_viewpoints = []
-        processed = 0
-    
-        START =time.time()
         # For every sampled_surface_point: Generate viewpoint with anchor_point in normal-direction of the surface-point's face-triangle.
         # Then, rotate the orientation of the viewpoint's laser_emitter_frame around the z-Axis (= boresight) with respect to the anchor point (-> Changes only orientation).
         # If specified, apply tilting to the viewpoint for every orientation, so that the viewpoint's anchor point is turned around the laser_emitter_frame's x-/y-axis but 
         # with respect to the corresponding surface point (-> Changes orientation and position of viewpoint-anchor).
-        for (surface_point, face_index) in zip(sampled_surface_points, sampled_face_indices):
+        for i, (surface_point, face_index) in enumerate(zip(sampled_surface_points, sampled_face_indices)):
             for angle in np.linspace(0, 360, orientations_around_boresight + 1)[:-1]:
                 new_viewpoint = ViewPoint(surface_point, self.target_mesh.face_normals[face_index], np.deg2rad(angle), self.sensor_model.get_optimal_standoff())
                 if viewpoint_tilt_mode == "none":
                     if self.process_viewpoint(new_viewpoint, ik_service, uncertainty_threshold, minimum_required_overmeasure):
-                        valid_viewpoints.append(new_viewpoint)
+                        output_set.add(new_viewpoint)
                 elif viewpoint_tilt_mode == "limited":
                     # angle_config = tuple describing (tilt around x-axis, tilt around y-axis) from the set of 2-element permutations with repitions of all valid tilt-angles
                     for angle_config in itertools.product([0, self.sensor_model.get_median_deviation_angle(), -1 * self.sensor_model.get_median_deviation_angle()], repeat=2):
                         new_viewpoint = ViewPoint(surface_point, self.target_mesh.face_normals[face_index], np.deg2rad(angle), self.sensor_model.get_optimal_standoff(), angle_config[0], angle_config[1])
                         # When valid viewpoint could be obtained through tilting -> Continue to next orientation
                         if self.process_viewpoint(new_viewpoint, ik_service, uncertainty_threshold, minimum_required_overmeasure):
-                            valid_viewpoints.append(new_viewpoint)
+                            output_set.add(new_viewpoint)
                             break
                 elif viewpoint_tilt_mode == "full":
                     # angle_config = tuple describing (tilt around x-axis, tilt around y-axis) from the set of 2-element permutations with repitions of all valid tilt-angles
                     for angle_config in itertools.product([0, self.sensor_model.get_median_deviation_angle(), -1 * self.sensor_model.get_median_deviation_angle()], repeat=2):
                         new_viewpoint = ViewPoint(surface_point, self.target_mesh.face_normals[face_index], np.deg2rad(angle), self.sensor_model.get_optimal_standoff(), angle_config[0], angle_config[1])
                         if self.process_viewpoint(new_viewpoint, ik_service, uncertainty_threshold, minimum_required_overmeasure):
-                            valid_viewpoints.append(new_viewpoint)
+                            output_set.add(new_viewpoint)
                 else:
                     raise ValueError("viewpoint_tilt_mode has to be 'none', 'limited' or 'full'. You entered: '{}'".format(viewpoint_tilt_mode))
-                processed += 1
-                print("Processed viewpoint {} of {} ({} %, {} of them are usable for measurement)".format(
-                    processed, 
-                    len(sampled_surface_points) * orientations_around_boresight, 
-                    np.round(100.0 * processed / (len(sampled_surface_points) * orientations_around_boresight), 2),
-                    len(valid_viewpoints)
-                ))
-                
+            yield (i, len(sampled_surface_points))
+        
         # Because the service was created "persistent", it must be closed properly
         if not plan_path_to_check_reachability:
             ik_service.close()
-
-        print("\n" + "*" * 20 + "\nGenerated {} valid viewpoints with fully evaluated measurement-trajectory/-ies".format(len(valid_viewpoints)))
-        print("DURATION WAS ", time.time() - START)
-        return sampled_surface_points, valid_viewpoints
 
 
     def process_viewpoint(self, viewpoint, ik_service, uncertainty_threshold, minimum_required_overmeasure = 5, trajectory_sample_step = 2, joint_jump_threshold = 1.5, minimum_trajectory_length = 50):
@@ -334,8 +321,11 @@ class TrajectoryManager:
 
         :param viewpoint: ViewPoint to be processed (if processing was successful, members of this viewpoint-object will be changed)
         :type viewpoint: ViewPoint
+
         :param ik_service: ROS-Serviceproxy that can resolve inverse-kinematics via moveit_msgs/GetPositionIK 
         :type ik_service: rospy.ServiceProxy
+        :param uncertainty_threshold: Maximum permissible uncertainty in mm
+        :type uncertainty_threshold: float
         :param minimum_required_overmeasure: How much to add to the trajectory in trajectory-direction in mm after the last measurable sample_point is measured (as samples usually do not occur exactly at edges), defaults to 5
         :type minimum_required_overmeasure: float, optional
         :param trajectory_sample_step: Euclidian distance between 2 trajectory-points in cartesian sapce in mm, defaults to 2
@@ -595,17 +585,17 @@ class TrajectoryManager:
                     output.add(provided_viewpoints[int(solved_viewpointpoint_variable.name.split("_")[-1])])
             return output           
         
-    def connect_viewpoints(self, unordered_viewpoints, min_planning_time=0.2):
+    def connect_viewpoints(self, unordered_viewpoints, ordered_viewpoints, min_planning_time=0.2):
         """
         Connect a set of unordered viewpoints with the current state and in between greedily so that they can be executed as fast as possible.
         Until all viewpoints are enqueued, do: From the end-point of the last enqueued trajetory, motion plans are calculated to the start-/end-poses
         of all unenqueued viewpoint's measurement-trajectories and the shortest (in time domain) will be selected. 
 
         :param unordered_viewpoints: Set of viewpoints to be connected where each has a stored measurement-trajectory 
-        :type unordered_viewpoints: set[viewpoint]
-        :param min_planning_time: Planning time that is used for connection-path-planning (will be increased automatically if no plan was found at first), defaults to 0.2
+        :type unordered_viewpoints: set[ViewPoint]
+        :param min_planning_time: Planning time that is used for connection-path-planning in s (will be increased automatically if no plan was found at first), defaults to 0.2
         :type min_planning_time: float, optional
-        :return: List of ordered and execution-ready viewpoints
+        :return: List of ordered and execution-ready ViewPoints
         :rtype: list[ViewPoint]
         """
         if len(unordered_viewpoints) == 0:
@@ -613,8 +603,6 @@ class TrajectoryManager:
         # Convert to list to make 'pop' easier
         unenqueued_viewpoints = list(unordered_viewpoints)
 
-        # Output list = ViewPoints with stored shortest inter-viewpoint-paths
-        enqueud_viewpoints = []
         
         # Introduce initial robot pose as pseudo "viewpoint"
         # (it has a trajectory with the current pose as its only (end-)point)
@@ -626,13 +614,13 @@ class TrajectoryManager:
         pseudo_trajectory.joint_trajectory.joint_names = unenqueued_viewpoints[0].get_trajectory_for_measurement().joint_trajectory.joint_names
         pseudo_trajectory.joint_trajectory.points.append(pseudo_end_point)
         initial_pseudo_viewpoint.set_trajectory_for_measurement(pseudo_trajectory)       
-        enqueud_viewpoints.append(initial_pseudo_viewpoint)
+        ordered_viewpoints.append(initial_pseudo_viewpoint)
 
         while len(unenqueued_viewpoints) != 0:
             # Set start state for planning to the last pose of the previously enqueued trajectory
             temporary_start_state = moveit_msgs.msg.RobotState()
-            temporary_start_state.joint_state.position = enqueud_viewpoints[-1].get_trajectory_for_measurement().joint_trajectory.points[-1].positions
-            temporary_start_state.joint_state.name = enqueud_viewpoints[-1].get_trajectory_for_measurement().joint_trajectory.joint_names
+            temporary_start_state.joint_state.position = ordered_viewpoints[-1].get_trajectory_for_measurement().joint_trajectory.points[-1].positions
+            temporary_start_state.joint_state.name = ordered_viewpoints[-1].get_trajectory_for_measurement().joint_trajectory.joint_names
             self.group.set_start_state(temporary_start_state)
             self.group.set_planning_time(min_planning_time)
             
@@ -663,24 +651,25 @@ class TrajectoryManager:
                 if reverse_flag:
                     next_viewpoint.reverse_trajectory_for_measurement()   
                 next_viewpoint.set_trajectory_to_viewpoint(min_plan)
-                enqueud_viewpoints.append(next_viewpoint)
+                ordered_viewpoints.append(next_viewpoint)
                 # Reset planning time
                 self.group.set_planning_time(min_planning_time)
-                print("Enqueued viewpointpoint-trajectory ({} left)".format(len(unenqueued_viewpoints)))
+                yield None
+
             else:
                 # No solution has been found -> Increase planning time to improve success-chances for the next iteration
                 self.group.set_planning_time(min_planning_time + self.group.get_planning_time())
-        return enqueud_viewpoints[1:]
+        ordered_viewpoints.pop(0)
 
 
 
     def execute(self, execution_list, surface_points=None):
         """
         Execute a list of RobotTrajectories or ViewPoints via MoveIt. When problems occur during execution,
-        the robot will be stopped and an exception will be raised. When executing from a list of viewpoints, the currently measured surface_points
+        the robot will be stopped and an exception will be raised. When executing from a list of ViewPoints, the currently measured surface_points
         are published in "/currently_measured_points" during execution.
 
-        :param execution_list: List of RobotTrajectories or viewpoints that can be executed consecutively (the next segment's start point is the last segment's end point)
+        :param execution_list: List of RobotTrajectories or ViewPoints that can be executed consecutively (the next segment's start point is the last segment's end point)
         :type execution_list: list[moveit_msgs/RobotTrajectory] or list[ViewPoint]
         :param surface_points: List of the actual sampled surface points, defaults to None
         :type surface_points: list[numpy.array], optional
@@ -699,7 +688,6 @@ class TrajectoryManager:
         # Flag for keeping track about what is executed at the moment (when execution_list consists of RobotTrajectories, 
         # they shifting between steering-to-measurement-segment [False] and measurement-trajectory-segment [True])
         trajectory_flag = False
-        
         # Consecutively execute segments/ViewPoints with short breaks between every trajectory-execution to enure nothing is moving anymore
         for i, execution_segment in enumerate(execution_list):
             if isinstance(execution_segment, ViewPoint):
@@ -712,7 +700,6 @@ class TrajectoryManager:
                 
                 # Firstly, steer to the start point of the measurement-trajectory
                 trajectory = execution_segment.get_trajectory_to_viewpoint()
-                print("Steering to next measurement-trajectory (time: {}s)...".format(trajectory.joint_trajectory.points[-1].time_from_start.to_sec()))
                 stitch_service.call(SetBoolRequest(data=False))
                 if not self.group.execute(trajectory):
                     self.group.stop()
@@ -721,50 +708,153 @@ class TrajectoryManager:
 
                 # Secondly, execute the measurement-trajectory
                 trajectory = execution_segment.get_trajectory_for_measurement()
-                print("Executing measurement-trajectory (time: {}s)...".format(trajectory.joint_trajectory.points[-1].time_from_start.to_sec()))
                 stitch_service.call(SetBoolRequest(data=True))
                 if not self.group.execute(trajectory):
                     self.group.stop()
                     raise Exception("Failed to execute trajectory")
                 rospy.sleep(0.1)
-
-                print("Executed viewpoint {} of {}".format(i + 1, len(execution_list)))
+                yield None
                 
                 
-            if isinstance(execution_segment, moveit_msgs.msg.RobotTrajectory):
+            elif isinstance(execution_segment, moveit_msgs.msg.RobotTrajectory):
                 if trajectory_flag:
                     stitch_service.call(SetBoolRequest(data=True))
-                    print("Executing measurement-trajectory (time: {}s)...".format(execution_segment.joint_trajectory.points[-1].time_from_start.to_sec()))
                 else:
                     stitch_service.call(SetBoolRequest(data=False))
-                    print("Steering to next measurement-trajectory (time: {}s)...".format(execution_segment.joint_trajectory.points[-1].time_from_start.to_sec()))
                 if not self.group.execute(execution_segment):
                     self.group.stop()
                     raise Exception("Failed to execute path segment")
-                print("Executed segment {} of {}".format(i + 1, len(execution_list)))
+                yield None
                 rospy.sleep(0.1)
                 trajectory_flag = not trajectory_flag
         
         # Finally, ensure stitching is disabled     
         stitch_service.call(SetBoolRequest(data=False))   
 
-    def perform_all(self, target_mesh_filename, density, orientations_around_boresight, uncertainty_threshold):
-        self.load_target_mesh(target_mesh_filename, transform=trimesh.transformations.translation_matrix(OFFSET))
-        # surface_pts, viewpoints  = self.generate_samples_and_viewpoints(density, uncertainty_threshold, orientations_around_boresight)
-        # scp_viewpoints = self.solve_scp(viewpoints, "greedy")
-        # connected_viewpoints = self.connect_viewpoints(scp_viewpoints)
-        #execution_plan = self.convert_viewpointlist_to_execution_plan(connected_viewpoints)
-        #self.store_execution_plan("/home/svenbecker/Bachelorarbeit/test/stored_plans/motor_high_res.yaml", execution_plan, {"Time of calculation": "Jetzt"})
-        # raw_input("JETZT")
-        execution_plan = self.load_execution_plan(os.path.join(rospkg.RosPack().get_path("agiprobot_measurement"), "benchmark_results/execution_plan_objectA_wuerfel_rho_001_solver_IP_basic_angels_around_boresight_3.yaml"))
-        self.execute(execution_plan)
+    def user_guide(self):
+        """Console program for execution of the algorithm. The user is asked all required information via questions so that the algorihtm can be
+        launched properly. For suitable inputs, tab-completion is available. This is the recommended way to use the algorithm.
+
+        :rtype: None
+        """
+        class AutoCompleter:
+            """Class for providing tab-completion functionality
+            """
+            def set_choices(self, choices):
+                self.choices = sorted(choices)
+            def evaluate(self, query, index):
+                if not query:
+                    return self.choices[index]
+                else:
+                    temp = [choice for choice in self.choices if query in choice]
+                    try:
+                        return sorted(temp)[index]
+                    except:
+                        return None
+        ac = AutoCompleter()
+        # Load trojectory from specified file, or generate new one
+        if click.confirm(click.style("Load trajectory from file?", fg="cyan"), default=False):
+            try:
+                path_files = [filename for filename in os.listdir(os.path.join(rospkg.RosPack().get_path("agiprobot_measurement"), "trajectories")) if (filename[-5:] == ".yaml")]
+            except:
+                click.secho("ROS-package 'agiprobot_measurement' not found!", bg="red", fg="white")
+                click.secho("Have you sourced 'devel/setup.bash'?", fg="yellow")
+                return False
+            # Set the tab-completion
+            ac.set_choices(path_files)
+            readline.set_completer(ac.evaluate)
+            readline.parse_and_bind('tab: complete')
+            path_file = click.prompt(click.style("Specify file-name", fg="cyan"), type=click.Choice(path_files, case_sensitive=True))
+            # Reset the tab-completion
+            ac.set_choices([])
+            full_trajectory = self.load_execution_plan(os.path.join(rospkg.RosPack().get_path("agiprobot_measurement"), "trajectories/{}".format(path_file)))
+        else:
+            try:
+                cad_files = [filename for filename in os.listdir(os.path.join(rospkg.RosPack().get_path("agiprobot_measurement"), "workpieces")) if (filename[-4:] == ".stl")]
+            except:
+                click.secho("ROS-package 'agiprobot_measurement' not found!", bg="red", fg="white")
+                click.secho("Have you sourced 'devel/setup.bash'?", fg="yellow")
+                exit(1)
+            # Set the tab-completion
+            ac.set_choices(cad_files)
+            readline.set_completer(ac.evaluate)
+            readline.parse_and_bind('tab: complete')
+            cad_file = click.prompt(click.style("Name of CAD-workpiece file (must be loaded in agiprobot_measurement/workpieces)", fg="cyan"), type=click.Choice(cad_files), show_choices=False)
+            # Reset the tab-completion
+            ac.set_choices([])
+            if click.confirm(click.style("Use hard-coded spatial transformation to place the workpiece?", fg="cyan"), default=True):
+                transform = trimesh.transformations.translation_matrix(OFFSET)
+            else:
+                x = click.prompt(click.style("Set the x-position of the object-/CAD-reference frame with respect to the world frame in millimeters", fg="cyan"), type=float)
+                y = click.prompt(click.style("Set the x-position of the object-/CAD-reference frame with respect to the world frame in millimeters", fg="cyan"), type=float)
+                z = click.prompt(click.style("Set the x-position of the object-/CAD-reference frame with respect to the world frame in millimeters", fg="cyan"), type=float)
+                roll = np.deg2rad(click.prompt(click.style("Set the roll-angle of the object-/CAD-reference frame with respect to the world frame in degrees", fg="cyan"), type=float))
+                pitch = np.deg2rad(click.prompt(click.style("Set the pitch-angle of the object-/CAD-reference frame with respect to the world frame in degrees", fg="cyan"), type=float))
+                yaw = np.rad2deg(click.prompt(click.style("Set the yaw-angle of the object-/CAD-reference frame with respect to the world frame in degrees", fg="cyan"), type=float))
+                transform = trimesh.transformations.translation_matrix([x,y,z]).dot(trimesh.transformations.euler_matrix(roll, pitch, yaw))
+            wbk_mirrors = click.confirm(click.style("Add wbk-obstacles around the robot station?", fg="cyan"), default=True)
+            Theta = click.prompt(click.style("Set threshold angle for downfacing normals (Theta) in degree", fg="cyan"), type=float, default=20.0)
+            click.secho("Loading CAD-file and preprocess...", fg="yellow")
+            if self.load_target_mesh(os.path.join(rospkg.RosPack().get_path("agiprobot_measurement"), "workpieces/{}".format(cad_file)), transform=transform, add_wbk_mirrors=wbk_mirrors, remove_downside=True, remove_threshold_angle_deg=Theta):
+                click.secho("CAD-file loaded and preprocessed successfully!", fg="green")
+            else:
+                click.secho("CAD-file could not be loaded or preprocessed!", bg="red", fg="black")
+                return False
+            rho_sampling = click.prompt(click.style("Set sampling-density in points per square-millimeters (rho_{sampling})", fg="cyan"), type=float, default=0.01)
+            if click.confirm(click.style("Enable tilting?", fg="cyan"), default=True):
+                tilt_mode = "full"
+            else:
+                tilt_mode = "none"
+            angles_around_boresight = click.prompt(click.style("Set number of angles around boresight (k)", fg="cyan"), type=int, default=3)
+            uncertainty_limit = click.prompt(click.style("Set maximum permissible uncertainty in micrometers (u_(zul,max) in [{},{}] micrometer)".format(self.sensor_model.get_min_uncertainty() * 1e3, self.sensor_model.get_max_uncertainty() * 1e3), fg="cyan"), type=float, default=int((self.sensor_model.get_max_uncertainty() + self.sensor_model.get_min_uncertainty()) * 5e2)) * 1e-3
+            over_measure = click.prompt(click.style("Set static over-measure in millimeters (t_Off)", fg="cyan"), type=float, default=0.0)
+            path_resolution = click.prompt(click.style("Set euclidean path resolution in millimeters (delta t)", fg="cyan"), type=float, default=2.0)
+            min_path_length = click.prompt(click.style("Set minimum euclidean path length in millimeters (t_(abs,min))", fg="cyan"), type=float, default=50.0)
+            # Set the tab-completion
+            ac.set_choices(["greedy", "IP_basic", "IP_time", "IP_uncert"])
+            scp_type = click.prompt(click.style("Set SCP solver", fg="cyan"), type=click.Choice(["greedy", "IP_basic", "IP_time", "IP_uncert"]), default="greedy")
+            # Reset the tab-completion
+            ac.set_choices([])
+            if click.confirm(click.style("Save contructed trajectory afterwards?", fg="cyan"), default=True):
+                path_name = click.prompt(click.style("Name of path in agiprobot_measurement/trajectory", fg="cyan"), type=str, default="path_{}_{}.yaml".format(cad_file.split(".")[0], int(time.time()))) + ".yaml"
+            else:
+                path_name = None
+            click.secho("All required parameters resolved!", fg="green")
+            click.secho("Starting main algorithm...", fg="yellow")
+            click.secho("Generating viewpoints... (the absolute progress corresponds to the processed surface points)", fg="yellow")
+            unordered_viewpoints = set()
+            # Show progress bar for the analyzation step and update it with every yield
+            with click.progressbar(length=50, show_pos=True) as bar:
+                for (i, length) in self.generate_samples_and_viewpoints(rho_sampling, uncertainty_limit, angles_around_boresight, unordered_viewpoints, tilt_mode, False, min_path_length, path_resolution, over_measure):
+                    bar.length = length
+                    bar.make_step(1)
+                    bar.render_progress()
+            click.secho("Generated {} viewpoints!".format(len(unordered_viewpoints)), fg="green")
+            click.secho("Selecting viewpoints...", fg="yellow")
+            selected_viewpoints = self.solve_scp(unordered_viewpoints, solver_type=scp_type)
+            click.secho("Selected {} viewpoints for inspection!".format(len(selected_viewpoints)), fg="green")
+            click.secho("Connecting trajectories for execution...", fg="yellow")
+            full_trajectory = []
+            # Show progress bar for the execution and update it with every yield
+            with click.progressbar(length=len(selected_viewpoints)) as bar:
+                for _ in self.connect_viewpoints(selected_viewpoints, full_trajectory):
+                    bar.make_step(1)
+                    bar.render_progress()
+            click.secho("Connected trajectories!", fg="green")
+            if path_name is not None:
+                self.store_execution_plan(os.path.join(rospkg.RosPack().get_path("agiprobot_measurement"), "trajectories/{}".format(path_name)), self.convert_viewpointlist_to_execution_plan(full_trajectory), metadata={"Timestamp": time.ctime(time.time())})
+        if click.confirm(click.style("\nFull trajectory available - Execute?", fg="magenta", bold=True), default=rospy.get_param("/use_sim_time")):
+            with click.progressbar(length=len(full_trajectory), show_eta=False) as bar:
+                for _ in self.execute(full_trajectory):
+                    bar.make_step(1)
+                    bar.render_progress()
+            
         
 if __name__ == "__main__":
     def signal_handler(signum_a, signum_b):
         exit()
     signal.signal(signal.SIGINT, signal_handler)
     tm = TrajectoryManager()
-    tm.perform_all(os.path.join(rospkg.RosPack().get_path("agiprobot_measurement"), "benchmark_meshes/objectA_wuerfel.stl"), 0.01, 3, 100e-3)
-    rospy.sleep(1)
-    rospy.spin()
+    tm.user_guide()
+
     

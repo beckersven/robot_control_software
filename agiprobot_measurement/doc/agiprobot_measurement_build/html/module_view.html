@@ -7,7 +7,7 @@
   
   <meta name="viewport" content="width=device-width, initial-scale=1.0" />
   
-  <title>ViewPoint &mdash; Agiprobot Measurement 1.0 documentation</title>
+  <title>View Point &mdash; Agiprobot Measurement 1.0 documentation</title>
   
 
   
@@ -101,13 +101,14 @@
               <p class="caption"><span class="caption-text">Explanation</span></p>
 <ul>
 <li class="toctree-l1"><a class="reference internal" href="overview.html">Overview</a></li>
-<li class="toctree-l1"><a class="reference internal" href="view_planning_detailed.html">View Planning Detailed</a></li>
+<li class="toctree-l1"><a class="reference internal" href="Usage_Guide.html">Usage Guide</a></li>
+<li class="toctree-l1"><a class="reference internal" href="view_planning_detailed.html">Path Planning Detailed</a></li>
 </ul>
 <p class="caption"><span class="caption-text">Components</span></p>
 <ul class="current">
 <li class="toctree-l1"><a class="reference internal" href="module_trajectory_manager.html">Trajectory Manager</a></li>
 <li class="toctree-l1"><a class="reference internal" href="module_sensor_model.html">Sensor Model</a></li>
-<li class="toctree-l1 current"><a class="current reference internal" href="#">ViewPoint</a><ul>
+<li class="toctree-l1 current"><a class="current reference internal" href="#">View Point</a><ul>
 <li class="toctree-l2"><a class="reference internal" href="#introduction-and-basic-ideas">Introduction and Basic Ideas</a><ul>
 <li class="toctree-l3"><a class="reference internal" href="#commonly-used-terms">Commonly Used Terms</a></li>
 <li class="toctree-l3"><a class="reference internal" href="#visualization-of-concepts">Visualization of Concepts</a></li>
@@ -164,7 +165,7 @@
     
       <li><a href="index.html" class="icon icon-home"></a> &raquo;</li>
         
-      <li>ViewPoint</li>
+      <li>View Point</li>
     
     
       <li class="wy-breadcrumbs-aside">
@@ -183,11 +184,12 @@
           <div role="main" class="document" itemscope="itemscope" itemtype="http://schema.org/Article">
            <div itemprop="articleBody">
             
-  <div class="section" id="viewpoint">
-<span id="id1"></span><h1>ViewPoint<a class="headerlink" href="#viewpoint" title="Permalink to this headline">¶</a></h1>
+  <div class="section" id="view-point">
+<span id="viewpoint"></span><h1>View Point<a class="headerlink" href="#view-point" title="Permalink to this headline">¶</a></h1>
 <div class="section" id="introduction-and-basic-ideas">
 <h2>Introduction and Basic Ideas<a class="headerlink" href="#introduction-and-basic-ideas" title="Permalink to this headline">¶</a></h2>
-<p>A ViewPoint is a container of one measurement-trajectory with extra-functionality.</p>
+<p>make latexpdf
+A ViewPoint is a container of one measurement-trajectory with extra-functionality.</p>
 <p>It can store besides the actual measurement-trajectory another trajectory towards its
 measurement trajectory as well as quantitative metrological predictions about the measurement. A View can construct itself in a bare geometrical sense: Given a surface point,
 a anchor-position as well as an orientation of the laser_emitter_frame are created so that the z-axis of this frame points towards this surface_point, when in anchor-position.</p>
@@ -197,7 +199,7 @@ a anchor-position as well as an orientation of the laser_emitter_frame are creat
 <li>surface-point: The sampled surface point on the target-mesh this viewpoint is based on</li>
 <li>anchor-position: The position this viewpoint’s trajectory goes through and where its laser_emitter_frame’s z-axis points towards the corresponding surface-point</li>
 <li><dl class="first docutils">
-<dt>laser_emitter_frame: Frame positioned at the scanners’s laser-emitter (“where the laser leaves the scanner”) that is moved along the straight trajectory during execution</dt>
+<dt>laser_emitter_frame: Frame positioned at the the tip of the scanners’s fan that is moved along the straight trajectory during execution</dt>
 <dd><ul class="first last">
 <li>x-axis points in the trajectory-direction</li>
 <li>z-axis points towards the corresponding surface-point when it becomes measured</li>
@@ -331,8 +333,8 @@ This measurement-trajectory is a straight line in cartesian space.</p>
 </dd></dl>
 
 <dl class="method">
-<dt id="agiprobot_measurement.viewpoint.ViewPoint.get_trajectory_to_view">
-<code class="descname">get_trajectory_to_view</code><span class="sig-paren">(</span><span class="sig-paren">)</span><a class="reference internal" href="_modules/agiprobot_measurement/viewpoint.html#ViewPoint.get_trajectory_to_view"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#agiprobot_measurement.viewpoint.ViewPoint.get_trajectory_to_view" title="Permalink to this definition">¶</a></dt>
+<dt id="agiprobot_measurement.viewpoint.ViewPoint.get_trajectory_to_viewpoint">
+<code class="descname">get_trajectory_to_viewpoint</code><span class="sig-paren">(</span><span class="sig-paren">)</span><a class="reference internal" href="_modules/agiprobot_measurement/viewpoint.html#ViewPoint.get_trajectory_to_viewpoint"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#agiprobot_measurement.viewpoint.ViewPoint.get_trajectory_to_viewpoint" title="Permalink to this definition">¶</a></dt>
 <dd><p>Returns the stored trajectory from a former state (might be robot’s current_state or the end point of a previously executed trajectory) to
 the start state of this views’s measurement trajectory. This is useful to connect multiple views into an execution plan.</p>
 <table class="docutils field-list" frame="void" rules="none">
@@ -399,8 +401,8 @@ This measurement-trajectory is a straight line in cartesian space.</p>
 </dd></dl>
 
 <dl class="method">
-<dt id="agiprobot_measurement.viewpoint.ViewPoint.set_trajectory_to_view">
-<code class="descname">set_trajectory_to_view</code><span class="sig-paren">(</span><em>trajectory_to_view</em><span class="sig-paren">)</span><a class="reference internal" href="_modules/agiprobot_measurement/viewpoint.html#ViewPoint.set_trajectory_to_view"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#agiprobot_measurement.viewpoint.ViewPoint.set_trajectory_to_view" title="Permalink to this definition">¶</a></dt>
+<dt id="agiprobot_measurement.viewpoint.ViewPoint.set_trajectory_to_viewpoint">
+<code class="descname">set_trajectory_to_viewpoint</code><span class="sig-paren">(</span><em>trajectory_to_viewpoint</em><span class="sig-paren">)</span><a class="reference internal" href="_modules/agiprobot_measurement/viewpoint.html#ViewPoint.set_trajectory_to_viewpoint"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#agiprobot_measurement.viewpoint.ViewPoint.set_trajectory_to_viewpoint" title="Permalink to this definition">¶</a></dt>
 <dd><p>Sets a trajectory that moves the robot to the start of the view’s measurement trajectory.
 The trajectory can be arbitrary but must end at this start point. This is useful to connect multiple views into an execution plan.</p>
 <table class="docutils field-list" frame="void" rules="none">

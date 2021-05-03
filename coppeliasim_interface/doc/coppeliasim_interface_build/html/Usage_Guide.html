@@ -102,7 +102,11 @@
               <p class="caption"><span class="caption-text">Explanation</span></p>
 <ul class="current">
 <li class="toctree-l1"><a class="reference internal" href="Overview.html">Overview</a></li>
-<li class="toctree-l1 current"><a class="current reference internal" href="#">Usage Guide</a></li>
+<li class="toctree-l1 current"><a class="current reference internal" href="#">Usage Guide</a><ul>
+<li class="toctree-l2"><a class="reference internal" href="#start-up">Start-Up</a></li>
+<li class="toctree-l2"><a class="reference internal" href="#scanner">Scanner</a></li>
+</ul>
+</li>
 </ul>
 <p class="caption"><span class="caption-text">Components</span></p>
 <ul>
@@ -178,17 +182,54 @@
             
   <div class="section" id="usage-guide">
 <h1>Usage Guide<a class="headerlink" href="#usage-guide" title="Permalink to this headline">¶</a></h1>
-<p>To use the CoppeliaSim-Interface, one has to do following steps in <strong>correct order</strong>. In the beginning, no ROS or CoppeliaSim should be running.
+<div class="section" id="start-up">
+<h2>Start-Up<a class="headerlink" href="#start-up" title="Permalink to this headline">¶</a></h2>
+<p>To launch the CoppeliaSim-Interface, one has to do following steps in <strong>correct order</strong>. In the beginning, no ROS or CoppeliaSim should be running.
 <strong>Be sure to always source required bash-files!</strong></p>
 <ol class="arabic simple">
 <li>Open 3 terminal windows</li>
-<li>In the first one, start the ROS-framework with <code class="code bash docutils literal"><span class="pre">roscore</span></code></li>
-<li>In the second, set the sim-time-parameter true through: <code class="code bash docutils literal"><span class="pre">rosparam</span> <span class="pre">set</span> <span class="pre">/use_sim_time</span> <span class="pre">true</span></code></li>
-<li>Also in this terminal, navigate via <code class="code bash docutils literal"><span class="pre">cd</span></code> to CoppeliaSim and launch it: <code class="code bash docutils literal"><span class="pre">./coppeliaSim.sh</span></code></li>
-<li>Wait until CoppeliaSim is launched, then open and configure the <code class="code bash docutils literal"><span class="pre">basic_scene.ttt</span></code></li>
+<li>In the first terminal, start the ROS-framework with <code class="code bash docutils literal"><span class="pre">roscore</span></code></li>
+<li>In the second one, navigate via <code class="code bash docutils literal"><span class="pre">cd</span></code> to CoppeliaSim and launch it: <code class="code bash docutils literal"><span class="pre">./coppeliaSim.sh</span></code></li>
+<li>Wait until CoppeliaSim is launched, then open and configure the <code class="code bash docutils literal"><span class="pre">basic_scene.ttt</span></code> (see the separate documentation)</li>
 <li>In the third terminal, run: <code class="code bash docutils literal"><span class="pre">roslaunch</span> <span class="pre">coppeliasim_interface</span> <span class="pre">simulation_bringup.launch</span></code></li>
 <li>Wait until MoveIt’s GUI is fully loaded and perform basic planning-/execution-tasks to ensure functionality</li>
 </ol>
+</div>
+<div class="section" id="scanner">
+<h2>Scanner<a class="headerlink" href="#scanner" title="Permalink to this headline">¶</a></h2>
+<ul class="simple">
+<li><dl class="first docutils">
+<dt>Output</dt>
+<dd><ul class="first last">
+<li><code class="code bash docutils literal"><span class="pre">/current_scan_line</span></code> (<code class="code bash docutils literal"><span class="pre">sensor_msgs/PointCloud</span></code>): What the Laser-Scanner measures at the moment</li>
+<li><code class="code bash docutils literal"><span class="pre">/stitched_point_cloud</span></code> (<code class="code bash docutils literal"><span class="pre">sensor_msgs/PointCloud</span></code>): Combined point cloud of all measurements while stitching was active</li>
+<li><dl class="first docutils">
+<dt>Visualization in RVIZ</dt>
+<dd><ol class="first last arabic">
+<li>At the bottom of the left panel “Displays”, click “Add”</li>
+<li>Switch the right tab and add the above topic(s)</li>
+<li>Optional: In the left panel “Displays”, customize the point cloud’s appearance (you might need to scroll down to do so)</li>
+</ol>
+</dd>
+</dl>
+</li>
+<li>Color matches sensor precision: Green = low uncertainty, red = high uncertainty, gradient inbetween</li>
+</ul>
+</dd>
+</dl>
+</li>
+<li><dl class="first docutils">
+<dt>Stitch-Control</dt>
+<dd><ul class="first last">
+<li>Service <code class="code bash docutils literal"><span class="pre">/clear_stitched_point_cloud</span></code> (<code class="code bash docutils literal"><span class="pre">std_srvs/Trigger</span></code>): Clear the stitched point cloud</li>
+<li>Service <code class="code bash docutils literal"><span class="pre">/switch_stitch_mode</span></code> (<code class="code bash docutils literal"><span class="pre">std_srvs/SetBool</span></code>): Enables stitching, if request’s <code class="code bash docutils literal"><span class="pre">data</span></code> is set <code class="code bash docutils literal"><span class="pre">true</span></code>, or disables it otherwise</li>
+<li>Stitching is disabled on start-up</li>
+</ul>
+</dd>
+</dl>
+</li>
+</ul>
+</div>
 </div>
 
 

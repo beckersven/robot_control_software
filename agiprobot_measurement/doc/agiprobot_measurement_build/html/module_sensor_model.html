@@ -49,7 +49,7 @@
     
     <link rel="index" title="Index" href="genindex.html" />
     <link rel="search" title="Search" href="search.html" />
-    <link rel="next" title="ViewPoint" href="module_view.html" />
+    <link rel="next" title="View Point" href="module_view.html" />
     <link rel="prev" title="Trajectory Manager" href="module_trajectory_manager.html" /> 
 </head>
 
@@ -102,7 +102,8 @@
               <p class="caption"><span class="caption-text">Explanation</span></p>
 <ul>
 <li class="toctree-l1"><a class="reference internal" href="overview.html">Overview</a></li>
-<li class="toctree-l1"><a class="reference internal" href="view_planning_detailed.html">View Planning Detailed</a></li>
+<li class="toctree-l1"><a class="reference internal" href="Usage_Guide.html">Usage Guide</a></li>
+<li class="toctree-l1"><a class="reference internal" href="view_planning_detailed.html">Path Planning Detailed</a></li>
 </ul>
 <p class="caption"><span class="caption-text">Components</span></p>
 <ul class="current">
@@ -120,7 +121,7 @@
 <li class="toctree-l2"><a class="reference internal" href="#module-agiprobot_measurement.sensor_model">API-Specification</a></li>
 </ul>
 </li>
-<li class="toctree-l1"><a class="reference internal" href="module_view.html">ViewPoint</a></li>
+<li class="toctree-l1"><a class="reference internal" href="module_view.html">View Point</a></li>
 </ul>
 
             
@@ -196,13 +197,13 @@
 <p>The mathematical foundation of the model is derived in the corresponding
 Bachelor’s Thesis, however the theoretical understanding is not needed to work with this module. One task is to make qualified predictions about the uncertainty
 of a given point within the scanners visibility, when certain spatial information (see below) is given. Within the <a class="reference internal" href="module_trajectory_manager.html#trajectory-manager"><span class="std std-ref">Trajectory Manager</span></a>’s pipeline, this module
-can also be used to determine which points can be measured and how ‘uncertain’ this measure for a <a class="reference internal" href="module_view.html#viewpoint"><span class="std std-ref">ViewPoint</span></a>-object’s trajectory given the occluding target-mesh,
+can also be used to determine which points can be measured and how ‘uncertain’ this measure for a <a class="reference internal" href="module_view.html#viewpoint"><span class="std std-ref">View Point</span></a>-object’s trajectory given the occluding target-mesh,
 possible sampled surface points, … (‘context’).</p>
 <div class="section" id="commonly-used-geometric-terms">
 <h3>Commonly Used Geometric Terms<a class="headerlink" href="#commonly-used-geometric-terms" title="Permalink to this headline">¶</a></h3>
 <p>See the image below for additional context.</p>
 <ul class="simple">
-<li>laser_emitter_frame: See <a class="reference internal" href="module_view.html#viewpoint"><span class="std std-ref">ViewPoint</span></a></li>
+<li>laser_emitter_frame: See <a class="reference internal" href="module_view.html#viewpoint"><span class="std std-ref">View Point</span></a></li>
 <li>psi/<span class="math">\(\psi\)</span>: Angle between the laser_emitter_frame’s z-y-plane and the surface-normal of the sample</li>
 <li>theta/<span class="math">\(\vartheta\)</span>:  Angle between the in normal-vector and the laser-emitter-ray-direction towards the sample, projected on the y-z-plane</li>
 <li><span class="math">\(z\)</span>: Distance of the sample-point projected onto the z-axis of the laser_emitter_frame = Distance from the x-y-plane of the laser_emitter_frame</li>
@@ -385,7 +386,7 @@ uncertainty for it eventually. Also, the deflection of the laser_emitter_frame a
 <tbody valign="top">
 <tr class="field-odd field"><th class="field-name">Parameters:</th><td class="field-body"><ul class="first simple">
 <li><strong>viewpoint</strong> (<a class="reference internal" href="module_view.html#agiprobot_measurement.viewpoint.ViewPoint" title="agiprobot_measurement.viewpoint.ViewPoint"><em>ViewPoint</em></a>) – ViewPoint with set viewpoint-anchor-pose</li>
-<li><strong>uncertainty_threshold</strong> (<em>float</em>) – Maximum permissible uncertainty of a measured surface point, in mm</li>
+<li><strong>uncertainty_threshold</strong> (<em>float</em>) – Maximum permissible uncertainty of a measured surface point in mm</li>
 <li><strong>maximum_deflection</strong> (<em>float</em><em>, </em><em>optional</em>) – Maximum deflection of the trajectory to be considered for processing in mm, defaults to 5e2</li>
 </ul>
 </td>
@@ -421,7 +422,7 @@ context becomes overwritten completely by calling this method again.</p>
 <tr class="field-odd field"><th class="field-name">Parameters:</th><td class="field-body"><ul class="first last simple">
 <li><strong>mesh</strong> (<em>trimesh.Trimesh</em>) – Mesh-object to load into the RayMeshIntersector</li>
 <li><strong>sampled_surface_points</strong> (<em>list</em><em>[</em><em>numpy.array</em><em>]</em>) – List of all sampled surface points that should be considered for the metrological processing</li>
-<li><strong>sampled_face_ids</strong> (<em>list</em><em>[</em><em>int</em><em>]</em>) – List of face-indices, where each entry corresponds to the face of the sampled surface point at the same position</li>
+<li><strong>sampled_face_indices</strong> (<em>list</em><em>[</em><em>int</em><em>]</em>) – List of face-indices, where each entry corresponds to the face of the sampled surface point at the same position</li>
 </ul>
 </td>
 </tr>
@@ -440,7 +441,7 @@ context becomes overwritten completely by calling this method again.</p>
           </div>
           <footer>
     <div class="rst-footer-buttons" role="navigation" aria-label="footer navigation">
-        <a href="module_view.html" class="btn btn-neutral float-right" title="ViewPoint" accesskey="n" rel="next">Next <span class="fa fa-arrow-circle-right" aria-hidden="true"></span></a>
+        <a href="module_view.html" class="btn btn-neutral float-right" title="View Point" accesskey="n" rel="next">Next <span class="fa fa-arrow-circle-right" aria-hidden="true"></span></a>
         <a href="module_trajectory_manager.html" class="btn btn-neutral float-left" title="Trajectory Manager" accesskey="p" rel="prev"><span class="fa fa-arrow-circle-left" aria-hidden="true"></span> Previous</a>
     </div>
 

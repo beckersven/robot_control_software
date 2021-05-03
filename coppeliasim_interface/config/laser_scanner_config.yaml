@@ -1,8 +1,0 @@
-u_0: 0.05       # Distance from the optical axis of the sensor to the intersection point according to the Scheimpflug-condition, in m
-f: 0.011        # Focal length, in m
-w_0: 0.0001     # Beam waist radius, in m
-alpha: 20       # Between laser-axis and optical axis of sensor system, in deg
-points_per_line: 50  # Number of measurement points per line (not to be confused with the resolution)
-opening_angle: 90    # Opening angle of the laser fan, in deg
-mean_working_distance: 0.15 # Ideal working distance according to manual, in m
-cut_off_deviation: 0.05     # Maximum permissible deviation with respect to the working distance so that the sensor can operate, in m

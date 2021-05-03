@@ -11,6 +11,7 @@ Agiprobot Measurement's Documentation
    :caption: Explanation
 
    overview.rst
+   Usage_Guide.rst
    view_planning_detailed.rst
 
 .. toctree::

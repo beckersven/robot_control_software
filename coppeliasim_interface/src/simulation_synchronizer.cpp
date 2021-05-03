@@ -43,11 +43,11 @@ namespace coppeliasim_interface{
         // ^^^^^^^^^^^^^^^^^^^^^^
         // Resolve required parameters
         simxInt coppelia_port, connection_timeout_ms;
-        if(!nh_.getParam("/coppelia_config/PORT_simulation_synchronizer", coppelia_port)
+        if(!nh_.getParam("/coppelia_config/port_simulation_synchronizer", coppelia_port)
             || !nh_.getParam("/coppelia_config/sim_dt", sim_dt)
             || !nh_.getParam("/coppelia_config/connection_timeout_ms", connection_timeout_ms)){
             ROS_ERROR_STREAM("Could not resolve CoppeliaSim-config. Expected parameters: " << std::endl 
-                << nh_.resolveName("/coppelia_config/PORT_simulation_synchronizer") << std::endl 
+                << nh_.resolveName("/coppelia_config/port_simulation_synchronizer") << std::endl 
                 << nh_.resolveName("/coppelia_config/sim_dt") << std::endl
                 << nh_.resolveName("/coppelia_config/connection_timeout_ms") << std::endl);
             return false;

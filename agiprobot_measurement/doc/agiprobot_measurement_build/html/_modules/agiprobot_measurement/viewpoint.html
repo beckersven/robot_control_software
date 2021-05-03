@@ -100,13 +100,14 @@
               <p class="caption"><span class="caption-text">Explanation</span></p>
 <ul>
 <li class="toctree-l1"><a class="reference internal" href="../../overview.html">Overview</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../Usage_Guide.html">Usage Guide</a></li>
 <li class="toctree-l1"><a class="reference internal" href="../../view_planning_detailed.html">Path Planning Detailed</a></li>
 </ul>
 <p class="caption"><span class="caption-text">Components</span></p>
 <ul>
 <li class="toctree-l1"><a class="reference internal" href="../../module_trajectory_manager.html">Trajectory Manager</a></li>
 <li class="toctree-l1"><a class="reference internal" href="../../module_sensor_model.html">Sensor Model</a></li>
-<li class="toctree-l1"><a class="reference internal" href="../../module_view.html">ViewPoint</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../module_view.html">View Point</a></li>
 </ul>
 
             
@@ -178,7 +179,7 @@
 <span class="kn">from</span> <span class="nn">moveit_msgs.msg</span> <span class="k">import</span> <span class="n">RobotTrajectory</span>
 <span class="kn">from</span> <span class="nn">trajectory_msgs.msg</span> <span class="k">import</span> <span class="n">JointTrajectoryPoint</span>
 
-<div class="viewcode-block" id="ViewPoint"><a class="viewcode-back" href="../../module_view.html#agiprobot_measurement.viewpoint.ViewPoint">[docs]</a><span class="k">class</span> <span class="nc">ViewPoint</span><span class="p">:</span>
+<div class="viewcode-block" id="ViewPoint"><a class="viewcode-back" href="../../agiprobot_measurement.html#agiprobot_measurement.viewpoint.ViewPoint">[docs]</a><span class="k">class</span> <span class="nc">ViewPoint</span><span class="p">:</span>
 
     <span class="sd">&quot;&quot;&quot;</span>
 <span class="sd">    Class for keeping track about one viewpoint.</span>
@@ -241,7 +242,7 @@
         <span class="bp">self</span><span class="o">.</span><span class="n">trajectory_for_measurement</span> <span class="o">=</span> <span class="n">RobotTrajectory</span><span class="p">()</span>
         <span class="bp">self</span><span class="o">.</span><span class="n">trajectory_to_viewpoint</span><span class="o">=</span> <span class="n">RobotTrajectory</span><span class="p">()</span>
     
-<div class="viewcode-block" id="ViewPoint.get_trajectory_to_view"><a class="viewcode-back" href="../../module_view.html#agiprobot_measurement.viewpoint.ViewPoint.get_trajectory_to_view">[docs]</a>    <span class="k">def</span> <span class="nf">get_trajectory_to_view</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
+<div class="viewcode-block" id="ViewPoint.get_trajectory_to_viewpoint"><a class="viewcode-back" href="../../agiprobot_measurement.html#agiprobot_measurement.viewpoint.ViewPoint.get_trajectory_to_viewpoint">[docs]</a>    <span class="k">def</span> <span class="nf">get_trajectory_to_viewpoint</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
         <span class="sd">&quot;&quot;&quot;</span>
 <span class="sd">        Returns the stored trajectory from a former state (might be robot&#39;s current_state or the end point of a previously executed trajectory) to</span>
 <span class="sd">        the start state of this views&#39;s measurement trajectory. This is useful to connect multiple views into an execution plan.</span>
@@ -249,9 +250,9 @@
 <span class="sd">        :return: Trajectory from certain start state to this views&#39;s measurement trajectory </span>
 <span class="sd">        :rtype: moveit_msgs/RobotTrajectory</span>
 <span class="sd">        &quot;&quot;&quot;</span>
-        <span class="k">return</span> <span class="bp">self</span><span class="o">.</span><span class="n">trajectory_to_view</span></div>
+        <span class="k">return</span> <span class="bp">self</span><span class="o">.</span><span class="n">trajectory_to_viewpoint</span></div>
 
-<div class="viewcode-block" id="ViewPoint.set_trajectory_to_view"><a class="viewcode-back" href="../../module_view.html#agiprobot_measurement.viewpoint.ViewPoint.set_trajectory_to_view">[docs]</a>    <span class="k">def</span> <span class="nf">set_trajectory_to_view</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">trajectory_to_view</span><span class="p">):</span>
+<div class="viewcode-block" id="ViewPoint.set_trajectory_to_viewpoint"><a class="viewcode-back" href="../../agiprobot_measurement.html#agiprobot_measurement.viewpoint.ViewPoint.set_trajectory_to_viewpoint">[docs]</a>    <span class="k">def</span> <span class="nf">set_trajectory_to_viewpoint</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">trajectory_to_viewpoint</span><span class="p">):</span>
         <span class="sd">&quot;&quot;&quot;</span>
 <span class="sd">        Sets a trajectory that moves the robot to the start of the view&#39;s measurement trajectory.</span>
 <span class="sd">        The trajectory can be arbitrary but must end at this start point. This is useful to connect multiple views into an execution plan.</span>
@@ -259,10 +260,10 @@
 <span class="sd">        :param trajectory_to_view: Trajectory from certain start state to this views&#39;s measurement trajectory </span>
 <span class="sd">        :type trajectory_to_view: moveit_msgs/RobotTrajectory</span>
 <span class="sd">        &quot;&quot;&quot;</span>
-        <span class="k">assert</span> <span class="nb">isinstance</span><span class="p">(</span><span class="n">trajectory_to_view</span><span class="p">,</span> <span class="n">RobotTrajectory</span><span class="p">)</span>
-        <span class="bp">self</span><span class="o">.</span><span class="n">trajectory_to_viewpoint</span><span class="o">=</span> <span class="n">trajectory_to_view</span></div>
+        <span class="k">assert</span> <span class="nb">isinstance</span><span class="p">(</span><span class="n">trajectory_to_viewpoint</span><span class="p">,</span> <span class="n">RobotTrajectory</span><span class="p">)</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">trajectory_to_viewpoint</span> <span class="o">=</span> <span class="n">trajectory_to_viewpoint</span></div>
 
-<div class="viewcode-block" id="ViewPoint.reverse_trajectory_for_measurement"><a class="viewcode-back" href="../../module_view.html#agiprobot_measurement.viewpoint.ViewPoint.reverse_trajectory_for_measurement">[docs]</a>    <span class="k">def</span> <span class="nf">reverse_trajectory_for_measurement</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
+<div class="viewcode-block" id="ViewPoint.reverse_trajectory_for_measurement"><a class="viewcode-back" href="../../agiprobot_measurement.html#agiprobot_measurement.viewpoint.ViewPoint.reverse_trajectory_for_measurement">[docs]</a>    <span class="k">def</span> <span class="nf">reverse_trajectory_for_measurement</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
         <span class="sd">&quot;&quot;&quot;</span>
 <span class="sd">        Flips the measurement-trajectory of this viewpoint. The start-pose becomes the end-pose and vice versa. The execution time stays the same.</span>
 
@@ -290,7 +291,7 @@
         <span class="k">return</span> <span class="kc">True</span></div>
             
 
-<div class="viewcode-block" id="ViewPoint.get_surface_point"><a class="viewcode-back" href="../../module_view.html#agiprobot_measurement.viewpoint.ViewPoint.get_surface_point">[docs]</a>    <span class="k">def</span> <span class="nf">get_surface_point</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">as_matrix</span><span class="o">=</span><span class="kc">False</span><span class="p">):</span>
+<div class="viewcode-block" id="ViewPoint.get_surface_point"><a class="viewcode-back" href="../../agiprobot_measurement.html#agiprobot_measurement.viewpoint.ViewPoint.get_surface_point">[docs]</a>    <span class="k">def</span> <span class="nf">get_surface_point</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">as_matrix</span><span class="o">=</span><span class="kc">False</span><span class="p">):</span>
         <span class="sd">&quot;&quot;&quot;</span>
 <span class="sd">        Gets the position of the surface point this viewpoint is based on. This is not the same as the view_anchor-point.</span>
 
@@ -305,7 +306,7 @@
             <span class="k">return</span> <span class="bp">self</span><span class="o">.</span><span class="n">projected_position</span></div>
 
 
-<div class="viewcode-block" id="ViewPoint.set_trajectory_for_measurement"><a class="viewcode-back" href="../../module_view.html#agiprobot_measurement.viewpoint.ViewPoint.set_trajectory_for_measurement">[docs]</a>    <span class="k">def</span> <span class="nf">set_trajectory_for_measurement</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">trajectory_for_measurement</span><span class="p">):</span>
+<div class="viewcode-block" id="ViewPoint.set_trajectory_for_measurement"><a class="viewcode-back" href="../../agiprobot_measurement.html#agiprobot_measurement.viewpoint.ViewPoint.set_trajectory_for_measurement">[docs]</a>    <span class="k">def</span> <span class="nf">set_trajectory_for_measurement</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">trajectory_for_measurement</span><span class="p">):</span>
         <span class="sd">&quot;&quot;&quot;</span>
 <span class="sd">        Trajectory that is performed to execute the measurement corresponding to this viewpoint.</span>
 <span class="sd">        This measurement-trajectory is a straight line in cartesian space.</span>
@@ -316,7 +317,7 @@
         <span class="k">assert</span> <span class="nb">isinstance</span><span class="p">(</span><span class="n">trajectory_for_measurement</span><span class="p">,</span> <span class="n">RobotTrajectory</span><span class="p">)</span>
         <span class="bp">self</span><span class="o">.</span><span class="n">trajectory_for_measurement</span> <span class="o">=</span> <span class="n">trajectory_for_measurement</span></div>
 
-<div class="viewcode-block" id="ViewPoint.get_trajectory_for_measurement"><a class="viewcode-back" href="../../module_view.html#agiprobot_measurement.viewpoint.ViewPoint.get_trajectory_for_measurement">[docs]</a>    <span class="k">def</span> <span class="nf">get_trajectory_for_measurement</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
+<div class="viewcode-block" id="ViewPoint.get_trajectory_for_measurement"><a class="viewcode-back" href="../../agiprobot_measurement.html#agiprobot_measurement.viewpoint.ViewPoint.get_trajectory_for_measurement">[docs]</a>    <span class="k">def</span> <span class="nf">get_trajectory_for_measurement</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
         <span class="sd">&quot;&quot;&quot;</span>
 <span class="sd">        Returns trajectory that is performed to execute the measurement corresponding to this viewpoint.</span>
 <span class="sd">        This measurement-trajectory is a straight line in cartesian space.</span>
@@ -326,7 +327,7 @@
 <span class="sd">        &quot;&quot;&quot;</span>
         <span class="k">return</span> <span class="bp">self</span><span class="o">.</span><span class="n">trajectory_for_measurement</span></div>
 
-<div class="viewcode-block" id="ViewPoint.get_orientation_matrix"><a class="viewcode-back" href="../../module_view.html#agiprobot_measurement.viewpoint.ViewPoint.get_orientation_matrix">[docs]</a>    <span class="k">def</span> <span class="nf">get_orientation_matrix</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
+<div class="viewcode-block" id="ViewPoint.get_orientation_matrix"><a class="viewcode-back" href="../../agiprobot_measurement.html#agiprobot_measurement.viewpoint.ViewPoint.get_orientation_matrix">[docs]</a>    <span class="k">def</span> <span class="nf">get_orientation_matrix</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
         <span class="sd">&quot;&quot;&quot;</span>
 <span class="sd">        Gets the orientation of the laser_emitter_frame of this viewpoint. The orientation (not the position) remains the same for every point on the assigned measurement-trajectory</span>
 
@@ -335,7 +336,7 @@
 <span class="sd">        &quot;&quot;&quot;</span>
         <span class="k">return</span> <span class="bp">self</span><span class="o">.</span><span class="n">orientation_matrix</span></div>
 
-<div class="viewcode-block" id="ViewPoint.get_anchor_position"><a class="viewcode-back" href="../../module_view.html#agiprobot_measurement.viewpoint.ViewPoint.get_anchor_position">[docs]</a>    <span class="k">def</span> <span class="nf">get_anchor_position</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">as_matrix</span> <span class="o">=</span> <span class="kc">False</span><span class="p">):</span>
+<div class="viewcode-block" id="ViewPoint.get_anchor_position"><a class="viewcode-back" href="../../agiprobot_measurement.html#agiprobot_measurement.viewpoint.ViewPoint.get_anchor_position">[docs]</a>    <span class="k">def</span> <span class="nf">get_anchor_position</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">as_matrix</span> <span class="o">=</span> <span class="kc">False</span><span class="p">):</span>
         <span class="sd">&quot;&quot;&quot;</span>
 <span class="sd">        Gets the laser_emitter_frame&#39;s position that was generated during construction. This is the point where the z-axis of the laser_emitter_frame</span>
 <span class="sd">        hits the surface_point of the target mesh that was used to design this viewpoint. Keep in mind that &#39;anchor&#39; does not necessarely mean &#39;anchor&#39; of the trajectory.</span>
@@ -350,7 +351,7 @@
         <span class="k">else</span><span class="p">:</span>
             <span class="k">return</span> <span class="bp">self</span><span class="o">.</span><span class="n">anchor_position</span></div>
     
-<div class="viewcode-block" id="ViewPoint.set_measurable_surface_point_indices_and_uncertainties"><a class="viewcode-back" href="../../module_view.html#agiprobot_measurement.viewpoint.ViewPoint.set_measurable_surface_point_indices_and_uncertainties">[docs]</a>    <span class="k">def</span> <span class="nf">set_measurable_surface_point_indices_and_uncertainties</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">measurable_point_indices</span><span class="p">,</span> <span class="n">uncertainties</span><span class="p">):</span>
+<div class="viewcode-block" id="ViewPoint.set_measurable_surface_point_indices_and_uncertainties"><a class="viewcode-back" href="../../agiprobot_measurement.html#agiprobot_measurement.viewpoint.ViewPoint.set_measurable_surface_point_indices_and_uncertainties">[docs]</a>    <span class="k">def</span> <span class="nf">set_measurable_surface_point_indices_and_uncertainties</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">measurable_point_indices</span><span class="p">,</span> <span class="n">uncertainties</span><span class="p">):</span>
         <span class="sd">&quot;&quot;&quot;</span>
 <span class="sd">        Sets the indices of surface points measurable by this view&#39;s measurement-trajectory as well as their model-predicted uncertainties. </span>
 <span class="sd">        The indices are abstract and only meaningful when connected to a concrete surface-point-list which is maintained externally of the View-scope.</span>
@@ -365,7 +366,7 @@
         <span class="bp">self</span><span class="o">.</span><span class="n">measurable_surface_point_indices</span> <span class="o">=</span> <span class="n">measurable_point_indices</span>
         <span class="bp">self</span><span class="o">.</span><span class="n">measurable_surface_point_uncertainties</span> <span class="o">=</span> <span class="n">uncertainties</span></div>
     
-<div class="viewcode-block" id="ViewPoint.get_measurable_surface_point_indices"><a class="viewcode-back" href="../../module_view.html#agiprobot_measurement.viewpoint.ViewPoint.get_measurable_surface_point_indices">[docs]</a>    <span class="k">def</span> <span class="nf">get_measurable_surface_point_indices</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
+<div class="viewcode-block" id="ViewPoint.get_measurable_surface_point_indices"><a class="viewcode-back" href="../../agiprobot_measurement.html#agiprobot_measurement.viewpoint.ViewPoint.get_measurable_surface_point_indices">[docs]</a>    <span class="k">def</span> <span class="nf">get_measurable_surface_point_indices</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
         <span class="sd">&quot;&quot;&quot;</span>
 <span class="sd">        Gets the surface_point-indices measurable by this view&#39;s measurement-trajectory. The indices are abstract and are only useful </span>
 <span class="sd">        when inserted into an externally maintained list of the actual surface points.</span>
@@ -376,7 +377,7 @@
 
         <span class="k">return</span> <span class="bp">self</span><span class="o">.</span><span class="n">measurable_surface_point_indices</span></div>
         
-<div class="viewcode-block" id="ViewPoint.get_measurable_surface_point_uncertainties"><a class="viewcode-back" href="../../module_view.html#agiprobot_measurement.viewpoint.ViewPoint.get_measurable_surface_point_uncertainties">[docs]</a>    <span class="k">def</span> <span class="nf">get_measurable_surface_point_uncertainties</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
+<div class="viewcode-block" id="ViewPoint.get_measurable_surface_point_uncertainties"><a class="viewcode-back" href="../../agiprobot_measurement.html#agiprobot_measurement.viewpoint.ViewPoint.get_measurable_surface_point_uncertainties">[docs]</a>    <span class="k">def</span> <span class="nf">get_measurable_surface_point_uncertainties</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
         <span class="sd">&quot;&quot;&quot;</span>
 <span class="sd">        Gets the uncertainties of each measurable surface point. The values in the returned list must be matched with the</span>
 <span class="sd">        actual surface points in an external viewpoint list using this views measurable_surface_point_indices: The uncertainty at index i</span>

@@ -36,14 +36,14 @@
   <link name="table">
     <visual>
       <geometry>
-        <box size="1 1 1.1"/>
+        <box size="1 1 0.9"/>
       </geometry>
       <material name="white"/>
     </visual>
     <collision>
       <origin rpy="0 0 0" xyz="0.0 0.0 0.0"/>
       <geometry>
-        <box size="1 1 1.1"/>
+        <box size="1 1 0.9"/>
       </geometry>
     </collision>
   </link>
@@ -51,7 +51,7 @@
   <joint name="table_base" type="fixed">
     <parent link="table"/>
     <child link="base_link"/>
-    <origin xyz="0.36 0.36 0.55" rpy="0 0 0" />
+    <origin xyz="0.36 0.36 0.45" rpy="0 0 0" />
   </joint>
 
   <!-- See corresponding Bachelor Thesis for the origin of these numbers / geometries / ... -->
@@ -104,7 +104,7 @@
   <joint name="world_joint" type="fixed">
     <parent link="world" />
     <child link = "table" />
-    <origin xyz="0.5 -0.5 0.55" rpy="0.0 0.0 0.0" />
+    <origin xyz="0.5 -0.5 0.45" rpy="0.0 0.0 0.0" />
   </joint>
 
 </robot>

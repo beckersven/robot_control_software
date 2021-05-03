@@ -100,13 +100,14 @@
               <p class="caption"><span class="caption-text">Explanation</span></p>
 <ul>
 <li class="toctree-l1"><a class="reference internal" href="../../overview.html">Overview</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../Usage_Guide.html">Usage Guide</a></li>
 <li class="toctree-l1"><a class="reference internal" href="../../view_planning_detailed.html">Path Planning Detailed</a></li>
 </ul>
 <p class="caption"><span class="caption-text">Components</span></p>
 <ul>
 <li class="toctree-l1"><a class="reference internal" href="../../module_trajectory_manager.html">Trajectory Manager</a></li>
 <li class="toctree-l1"><a class="reference internal" href="../../module_sensor_model.html">Sensor Model</a></li>
-<li class="toctree-l1"><a class="reference internal" href="../../module_view.html">ViewPoint</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../module_view.html">View Point</a></li>
 </ul>
 
             
@@ -179,7 +180,7 @@
 <span class="kn">from</span> <span class="nn">imp</span> <span class="k">import</span> <span class="n">find_module</span>
 <span class="kn">import</span> <span class="nn">array</span>
 
-<div class="viewcode-block" id="SensorModel"><a class="viewcode-back" href="../../module_sensor_model.html#agiprobot_measurement.sensor_model.SensorModel">[docs]</a><span class="k">class</span> <span class="nc">SensorModel</span><span class="p">:</span>
+<div class="viewcode-block" id="SensorModel"><a class="viewcode-back" href="../../agiprobot_measurement.html#agiprobot_measurement.sensor_model.SensorModel">[docs]</a><span class="k">class</span> <span class="nc">SensorModel</span><span class="p">:</span>
     <span class="sd">&quot;&quot;&quot;</span>
 <span class="sd">    Computional representation of an laser triangulation sensor under influence of uncertainty.</span>
 <span class="sd">    &quot;&quot;&quot;</span>
@@ -208,7 +209,7 @@
             <span class="k">raise</span> <span class="ne">Exception</span><span class="p">(</span><span class="s2">&quot;Provided parameter-map for sensor-model incomplete: </span><span class="si">{}</span><span class="s2">&quot;</span><span class="o">.</span><span class="n">format</span><span class="p">(</span><span class="n">e</span><span class="o">.</span><span class="n">message</span><span class="p">))</span>
         
         <span class="c1"># Calculate useful sensor features from the specifics (so that they must not be calculated every time)</span>
-        <span class="bp">self</span><span class="o">.</span><span class="n">u_0</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">sin</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">alpha</span><span class="p">)</span> <span class="o">*</span> <span class="bp">self</span><span class="o">.</span><span class="n">optimal_standoff</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">xi_0</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">sin</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">alpha</span><span class="p">)</span> <span class="o">*</span> <span class="bp">self</span><span class="o">.</span><span class="n">optimal_standoff</span>
         <span class="bp">self</span><span class="o">.</span><span class="n">laser_emission_perception_distance</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">tan</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">alpha</span><span class="p">)</span> <span class="o">*</span> <span class="bp">self</span><span class="o">.</span><span class="n">optimal_standoff</span>
         <span class="bp">self</span><span class="o">.</span><span class="n">m_L</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">tan</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">alpha</span><span class="p">)</span>
 
@@ -216,7 +217,7 @@
         <span class="bp">self</span><span class="o">.</span><span class="n">context</span> <span class="o">=</span> <span class="kc">None</span>
   
     
-<div class="viewcode-block" id="SensorModel.get_median_deviation_angle"><a class="viewcode-back" href="../../module_sensor_model.html#agiprobot_measurement.sensor_model.SensorModel.get_median_deviation_angle">[docs]</a>    <span class="k">def</span> <span class="nf">get_median_deviation_angle</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
+<div class="viewcode-block" id="SensorModel.get_median_deviation_angle"><a class="viewcode-back" href="../../agiprobot_measurement.html#agiprobot_measurement.sensor_model.SensorModel.get_median_deviation_angle">[docs]</a>    <span class="k">def</span> <span class="nf">get_median_deviation_angle</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
         <span class="sd">&quot;&quot;&quot;</span>
 <span class="sd">        Get the smallest angle allowed for tilting (smallest of maximum deviations of theta and psi devided by 2).</span>
 
@@ -225,7 +226,7 @@
 <span class="sd">        &quot;&quot;&quot;</span>
         <span class="k">return</span> <span class="nb">min</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">maximum_deviation_theta</span> <span class="o">/</span> <span class="mi">2</span><span class="p">,</span> <span class="bp">self</span><span class="o">.</span><span class="n">maximum_deviation_psi</span> <span class="o">/</span> <span class="mi">2</span><span class="p">)</span></div>
 
-<div class="viewcode-block" id="SensorModel.evaluate_score"><a class="viewcode-back" href="../../module_sensor_model.html#agiprobot_measurement.sensor_model.SensorModel.evaluate_score">[docs]</a>    <span class="k">def</span> <span class="nf">evaluate_score</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">z</span><span class="p">,</span> <span class="n">psi</span><span class="p">):</span>
+<div class="viewcode-block" id="SensorModel.evaluate_score"><a class="viewcode-back" href="../../agiprobot_measurement.html#agiprobot_measurement.sensor_model.SensorModel.evaluate_score">[docs]</a>    <span class="k">def</span> <span class="nf">evaluate_score</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">z</span><span class="p">,</span> <span class="n">psi</span><span class="p">):</span>
         <span class="sd">&quot;&quot;&quot;</span>
 <span class="sd">        Calculates a score of uncertainty :math:`\\in [0,1]` for the given z and psi (higher score means lower uncertainty). The score</span>
 <span class="sd">        is linear affine in the uncertainty based on z and psi - It is 1 if the provided values match the best possible case (lowest</span>
@@ -241,7 +242,7 @@
 <span class="sd">        &quot;&quot;&quot;</span>
         <span class="k">return</span> <span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">get_max_uncertainty</span><span class="p">()</span> <span class="o">-</span> <span class="bp">self</span><span class="o">.</span><span class="n">evaluate_uncertainty</span><span class="p">(</span><span class="n">z</span><span class="p">,</span> <span class="n">psi</span><span class="p">))</span> <span class="o">/</span> <span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">get_max_uncertainty</span><span class="p">()</span> <span class="o">-</span> <span class="bp">self</span><span class="o">.</span><span class="n">get_min_uncertainty</span><span class="p">())</span></div>
 
-<div class="viewcode-block" id="SensorModel.get_max_uncertainty"><a class="viewcode-back" href="../../module_sensor_model.html#agiprobot_measurement.sensor_model.SensorModel.get_max_uncertainty">[docs]</a>    <span class="k">def</span> <span class="nf">get_max_uncertainty</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
+<div class="viewcode-block" id="SensorModel.get_max_uncertainty"><a class="viewcode-back" href="../../agiprobot_measurement.html#agiprobot_measurement.sensor_model.SensorModel.get_max_uncertainty">[docs]</a>    <span class="k">def</span> <span class="nf">get_max_uncertainty</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
         <span class="sd">&quot;&quot;&quot;</span>
 <span class="sd">        Computes maximum possible uncertainty of a measured point that is not rejected using geometric sensor parameters. </span>
 <span class="sd">        The uncertainty-formula is evaluated at z- and psi-values that are at rejection-limits for a surface point, so that this value corresponds</span>
@@ -250,9 +251,9 @@
 <span class="sd">        :returns: Maximum possible uncertainty of a measurable point (= is within the max_deviation_...-range) in mm</span>
 <span class="sd">        :rtype: float</span>
 <span class="sd">        &quot;&quot;&quot;</span>
-        <span class="k">return</span> <span class="bp">self</span><span class="o">.</span><span class="n">evaluate_uncertainty</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">maximum_standoff</span><span class="p">,</span> <span class="bp">self</span><span class="o">.</span><span class="n">maximum_deviation_psi</span> <span class="o">+</span> <span class="n">np</span><span class="o">.</span><span class="n">pi</span> <span class="o">/</span> <span class="mi">2</span><span class="p">)</span></div>
+        <span class="k">return</span> <span class="bp">self</span><span class="o">.</span><span class="n">evaluate_uncertainty</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">maximum_standoff</span><span class="p">,</span> <span class="bp">self</span><span class="o">.</span><span class="n">maximum_deviation_psi</span><span class="p">)</span></div>
     
-<div class="viewcode-block" id="SensorModel.get_min_uncertainty"><a class="viewcode-back" href="../../module_sensor_model.html#agiprobot_measurement.sensor_model.SensorModel.get_min_uncertainty">[docs]</a>    <span class="k">def</span> <span class="nf">get_min_uncertainty</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
+<div class="viewcode-block" id="SensorModel.get_min_uncertainty"><a class="viewcode-back" href="../../agiprobot_measurement.html#agiprobot_measurement.sensor_model.SensorModel.get_min_uncertainty">[docs]</a>    <span class="k">def</span> <span class="nf">get_min_uncertainty</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
         <span class="sd">&quot;&quot;&quot;</span>
 <span class="sd">        Computes the minimum possible uncertainty using the geometric sensor parameters. It returns the uncertainty value assignable to</span>
 <span class="sd">        a surface point which has been measured with optimal z- and psi-values, i.e. the best-case.</span>
@@ -260,9 +261,9 @@
 <span class="sd">        :returns: Minimum possible uncertainty in mm</span>
 <span class="sd">        :rtype: float</span>
 <span class="sd">        &quot;&quot;&quot;</span>
-        <span class="k">return</span> <span class="bp">self</span><span class="o">.</span><span class="n">evaluate_uncertainty</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">minimum_standoff</span><span class="p">,</span> <span class="n">np</span><span class="o">.</span><span class="n">pi</span> <span class="o">/</span> <span class="mi">2</span><span class="p">)</span></div>
+        <span class="k">return</span> <span class="bp">self</span><span class="o">.</span><span class="n">evaluate_uncertainty</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">minimum_standoff</span><span class="p">,</span> <span class="mi">0</span><span class="p">)</span></div>
 
-<div class="viewcode-block" id="SensorModel.evaluate_uncertainty"><a class="viewcode-back" href="../../module_sensor_model.html#agiprobot_measurement.sensor_model.SensorModel.evaluate_uncertainty">[docs]</a>    <span class="k">def</span> <span class="nf">evaluate_uncertainty</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">z</span><span class="p">,</span> <span class="n">psi</span><span class="p">):</span>
+<div class="viewcode-block" id="SensorModel.evaluate_uncertainty"><a class="viewcode-back" href="../../agiprobot_measurement.html#agiprobot_measurement.sensor_model.SensorModel.evaluate_uncertainty">[docs]</a>    <span class="k">def</span> <span class="nf">evaluate_uncertainty</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">z</span><span class="p">,</span> <span class="n">psi</span><span class="p">):</span>
         <span class="sd">&quot;&quot;&quot;</span>
 <span class="sd">        Computes the uncertainty of a surface point with given z and psi using the specified geometric sensor parameters.</span>
 
@@ -274,13 +275,13 @@
 <span class="sd">        :rtype: float</span>
 <span class="sd">        &quot;&quot;&quot;</span>
         <span class="k">try</span><span class="p">:</span>
-            <span class="c1"># See the corresponding Bachelors Thesis to understand the origin of this equation</span>
-            <span class="n">u</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">K_u</span> <span class="o">*</span> <span class="n">np</span><span class="o">.</span><span class="n">sqrt</span><span class="p">(</span><span class="n">z</span><span class="o">**</span><span class="mi">2</span><span class="o">+</span><span class="bp">self</span><span class="o">.</span><span class="n">u_0</span><span class="o">**</span><span class="mi">2</span><span class="o">-</span><span class="mi">2</span><span class="o">*</span><span class="n">z</span><span class="o">*</span><span class="bp">self</span><span class="o">.</span><span class="n">u_0</span><span class="o">*</span><span class="n">np</span><span class="o">.</span><span class="n">sin</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">alpha</span><span class="p">))</span> <span class="o">/</span> <span class="n">np</span><span class="o">.</span><span class="n">sin</span><span class="p">(</span><span class="n">psi</span><span class="p">)</span> <span class="o">*</span> <span class="n">z</span>
+            <span class="c1"># See the corresponding bachelors thesis to understand the origin of this equation</span>
+            <span class="n">u</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">K_u</span> <span class="o">*</span> <span class="n">np</span><span class="o">.</span><span class="n">sqrt</span><span class="p">(</span><span class="n">z</span><span class="o">**</span><span class="mi">2</span><span class="o">+</span><span class="bp">self</span><span class="o">.</span><span class="n">xi_0</span><span class="o">**</span><span class="mi">2</span><span class="o">-</span><span class="mi">2</span><span class="o">*</span><span class="n">z</span><span class="o">*</span><span class="bp">self</span><span class="o">.</span><span class="n">xi_0</span><span class="o">*</span><span class="n">np</span><span class="o">.</span><span class="n">sin</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">alpha</span><span class="p">))</span> <span class="o">/</span> <span class="n">np</span><span class="o">.</span><span class="n">cos</span><span class="p">(</span><span class="n">psi</span><span class="p">)</span> <span class="o">*</span> <span class="n">z</span>
         <span class="k">except</span><span class="p">:</span>
-            <span class="k">return</span> <span class="nb">float</span><span class="p">(</span><span class="s2">&quot;NaN&quot;</span><span class="p">)</span>
+            <span class="n">u</span> <span class="o">=</span> <span class="nb">float</span><span class="p">(</span><span class="s2">&quot;NaN&quot;</span><span class="p">)</span>
         <span class="k">return</span> <span class="n">u</span></div>
 
-<div class="viewcode-block" id="SensorModel.get_optimal_standoff"><a class="viewcode-back" href="../../module_sensor_model.html#agiprobot_measurement.sensor_model.SensorModel.get_optimal_standoff">[docs]</a>    <span class="k">def</span> <span class="nf">get_optimal_standoff</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
+<div class="viewcode-block" id="SensorModel.get_optimal_standoff"><a class="viewcode-back" href="../../agiprobot_measurement.html#agiprobot_measurement.sensor_model.SensorModel.get_optimal_standoff">[docs]</a>    <span class="k">def</span> <span class="nf">get_optimal_standoff</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
         <span class="sd">&quot;&quot;&quot;</span>
 <span class="sd">        Gets the optimal standoff, i.e. required the .</span>
 <span class="sd">        The returned optimal standoff is not equal to the standoff providing the lowest uncertainty, but in the center between the z-rejection-limits</span>
@@ -292,7 +293,7 @@
 <span class="sd">        &quot;&quot;&quot;</span>
         <span class="k">return</span> <span class="bp">self</span><span class="o">.</span><span class="n">optimal_standoff</span></div>
 
-<div class="viewcode-block" id="SensorModel.set_processing_context"><a class="viewcode-back" href="../../module_sensor_model.html#agiprobot_measurement.sensor_model.SensorModel.set_processing_context">[docs]</a>    <span class="k">def</span> <span class="nf">set_processing_context</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">mesh</span><span class="p">,</span> <span class="n">sampled_surface_points</span><span class="p">,</span> <span class="n">sampled_face_indices</span><span class="p">):</span>
+<div class="viewcode-block" id="SensorModel.set_processing_context"><a class="viewcode-back" href="../../agiprobot_measurement.html#agiprobot_measurement.sensor_model.SensorModel.set_processing_context">[docs]</a>    <span class="k">def</span> <span class="nf">set_processing_context</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">mesh</span><span class="p">,</span> <span class="n">sampled_surface_points</span><span class="p">,</span> <span class="n">sampled_face_indices</span><span class="p">):</span>
         <span class="sd">&quot;&quot;&quot;</span>
 <span class="sd">        Loads a context for metrological processing to the sensor model.</span>
 <span class="sd">        This includes loading the target mesh into a ray-tracer as well as gaining awareness over the</span>
@@ -304,8 +305,8 @@
 <span class="sd">        :type mesh: trimesh.Trimesh</span>
 <span class="sd">        :param sampled_surface_points: List of all sampled surface points that should be considered for the metrological processing</span>
 <span class="sd">        :type sampled_surface_points: list[numpy.array]</span>
-<span class="sd">        :param sampled_face_ids: List of face-indices, where each entry corresponds to the face of the sampled surface point at the same position</span>
-<span class="sd">        :type sampled_face_ids: list[int]</span>
+<span class="sd">        :param sampled_face_indices: List of face-indices, where each entry corresponds to the face of the sampled surface point at the same position</span>
+<span class="sd">        :type sampled_face_indices: list[int]</span>
 <span class="sd">        &quot;&quot;&quot;</span>
         <span class="bp">self</span><span class="o">.</span><span class="n">context</span> <span class="o">=</span> <span class="p">{</span>
             <span class="s2">&quot;sampled_surface_points&quot;</span><span class="p">:</span>   <span class="n">np</span><span class="o">.</span><span class="n">array</span><span class="p">(</span><span class="n">sampled_surface_points</span><span class="p">),</span>
@@ -328,7 +329,7 @@
 
 
 
-<div class="viewcode-block" id="SensorModel.process_viewpoint_metrologically"><a class="viewcode-back" href="../../module_sensor_model.html#agiprobot_measurement.sensor_model.SensorModel.process_viewpoint_metrologically">[docs]</a>    <span class="k">def</span> <span class="nf">process_viewpoint_metrologically</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">viewpoint</span><span class="p">,</span> <span class="n">uncertainty_threshold</span><span class="p">,</span> <span class="n">maximum_deflection</span> <span class="o">=</span> <span class="mf">5e2</span><span class="p">):</span>
+<div class="viewcode-block" id="SensorModel.process_viewpoint_metrologically"><a class="viewcode-back" href="../../agiprobot_measurement.html#agiprobot_measurement.sensor_model.SensorModel.process_viewpoint_metrologically">[docs]</a>    <span class="k">def</span> <span class="nf">process_viewpoint_metrologically</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">viewpoint</span><span class="p">,</span> <span class="n">uncertainty_threshold</span><span class="p">,</span> <span class="n">maximum_deflection</span> <span class="o">=</span> <span class="mf">5e2</span><span class="p">):</span>
         <span class="sd">&quot;&quot;&quot;</span>
 <span class="sd">        Computes all measurable surface-points by a viewpoint-object as well as uncertainties and where they are measurable on the viewpoint-measurement-trajectory.</span>
 <span class="sd">        Requires context to be set via set_processing_context(...). Checks for every sampled surface point of the given context whether it is visible and calculates the</span>
@@ -336,7 +337,7 @@
 <span class="sd">        </span>
 <span class="sd">        :param viewpoint: ViewPoint with set viewpoint-anchor-pose</span>
 <span class="sd">        :type viewpoint: ViewPoint</span>
-<span class="sd">        :param uncertainty_threshold: Maximum permissible uncertainty of a measured surface point, in mm</span>
+<span class="sd">        :param uncertainty_threshold: Maximum permissible uncertainty of a measured surface point in mm</span>
 <span class="sd">        :type uncertainty_threshold: float</span>
 <span class="sd">        :param maximum_deflection: Maximum deflection of the trajectory to be considered for processing in mm, defaults to 5e2 </span>
 <span class="sd">        :type maximum_deflection: float, optional</span>
@@ -414,9 +415,8 @@
                 <span class="k">continue</span>
             <span class="k">else</span><span class="p">:</span>
                 <span class="c1"># Compute uncertainty-parameters z, psi, theta</span>
-                <span class="n">psi</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">pi</span> <span class="o">/</span> <span class="mi">2</span> <span class="o">+</span> <span class="n">np</span><span class="o">.</span><span class="n">arctan2</span><span class="p">(</span><span class="n">trajectory_direction</span><span class="o">.</span><span class="n">dot</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">context</span><span class="p">[</span><span class="s2">&quot;face_normals&quot;</span><span class="p">][</span><span class="n">rt_detector_face_id</span><span class="p">]),</span> <span class="o">-</span><span class="mi">1</span> <span class="o">*</span> <span class="n">sensor_direction</span><span class="o">.</span><span class="n">dot</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">context</span><span class="p">[</span><span class="s2">&quot;face_normals&quot;</span><span class="p">][</span><span class="n">rt_detector_face_id</span><span class="p">]))</span>
-                <span class="n">theta</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">arctan2</span><span class="p">(</span><span class="n">lateral_direction</span><span class="o">.</span><span class="n">dot</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">context</span><span class="p">[</span><span class="s2">&quot;face_normals&quot;</span><span class="p">][</span><span class="n">rt_detector_face_id</span><span class="p">]),</span> <span class="n">sensor_direction</span><span class="o">.</span><span class="n">dot</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">context</span><span class="p">[</span><span class="s2">&quot;face_normals&quot;</span><span class="p">][</span><span class="n">rt_detector_face_id</span><span class="p">]))</span>
-                <span class="n">theta</span> <span class="o">-=</span> <span class="n">np</span><span class="o">.</span><span class="n">arctan2</span><span class="p">(</span><span class="n">lateral_direction</span><span class="o">.</span><span class="n">dot</span><span class="p">(</span><span class="o">-</span><span class="mi">1</span> <span class="o">*</span> <span class="n">ray_directions_emitter</span><span class="p">[</span><span class="n">i</span><span class="p">]),</span> <span class="n">sensor_direction</span><span class="o">.</span><span class="n">dot</span><span class="p">(</span><span class="o">-</span><span class="mi">1</span> <span class="o">*</span> <span class="n">ray_directions_emitter</span><span class="p">[</span><span class="n">i</span><span class="p">]))</span>
+                <span class="n">psi</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">arctan2</span><span class="p">(</span><span class="n">trajectory_direction</span><span class="o">.</span><span class="n">dot</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">context</span><span class="p">[</span><span class="s2">&quot;face_normals&quot;</span><span class="p">][</span><span class="n">rt_detector_face_id</span><span class="p">]),</span> <span class="o">-</span><span class="mi">1</span> <span class="o">*</span> <span class="n">sensor_direction</span><span class="o">.</span><span class="n">dot</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">context</span><span class="p">[</span><span class="s2">&quot;face_normals&quot;</span><span class="p">][</span><span class="n">rt_detector_face_id</span><span class="p">]))</span>
+                <span class="n">theta</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">arccos</span><span class="p">(</span><span class="o">-</span><span class="mi">1</span> <span class="o">*</span> <span class="bp">self</span><span class="o">.</span><span class="n">context</span><span class="p">[</span><span class="s2">&quot;face_normals&quot;</span><span class="p">][</span><span class="n">rt_detector_face_id</span><span class="p">][</span><span class="mi">1</span><span class="p">:]</span><span class="o">.</span><span class="n">dot</span><span class="p">(</span><span class="n">ray_directions_emitter</span><span class="p">[</span><span class="n">i</span><span class="p">][</span><span class="mi">1</span><span class="p">:])</span> <span class="o">/</span> <span class="n">np</span><span class="o">.</span><span class="n">linalg</span><span class="o">.</span><span class="n">norm</span><span class="p">(</span><span class="n">ray_directions_emitter</span><span class="p">[</span><span class="n">i</span><span class="p">][</span><span class="mi">1</span><span class="p">:])</span> <span class="o">/</span> <span class="n">np</span><span class="o">.</span><span class="n">linalg</span><span class="o">.</span><span class="n">norm</span><span class="p">(</span><span class="n">sensor_direction</span><span class="p">[</span><span class="mi">1</span><span class="p">:]))</span>
                 <span class="c1"># Wrapping into [-pi, pi]</span>
                 <span class="k">if</span> <span class="n">theta</span> <span class="o">&gt;</span> <span class="n">np</span><span class="o">.</span><span class="n">pi</span><span class="p">:</span>
                     <span class="n">theta</span> <span class="o">=</span> <span class="o">-</span><span class="mi">2</span> <span class="o">*</span> <span class="n">np</span><span class="o">.</span><span class="n">pi</span> <span class="o">+</span> <span class="n">theta</span>
@@ -425,7 +425,7 @@
                 <span class="n">z</span> <span class="o">=</span> <span class="n">sensor_direction</span><span class="o">.</span><span class="n">dot</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">context</span><span class="p">[</span><span class="s2">&quot;sampled_surface_points&quot;</span><span class="p">][</span><span class="n">inlier_indices</span><span class="p">[</span><span class="n">i</span><span class="p">]]</span> <span class="o">-</span> <span class="n">ray_origins_emitter</span><span class="p">[</span><span class="n">i</span><span class="p">])</span>
                 <span class="c1"># Only accept, if no violation of hard geometric limit</span>
                 
-                <span class="k">if</span> <span class="nb">abs</span><span class="p">(</span><span class="n">psi</span> <span class="o">-</span> <span class="n">np</span><span class="o">.</span><span class="n">pi</span><span class="o">/</span><span class="mi">2</span><span class="p">)</span> <span class="o">&lt;</span> <span class="bp">self</span><span class="o">.</span><span class="n">maximum_deviation_psi</span> <span class="ow">and</span> <span class="nb">abs</span><span class="p">(</span><span class="n">theta</span><span class="p">)</span> <span class="o">&lt;</span> <span class="bp">self</span><span class="o">.</span><span class="n">maximum_deviation_theta</span> <span class="ow">and</span> <span class="n">z</span> <span class="o">&lt;</span> <span class="bp">self</span><span class="o">.</span><span class="n">maximum_standoff</span> <span class="ow">and</span> <span class="n">z</span> <span class="o">&gt;</span> <span class="bp">self</span><span class="o">.</span><span class="n">minimum_standoff</span><span class="p">:</span>
+                <span class="k">if</span> <span class="nb">abs</span><span class="p">(</span><span class="n">psi</span><span class="p">)</span> <span class="o">&lt;</span> <span class="bp">self</span><span class="o">.</span><span class="n">maximum_deviation_psi</span> <span class="ow">and</span> <span class="nb">abs</span><span class="p">(</span><span class="n">theta</span><span class="p">)</span> <span class="o">&lt;</span> <span class="bp">self</span><span class="o">.</span><span class="n">maximum_deviation_theta</span> <span class="ow">and</span> <span class="n">z</span> <span class="o">&lt;</span> <span class="bp">self</span><span class="o">.</span><span class="n">maximum_standoff</span> <span class="ow">and</span> <span class="n">z</span> <span class="o">&gt;</span> <span class="bp">self</span><span class="o">.</span><span class="n">minimum_standoff</span><span class="p">:</span>
                     <span class="n">u</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">evaluate_uncertainty</span><span class="p">(</span><span class="n">z</span><span class="p">,</span> <span class="n">psi</span><span class="p">)</span> <span class="o">*</span> <span class="nb">abs</span><span class="p">(</span><span class="n">sensor_direction</span><span class="o">.</span><span class="n">dot</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">context</span><span class="p">[</span><span class="s2">&quot;face_normals&quot;</span><span class="p">][</span><span class="n">rt_detector_face_id</span><span class="p">]))</span>
                     <span class="c1"># Only accept, if no violation of hard uncertainty threshold</span>
                     <span class="k">if</span> <span class="n">u</span> <span class="o">&lt;</span> <span class="n">uncertainty_threshold</span><span class="p">:</span>
@@ -438,7 +438,7 @@
         <span class="k">return</span> <span class="n">measurable_surface_point_indices</span><span class="p">,</span> <span class="n">uncertainties</span><span class="p">,</span> <span class="n">trajectory_line_arguments_selected</span></div>
         
 
-<div class="viewcode-block" id="SensorModel.get_scanning_frustum"><a class="viewcode-back" href="../../module_sensor_model.html#agiprobot_measurement.sensor_model.SensorModel.get_scanning_frustum">[docs]</a>    <span class="k">def</span> <span class="nf">get_scanning_frustum</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">half_length</span><span class="p">):</span>
+<div class="viewcode-block" id="SensorModel.get_scanning_frustum"><a class="viewcode-back" href="../../agiprobot_measurement.html#agiprobot_measurement.sensor_model.SensorModel.get_scanning_frustum">[docs]</a>    <span class="k">def</span> <span class="nf">get_scanning_frustum</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">half_length</span><span class="p">):</span>
         <span class="sd">&quot;&quot;&quot;</span>
 <span class="sd">        Generates a trimesh-mesh object representing the &#39;frustum of measurability&#39; in the laser_emitter_frame. Points within this frustum have </span>
 <span class="sd">        the potential to be measurable, but maximum_deviation_... may still reject points within this frustum. The frustum is constructed based on</span>

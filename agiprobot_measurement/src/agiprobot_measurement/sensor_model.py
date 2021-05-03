@@ -75,7 +75,7 @@ class SensorModel:
         :returns: Maximum possible uncertainty of a measurable point (= is within the max_deviation_...-range) in mm
         :rtype: float
         """
-        return self.evaluate_uncertainty(self.maximum_standoff, self.maximum_deviation_psi + np.pi / 2)
+        return self.evaluate_uncertainty(self.maximum_standoff, self.maximum_deviation_psi)
     
     def get_min_uncertainty(self):
         """
@@ -85,7 +85,7 @@ class SensorModel:
         :returns: Minimum possible uncertainty in mm
         :rtype: float
         """
-        return self.evaluate_uncertainty(self.minimum_standoff, np.pi / 2)
+        return self.evaluate_uncertainty(self.minimum_standoff, 0)
 
     def evaluate_uncertainty(self, z, psi):
         """
@@ -99,10 +99,10 @@ class SensorModel:
         :rtype: float
         """
         try:
-            # See the corresponding Bachelors Thesis to understand the origin of this equation
-            u = self.K_u * np.sqrt(z**2+self.xi_0**2-2*z*self.xi_0*np.sin(self.alpha)) / np.sin(psi) * z
+            # See the corresponding bachelors thesis to understand the origin of this equation
+            u = self.K_u * np.sqrt(z**2+self.xi_0**2-2*z*self.xi_0*np.sin(self.alpha)) / np.cos(psi) * z
         except:
-            return float("NaN")
+            u = float("NaN")
         return u
 
     def get_optimal_standoff(self):
@@ -129,8 +129,8 @@ class SensorModel:
         :type mesh: trimesh.Trimesh
         :param sampled_surface_points: List of all sampled surface points that should be considered for the metrological processing
         :type sampled_surface_points: list[numpy.array]
-        :param sampled_face_ids: List of face-indices, where each entry corresponds to the face of the sampled surface point at the same position
-        :type sampled_face_ids: list[int]
+        :param sampled_face_indices: List of face-indices, where each entry corresponds to the face of the sampled surface point at the same position
+        :type sampled_face_indices: list[int]
         """
         self.context = {
             "sampled_surface_points":   np.array(sampled_surface_points),
@@ -161,7 +161,7 @@ class SensorModel:
         
         :param viewpoint: ViewPoint with set viewpoint-anchor-pose
         :type viewpoint: ViewPoint
-        :param uncertainty_threshold: Maximum permissible uncertainty of a measured surface point, in mm
+        :param uncertainty_threshold: Maximum permissible uncertainty of a measured surface point in mm
         :type uncertainty_threshold: float
         :param maximum_deflection: Maximum deflection of the trajectory to be considered for processing in mm, defaults to 5e2 
         :type maximum_deflection: float, optional
@@ -239,9 +239,18 @@ class SensorModel:
                 continue
             else:
                 # Compute uncertainty-parameters z, psi, theta
-                psi = np.pi / 2 + np.arctan2(trajectory_direction.dot(self.context["face_normals"][rt_detector_face_id]), -1 * sensor_direction.dot(self.context["face_normals"][rt_detector_face_id]))
-                theta = np.arctan2(lateral_direction.dot(self.context["face_normals"][rt_detector_face_id]), sensor_direction.dot(self.context["face_normals"][rt_detector_face_id]))
-                theta -= np.arctan2(lateral_direction.dot(-1 * ray_directions_emitter[i]), sensor_direction.dot(-1 * ray_directions_emitter[i]))
+                psi = np.arctan2(trajectory_direction.dot(self.context["face_normals"][rt_detector_face_id]), -1 * sensor_direction.dot(self.context["face_normals"][rt_detector_face_id]))
+                # Use help-vectors to master the complicated formula
+                vec1 = np.array([ray_directions_emitter[i].dot(lateral_direction), ray_directions_emitter[i].dot(sensor_direction)])
+                vec2 = np.array([self.context["face_normals"][rt_detector_face_id].dot(lateral_direction), self.context["face_normals"][rt_detector_face_id].dot(sensor_direction)])
+                if np.linalg.norm(vec1) > 0 and np.linalg.norm(vec2) > 0:
+                    argcosarg = -1 * vec1.dot(vec2) / np.linalg.norm(vec1) / np.linalg.norm(vec2)
+                    if argcosarg <= 1 and argcosarg >= -1:
+                        theta = np.arccos(-1 * vec1.dot(vec2) / np.linalg.norm(vec1) / np.linalg.norm(vec2))
+                    else:
+                        theta = 1e9
+                else:
+                    theta = 1e9
                 # Wrapping into [-pi, pi]
                 if theta > np.pi:
                     theta = -2 * np.pi + theta
@@ -250,7 +259,7 @@ class SensorModel:
                 z = sensor_direction.dot(self.context["sampled_surface_points"][inlier_indices[i]] - ray_origins_emitter[i])
                 # Only accept, if no violation of hard geometric limit
                 
-                if abs(psi - np.pi/2) < self.maximum_deviation_psi and abs(theta) < self.maximum_deviation_theta and z < self.maximum_standoff and z > self.minimum_standoff:
+                if abs(psi) < self.maximum_deviation_psi and abs(theta) < self.maximum_deviation_theta and z < self.maximum_standoff and z > self.minimum_standoff:
                     u = self.evaluate_uncertainty(z, psi) * abs(sensor_direction.dot(self.context["face_normals"][rt_detector_face_id]))
                     # Only accept, if no violation of hard uncertainty threshold
                     if u < uncertainty_threshold:

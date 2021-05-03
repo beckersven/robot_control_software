@@ -85,7 +85,7 @@ class ViewPoint:
         :type trajectory_to_view: moveit_msgs/RobotTrajectory
         """
         assert isinstance(trajectory_to_viewpoint, RobotTrajectory)
-        self.trajectory_to_viewpoint= trajectory_to_viewpoint
+        self.trajectory_to_viewpoint = trajectory_to_viewpoint
 
     def reverse_trajectory_for_measurement(self):
         """

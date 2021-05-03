@@ -88,22 +88,21 @@ class PointCloudManager:
         :rtype: NoneType
         """
 
-        # The scan-data is decoded as an array of 32-Bit floats with length 1 + 6 * n (n is integer) according to:
+        # The scan-data is decoded as an array of 32-Bit floats with length 1 + 5 * n (n is integer) according to:
         # First entry is time-stamp (which is important to map the sensors point cloud to the correct transform),
         # subsequent are batches of 6 values, each representing one measured point by CoppliaSim. In each batch,
         # the first 3 values represent coordinates of the point in the sensor frame and the 
-        # last 3 values are the uncertainty-critical characteristics z (in mm), gamma (in rad) and theta (in rad).
+        # last 3 values are the uncertainty-critical characteristics z (in mm), psi (in rad).
 
         assert isinstance(raw_data, Float32MultiArray)
         
         # Ensure correct shape
-        if (len(raw_data.data) - 1) / 6 % 1 != 0:
+        if (len(raw_data.data) - 1) / 5 % 1 != 0:
             rospy.logerr("Received wrongly shaped raw laser scan data")
             return
         
         # Read out timestamp
-        stamp = rospy.Time(raw_data.data[0])
-        raw_data.data = raw_data.data[1:]
+        stamp = rospy.Time.now()
         
         # Contains currently scanned points:
         current_scan_line = PointCloud()
@@ -119,13 +118,12 @@ class PointCloudManager:
                 new_point = PointStamped()
                 new_point.header.frame_id = "laser_emitter_frame"
                 new_point.header.stamp = stamp
-                new_point.point = Point32(*raw_data.data[6 * i: 6 * i + 3])
+                new_point.point = Point32(*raw_data.data[5 * i: 5 * i + 3])
                 current_scan_line.points.append(new_point.point)
 
                 # Uncertainty evaluation: Color of the extracted point changes linearly from green to red as uncertainty-score
                 # declines from 1 to 0 (see http://wiki.ros.org/rviz/DisplayTypes/PointCloud at section 0.0.2)
-                score = self.sensor_model.evaluate_score(*raw_data.data[6 * i + 3:6 * i + 5])
-                print(raw_data.data[4])
+                score = self.sensor_model.evaluate_score(*raw_data.data[5 * i + 3:5 * i + 5])
                 color_hex = struct.unpack('f', struct.pack('i', (int(0xff * (1 - score)) << 16) + (int(0xff * score) << 8)))[0]
                 current_scan_line.channels[0].values.append(color_hex)
             if self.stitch:                    
