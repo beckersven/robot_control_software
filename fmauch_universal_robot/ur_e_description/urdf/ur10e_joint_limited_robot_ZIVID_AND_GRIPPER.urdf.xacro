@@ -1,0 +1,122 @@
+<?xml version="1.0"?>
+<robot xmlns:xacro="http://ros.org/wiki/xacro"
+  name="ur10e" >
+
+  <xacro:arg name="transmission_hw_interface" default="hardware_interface/PositionJointInterface"/>
+
+  <!-- common stuff -->
+  <xacro:include filename="$(find ur_e_description)/urdf/common.gazebo.xacro" />
+
+  <!-- ur10e -->
+  <xacro:include filename="$(find ur_e_description)/urdf/ur10e.urdf.xacro" />
+
+  <!-- arm -->
+  <xacro:arg name="kinematics_config" default="$(find ur_e_description)/config/ur10e_default.yaml"/>
+  <!-- Use numerical values instead of "pi" to assert coherence with the joint_limits.yaml -->
+  <xacro:ur10e_robot prefix="" joint_limited="true"
+    shoulder_pan_lower_limit="-6.283" shoulder_pan_upper_limit="6.283"
+    shoulder_lift_lower_limit="-3.14"    shoulder_lift_upper_limit="0.52"
+    elbow_joint_lower_limit="-2.9"    elbow_joint_upper_limit="0.1"
+    wrist_1_lower_limit="-6.283"      wrist_1_upper_limit="6.283"
+    wrist_2_lower_limit="-6.283"      wrist_2_upper_limit="6.283"
+    wrist_3_lower_limit="-6.283"      wrist_3_upper_limit="6.283"
+    transmission_hw_interface="$(arg transmission_hw_interface)"
+    kinematics_file="${load_yaml('$(arg kinematics_config)')}"
+    />
+
+  
+   <!-- added by Adem, modified by Sven -->
+  <material name="white">
+    <color rgba="1 1 1 1"/>
+  </material>
+  <material name="end_effector_dark_gray">
+    <color rgba="0.1 0.1 0.1 1"/>
+  </material>
+  
+  <link name="table">
+    <visual>
+      <geometry>
+        <box size="1 1 0.9"/>
+      </geometry>
+      <material name="white"/>
+    </visual>
+    <collision>
+      <origin rpy="0 0 0" xyz="0.0 0.0 0.0"/>
+      <geometry>
+        <box size="1 1 0.9"/>
+      </geometry>
+    </collision>
+  </link>
+
+  <joint name="table_base" type="fixed">
+    <parent link="table"/>
+    <child link="base_link"/>
+    <origin xyz="0.36 0.36 0.45" rpy="0 0 0" />
+  </joint>
+  
+  <link name="fixture">
+    <visual>
+      <geometry>
+        <mesh scale="0.001 0.001 0.001" filename="package://ur_e_description/meshes/custom/fixture.stl" />
+      </geometry>
+      <material name="white"/>
+    </visual>
+    <collision>
+      <origin rpy="0 0 0" xyz="0.0 0.0 0.0"/>
+      <geometry>
+        <mesh scale="0.001 0.001 0.001" filename="package://ur_e_description/meshes/custom/collision/fixture.stl" />
+      </geometry>
+    </collision>
+  </link>
+
+  <joint name="table_fixture" type="fixed">
+    <parent link="table"/>
+    <child link="fixture"/>
+    <origin xyz="0.0 -0.24 0.45" rpy="1.570796327 0 0" />
+  </joint>
+  <joint name="tool0_end_effector" type="fixed">
+    <parent link="tool0"/>
+    <child link="end_effector"/>
+    <origin xyz="0.0 0.0 0.0" rpy="0 0 3.141592654"/>
+  </joint>
+  <link name="end_effector">
+    <visual>
+      <geometry>
+        <mesh scale="0.001 0.001 0.001" filename="package://ur_e_description/meshes/custom/zivid_gripper.stl" />
+      </geometry>
+      <material name="end_effector_dark_gray"/>
+      <origin rpy="0 0 0" xyz="0 0 0"/>  
+    </visual>
+    <collision>
+      <geometry>
+        <mesh scale="0.001 0.001 0.001" filename="package://ur_e_description/meshes/custom/collision/zivid.stl" />
+      </geometry>
+      <material name="end_effector_dark_gray"/>
+      <origin rpy="0 0 0" xyz="0 0 0"/>
+    </collision>
+    <collision>
+      <geometry>
+        <mesh scale="0.001 0.001 0.001" filename="package://ur_e_description/meshes/custom/collision/zivid_mount.stl" />
+      </geometry>
+      <material name="end_effector_dark_gray"/>
+      <origin rpy="0 0 0" xyz="0 0 0"/>
+    </collision>
+    <collision>
+      <geometry>
+        <box size="0.21 0.04 0.194"/>
+      </geometry>
+      <material name="end_effector_dark_gray"/>
+      <origin rpy="0 0 0" xyz="0 0 0.163"/>
+    </collision>
+  </link>
+
+
+  <link name="world" />
+
+  <joint name="world_joint" type="fixed">
+    <parent link="world" />
+    <child link = "table" />
+    <origin xyz="0.5 -0.5 0.45" rpy="0.0 0.0 0.0" />
+  </joint>
+
+</robot>
