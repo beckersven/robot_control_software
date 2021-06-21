@@ -28,9 +28,7 @@
   <material name="white">
     <color rgba="1 1 1 1"/>
   </material>
-  <material name="dark_green">
-    <color rgba="0.26 0.62 0.58 1"/>
-  </material>
+
   
   <link name="table">
     <visual>
@@ -47,27 +45,6 @@
     <origin xyz="0.36 0.36 0.55" rpy="0 0 0" />
   </joint>
 
-  <link name="laser_scanner">
-    <visual>
-      <geometry>
-        <box size="0.18 0.18 0.18"/>
-      </geometry>
-      <material name="dark_green"/>
-      <origin rpy="0 0 0" xyz="0.00 0.0 0.09"/>  <!--"0 0 0" xyz="0.08 0 -0.075" -->
-    </visual>
-    <collision>
-      <origin rpy="0 0 0" xyz="0.0 0.0 0.095"/>
-      <geometry>
-        <box size="0.20 0.20 0.19"/>     <!--size="0.23 0.09 0.15" -->
-      </geometry>
-    </collision>
-  </link>
-  
-  <joint name="scanner_connection" type="fixed">
-    <parent link="tool0"/>
-    <child link="laser_scanner"/>
-    <origin xyz="0 0 0" rpy="0.0 0.0 0.0" />
-  </joint>
 
  <!--added: END       <origin xyz="${-(0.125/2)-(0.11/2)} -0.01 0" rpy="0 0 ${pi/2}" /> -->
 
