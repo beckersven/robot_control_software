@@ -1,5 +1,5 @@
 <launch>
-    <arg name="controller_config_file" default="$(find ur_robot_driver)/config/ur10e_controllers.yaml" doc="Config file used for defining the ROS-Control controllers."/>
+    <arg name="controller_config_file" default="$(find coppeliasim_interface)/config/ur10e_controllers.yaml" doc="Config file used for defining the ROS-Control controllers."/>
     <arg name="stopped_controllers" default="pos_joint_traj_controller joint_group_vel_controller" doc="Controllers that are initally loaded, but not started."/>
     <!--'force_torque_sensor_controller' is disabled in contrast to the UR-driver-->
     <arg name="controllers" default="joint_state_controller scaled_pos_joint_traj_controller speed_scaling_state_controller" doc="Controllers that are activated by default."/>
