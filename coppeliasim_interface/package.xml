@@ -57,7 +57,7 @@
   
   <build_depend>boost</build_depend>
   <build_depend>industrial_robot_status_interface</build_depend>
-
+  <build_depend>ur_robot_driver</build_depend>
   <depend>control_msgs</depend>
   <depend>controller_manager</depend>
   <depend>geometry_msgs</depend>
@@ -78,7 +78,7 @@
   <exec_depend>robot_state_publisher</exec_depend>
   <exec_depend>ur_e_description</exec_depend>
   <exec_depend>velocity_controllers</exec_depend>
-  
+  <exec_depend>ur_robot_driver</exec_depend>
   
   <doc_depend>doxygen</doc_depend>
 

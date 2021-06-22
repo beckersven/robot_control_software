@@ -124,7 +124,7 @@ find_package(Boost REQUIRED COMPONENTS system)
 catkin_package(
 #  INCLUDE_DIRS include
 #  LIBRARIES coppeliasim_interface
-#  CATKIN_DEPENDS roscpp
+  CATKIN_DEPENDS roscpp ur_robot_driver
 #  DEPENDS system_lib
 )
 
