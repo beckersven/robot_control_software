@@ -2,8 +2,8 @@
     <arg name="kinematics_config" default="$(find launcher)/config/my_robot_calibration.yaml" doc="Kinematics config file used for calibration correction. This will be used to verify the robot's calibration is matching the robot_description."/>
     <arg name="robot_ip" default="192.168.56.2" doc="IP address by which the robot can be reached."/>
     <arg name="limited" default="true"/>
-    <arg name="end_effector_config" default="NONE" doc="What endeffector is installed. Current possibilities: 'NONE', 'TSCAN', 'ZIVID_AND_GRIPPER'."/>
-    <arg name="type" default="NONE" doc="To select whether a dynamics simulator (SIM), the real robot (REAL) or nothing (NONE, so just planning and reachibility computations possible) shall be loaded."/>
+    <arg name="endeffector" default="none" doc="What endeffector is installed. Current possibilities: 'none', 'tscan', 'zivid_and_gripper'."/>
+    <arg name="type" default="none" doc="To select whether a dynamics simulator (SIM), the real robot (REAL) or nothing (none, so just planning and reachibility computations possible) shall be loaded."/>
     <arg name="rviz" default="true" doc="Whether to show the RVIZ-planning environment (planning via MoveIt!-interfaces does not require this panel!)."/>
     
     <!--Launch real robot druver-->
@@ -16,11 +16,11 @@
     
     <!--Launch simulator robot driver-->
     <include if="$(eval arg('type') == 'SIM')" file="$(find coppeliasim_interface)/launch/connect_to_coppeliasim.launch">
-        <arg name="enable_TSCAN" value="$(eval arg('end_effector_config') == 'TSCAN')"/>
+        <arg name="enable_tscan" value="$(eval arg('end_effector_config') == 'tscan')"/>
     </include>
 
 
-  <group if="$(eval arg('type')=='NONE')">
+  <group if="$(eval arg('type')=='none')">
 
     <!-- We do not have a robot connected, so publish fake joint states -->
     <node name="joint_state_publisher" pkg="joint_state_publisher" type="joint_state_publisher">
@@ -36,8 +36,8 @@
   <include file="$(find ur10_e_moveit_config)/launch/ur10_e_moveit_planning_execution.launch">
     <arg name="sim" default="$(eval arg('type')!='REAL')" />
     <arg name="limited" default="$(arg limited)"/>
-    <arg name="fake_execution" default="$(eval arg('type')=='NONE')"/>
-    <arg name="model_postfix" default="_$(arg end_effector_config)"/>
+    <arg name="fake_execution" default="$(eval arg('type')=='none')"/>
+    <arg name="endeffector" default="$(arg endeffector)"/>
   </include>
   <!-- Run Rviz and load the default config to see the state of the move_group node -->
   <include file="$(find ur10_e_moveit_config)/launch/moveit_rviz.launch">

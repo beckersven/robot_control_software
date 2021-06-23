@@ -1,0 +1,39 @@
+<?xml version="1.0"?>
+<robot xmlns:xacro="http://ros.org/wiki/xacro">
+
+   <link name="tool_center_point">
+    <visual>
+      <geometry>
+        <mesh scale="0.001 0.001 0.001" filename="package://ur_e_description/meshes/custom/zivid_gripper.stl" />
+      </geometry>
+      <material name="end_effector_dark_gray"/>
+      <origin rpy="0 0 0" xyz="0 0 0"/>  
+    </visual>
+    <collision>
+      <geometry>
+        <mesh scale="0.001 0.001 0.001" filename="package://ur_e_description/meshes/custom/collision/zivid.stl" />
+      </geometry>
+      <material name="end_effector_dark_gray"/>
+      <origin rpy="0 0 0" xyz="0 0 0"/>
+    </collision>
+    <collision>
+      <geometry>
+        <mesh scale="0.001 0.001 0.001" filename="package://ur_e_description/meshes/custom/collision/zivid_mount.stl" />
+      </geometry>
+      <material name="end_effector_dark_gray"/>
+      <origin rpy="0 0 0" xyz="0 0 0"/>
+    </collision>
+    <collision>
+      <geometry>
+        <box size="0.21 0.04 0.194"/>
+      </geometry>
+      <material name="end_effector_dark_gray"/>
+      <origin rpy="0 0 0" xyz="0 0 0.163"/>
+    </collision>
+  </link>
+  <joint name="tool0_tool_center_point" type="fixed">
+    <parent link="tool0"/>
+    <child link="tool_center_point"/>
+    <origin xyz="0.0 0.0 0.0" rpy="0 0 3.141592654"/>
+  </joint>
+</robot>

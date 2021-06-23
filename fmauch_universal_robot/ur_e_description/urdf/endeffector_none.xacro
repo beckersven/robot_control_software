@@ -23,7 +23,8 @@
     transmission_hw_interface="$(arg transmission_hw_interface)"
     kinematics_file="${load_yaml('$(arg kinematics_config)')}"
     />
-
+  <!-- add fixture -->
+  <xacro:include filename="$(find ur_e_description)/urdf/ur10e_fixture.urdf.xacro" />
 
    <!-- added by Adem, modified by Sven -->
   <material name="white">

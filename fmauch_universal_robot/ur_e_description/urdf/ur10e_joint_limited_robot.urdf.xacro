@@ -3,6 +3,8 @@
   name="ur10e" >
 
   <xacro:arg name="transmission_hw_interface" default="hardware_interface/PositionJointInterface"/>
+  <xacro:arg name="endeffector" default="NONE"/>
+  <xacro:property name="endeffector" value="$(arg endeffector)"/>
 
   <!-- common stuff -->
   <xacro:include filename="$(find ur_e_description)/urdf/common.gazebo.xacro" />
@@ -23,7 +25,7 @@
     transmission_hw_interface="$(arg transmission_hw_interface)"
     kinematics_file="${load_yaml('$(arg kinematics_config)')}"
     />
-
+  
   
    <!-- added by Adem, modified by Sven -->
   <material name="white">
@@ -54,61 +56,22 @@
     <origin xyz="0.36 0.36 0.45" rpy="0 0 0" />
   </joint>
   
-  <link name="fixture">
-    <visual>
-      <geometry>
-        <mesh scale="0.001 0.001 0.001" filename="package://ur_e_description/meshes/custom/fixture.stl" />
-      </geometry>
-      <material name="white"/>
-    </visual>
-    <collision>
-      <origin rpy="0 0 0" xyz="0.0 0.0 0.0"/>
-      <geometry>
-        <mesh scale="0.001 0.001 0.001" filename="package://ur_e_description/meshes/custom/collision/fixture.stl" />
-      </geometry>
-    </collision>
-  </link>
-
-  <joint name="table_fixture" type="fixed">
-    <parent link="table"/>
-    <child link="fixture"/>
-    <origin xyz="0.0 -0.24 0.45" rpy="1.570796327 0 0" />
-  </joint>
-  <joint name="tool0_end_effector" type="fixed">
-    <parent link="tool0"/>
-    <child link="end_effector"/>
-    <origin xyz="0.0 0.0 0.0" rpy="0 0 3.141592654"/>
-  </joint>
-  <link name="end_effector">
-    <visual>
-      <geometry>
-        <mesh scale="0.001 0.001 0.001" filename="package://ur_e_description/meshes/custom/zivid_gripper.stl" />
-      </geometry>
-      <material name="end_effector_dark_gray"/>
-      <origin rpy="0 0 0" xyz="0 0 0"/>  
-    </visual>
-    <collision>
-      <geometry>
-        <mesh scale="0.001 0.001 0.001" filename="package://ur_e_description/meshes/custom/collision/zivid.stl" />
-      </geometry>
-      <material name="end_effector_dark_gray"/>
-      <origin rpy="0 0 0" xyz="0 0 0"/>
-    </collision>
-    <collision>
-      <geometry>
-        <mesh scale="0.001 0.001 0.001" filename="package://ur_e_description/meshes/custom/collision/zivid_mount.stl" />
-      </geometry>
-      <material name="end_effector_dark_gray"/>
-      <origin rpy="0 0 0" xyz="0 0 0"/>
-    </collision>
-    <collision>
-      <geometry>
-        <box size="0.21 0.04 0.194"/>
-      </geometry>
-      <material name="end_effector_dark_gray"/>
-      <origin rpy="0 0 0" xyz="0 0 0.163"/>
-    </collision>
-  </link>
+  <!-- add fixture -->
+  <xacro:include filename="$(find ur_e_description)/urdf/fixture.xacro" />
+  
+  <!-- Load endeffector config -->
+  <xacro:if value="${endeffector != 'none'}">
+    <xacro:include filename="$(find ur_e_description)/urdf/endeffector_$(arg endeffector).xacro" />
+  </xacro:if>
+  <xacro:if value="${endeffector == 'none'}">
+    <joint name="dummy_joint" type="fixed">
+      <origin xyz="0 0 0" rpy="0 0 0"/>
+      <parent link="tool0"/>
+      <child link="tool_center_point"/>
+    </joint>
+    <link name="tool_center_point"/>
+  </xacro:if>
+ 
 
 
   <link name="world" />

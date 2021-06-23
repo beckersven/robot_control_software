@@ -2,7 +2,7 @@
   <arg name="sim" default="false" />
   <arg name="limited" default="false"/>
   <arg name="debug" default="false" />
-  <arg name="model_postfix" default="_NONE"/>
+  <arg name="endeffector" default="none"/>
   <arg name="fake_execution" default="false"/>
     
   <!-- Remap follow_joint_trajectory -->
@@ -13,6 +13,6 @@
     <arg name="limited" default="$(arg limited)"/>
     <arg name="debug" default="$(arg debug)" />
     <arg name="fake_execution" default="$(arg fake_execution)"/>
-    <arg name="model_postfix" default="$(arg model_postfix)"/>
+    <arg name="endeffector" default="$(arg endeffector)"/>
   </include>
 </launch>
