@@ -1,13 +1,13 @@
 <launch>
     <arg name="kinematics_config" default="$(find launcher)/config/my_robot_calibration.yaml" doc="Kinematics config file used for calibration correction. This will be used to verify the robot's calibration is matching the robot_description."/>
-    <arg name="robot_ip" default="192.168.56.2" doc="IP address by which the robot can be reached."/>
+    <arg name="robot_ip" default="129.13.234.156" doc="IP address by which the robot can be reached."/>
     <arg name="limited" default="true"/>
     <arg name="endeffector" default="none" doc="What endeffector is installed. Current possibilities: 'none', 'tscan', 'zivid_and_gripper'."/>
-    <arg name="type" default="none" doc="To select whether a dynamics simulator (SIM), the real robot (REAL) or nothing (none, so just planning and reachibility computations possible) shall be loaded."/>
+    <arg name="type" default="none" doc="To select whether a dynamics simulator (sim), the real robot (real) or nothing (none, so just planning and reachibility computations possible) shall be loaded."/>
     <arg name="rviz" default="true" doc="Whether to show the RVIZ-planning environment (planning via MoveIt!-interfaces does not require this panel!)."/>
     
     <!--Launch real robot druver-->
-    <include if="$(eval arg('type') == 'REAL')" file="$(find ur_robot_driver)/launch/ur10e_bringup.launch">
+    <include if="$(eval arg('type') == 'real')" file="$(find ur_robot_driver)/launch/ur10e_bringup.launch">
         <arg name="kinematics_config" default="$(arg kinematics_config)"/>
         <arg name="robot_ip" default="$(arg robot_ip)"/>
         <arg name="limited" default="true"/>
@@ -15,7 +15,7 @@
     
     
     <!--Launch simulator robot driver-->
-    <include if="$(eval arg('type') == 'SIM')" file="$(find coppeliasim_interface)/launch/connect_to_coppeliasim.launch">
+    <include if="$(eval arg('type') == 'sim')" file="$(find coppeliasim_interface)/launch/connect_to_coppeliasim.launch">
         <arg name="enable_tscan" value="$(eval arg('end_effector_config') == 'tscan')"/>
     </include>
 
@@ -34,7 +34,7 @@
 
   <!-- Launch MoveIt planner -->
   <include file="$(find ur10_e_moveit_config)/launch/ur10_e_moveit_planning_execution.launch">
-    <arg name="sim" default="$(eval arg('type')!='REAL')" />
+    <arg name="sim" default="$(eval arg('type')!='real')" />
     <arg name="limited" default="$(arg limited)"/>
     <arg name="fake_execution" default="$(eval arg('type')=='none')"/>
     <arg name="endeffector" default="$(arg endeffector)"/>

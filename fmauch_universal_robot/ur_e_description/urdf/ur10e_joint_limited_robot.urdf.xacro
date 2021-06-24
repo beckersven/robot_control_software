@@ -3,7 +3,7 @@
   name="ur10e" >
 
   <xacro:arg name="transmission_hw_interface" default="hardware_interface/PositionJointInterface"/>
-  <xacro:arg name="endeffector" default="NONE"/>
+  <xacro:arg name="endeffector" default="none"/>
   <xacro:property name="endeffector" value="$(arg endeffector)"/>
 
   <!-- common stuff -->
