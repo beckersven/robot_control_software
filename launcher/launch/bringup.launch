@@ -15,9 +15,10 @@
         <arg name="robot_ip" default="$(arg robot_ip)"/>
         <arg name="limited" default="true"/>
     </include>
-    <group if="$(eval arg('type') == 'real' and arg('endeffector') == 'zivid_and_gripper')"/>
+    <group if="$(eval arg('type') == 'real' and arg('endeffector') == 'zivid_and_gripper')">
       <node ns="zivid_camera" name="zivid_camera_node" type="zivid_camera_node" pkg="zivid_camera" output="screen"/>
       <node name="robotiq2FGripper" type="Robotiq2FGripperRtuNode.py" pkg="robotiq_2f_gripper_control" output="screen" args="$(arg gripper_usb_configuration)"/>
+    </group>
     <!--Launch simulator robot driver-->
     <include if="$(eval arg('type') == 'sim')" file="$(find coppeliasim_interface)/launch/connect_to_coppeliasim.launch">
         <arg name="enable_tscan" value="$(eval arg('endeffector') == 'tscan')"/>
