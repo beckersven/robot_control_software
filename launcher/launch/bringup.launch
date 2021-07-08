@@ -1,6 +1,6 @@
 <launch>
     <arg name="kinematics_config" default="$(find launcher)/config/my_robot_calibration.yaml" doc="Kinematics config file used for calibration correction. This will be used to verify the robot's calibration is matching the robot_description."/>
-    <arg name="robot_ip" default="192.168.56.2" doc="IP address by which the robot can be reached."/>
+    <arg name="robot_ip" default="129.13.234.156" doc="IP address by which the robot can be reached."/>
     <arg name="limited" default="true"/>
     <arg name="endeffector" default="none" doc="What endeffector is installed. Current possibilities: 'none', 'tscan', 'zivid_and_gripper'."/>
     <arg name="type" default="none" doc="To select whether a dynamics simulator (sim), the real robot (real) or nothing (none, so just planning and reachibility computations possible) shall be loaded."/>
