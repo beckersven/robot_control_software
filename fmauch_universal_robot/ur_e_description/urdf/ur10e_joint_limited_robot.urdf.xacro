@@ -60,17 +60,8 @@
   <xacro:include filename="$(find ur_e_description)/urdf/fixture.xacro" />
   
   <!-- Load endeffector config -->
-  <xacro:if value="${endeffector != 'none'}">
-    <xacro:include filename="$(find ur_e_description)/urdf/endeffector_$(arg endeffector).xacro" />
-  </xacro:if>
-  <xacro:if value="${endeffector == 'none'}">
-    <joint name="dummy_joint" type="fixed">
-      <origin xyz="0 0 0" rpy="0 0 0"/>
-      <parent link="tool0"/>
-      <child link="tool_center_point"/>
-    </joint>
-    <link name="tool_center_point"/>
-  </xacro:if>
+  <xacro:include filename="$(find ur_e_description)/urdf/endeffector_$(arg endeffector).xacro" />
+
  
 
 
