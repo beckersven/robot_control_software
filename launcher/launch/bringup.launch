@@ -5,7 +5,8 @@
     <arg name="endeffector" default="none" doc="What endeffector is installed. Current possibilities: 'none', 'tscan', 'zivid_and_gripper'."/>
     <arg name="type" default="none" doc="To select whether a dynamics simulator (sim), the real robot (real) or nothing (none, so just planning and reachibility computations possible) shall be loaded."/>
     <arg name="rviz" default="true" doc="Whether to show the RVIZ-planning environment (planning via MoveIt!-interfaces does not require this panel!)."/>
-    
+    <arg name="gripper_usb_configuration" default="/dev/ttyUSB0" doc="Port at which the serial device for the gripper is connected to. Get config via command 'dmesg | grep tty'."/>
+
     <param name="/execution_type" value="$(arg type)"/>
     
     <!--Launch real robot druver-->
@@ -14,9 +15,9 @@
         <arg name="robot_ip" default="$(arg robot_ip)"/>
         <arg name="limited" default="true"/>
     </include>
-    
-    
-    
+    <group if="$(eval arg('type') == 'real' and arg('endeffector') == 'zivid_and_gripper')"/>
+      <node ns="zivid_camera" name="zivid_camera_node" type="zivid_camera_node" pkg="zivid_camera" output="screen"/>
+      <node name="robotiq2FGripper" type="Robotiq2FGripperRtuNode.py" pkg="robotiq_2f_gripper_control" output="screen" args="$(arg gripper_usb_configuration)"/>
     <!--Launch simulator robot driver-->
     <include if="$(eval arg('type') == 'sim')" file="$(find coppeliasim_interface)/launch/connect_to_coppeliasim.launch">
         <arg name="enable_tscan" value="$(eval arg('endeffector') == 'tscan')"/>
@@ -30,7 +31,6 @@
       <param name="/use_gui" value="false"/> 
       <rosparam param="/source_list">[/move_group/fake_controller_joint_states]</rosparam>
     </node>
-    
     <!-- Given the published joint states, publish tf for the robot links -->
     <node name="robot_state_publisher" pkg="robot_state_publisher" type="robot_state_publisher" respawn="true" output="screen" />
   </group>
