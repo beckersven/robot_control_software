@@ -24,7 +24,7 @@
         <arg name="enable_tscan" value="$(eval arg('endeffector') == 'tscan')"/>
     </include>
 
-
+  <node name="obstacle_provider" type="obstacle_provider.py" pkg="launcher" output="screen"/>
   <group if="$(eval arg('type')=='none')">
 
     <!-- We do not have a robot connected, so publish fake joint states -->

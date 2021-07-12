@@ -12,4 +12,6 @@ controller_list:
   - name: fake_endeffector_controller
     joints:
       []
-  
+initial:
+  - group: manipulator
+    pose:  angled
