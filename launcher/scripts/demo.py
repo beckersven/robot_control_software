@@ -9,6 +9,8 @@ import numpy as np
 import os
 import rospkg
 import geometry_msgs.msg
+from zivid_camera.srv import CaptureRequest, Capture, CaptureAssistantSuggestSettings, CaptureAssistantSuggestSettingsRequest
+
 if __name__ == "__main__":
     
     # Initialize ROS and MoveIt!
@@ -120,4 +122,22 @@ if __name__ == "__main__":
     gripper_message.rPR = int(0)
     gripper_command_pub.publish(gripper_message)
     print("Open gripper")
+
+    # Connect to and call capture assistant service
+    print("Obtaining parameters for capture")
+    rospy.wait_for_service("/zivid_camera/capture_assistant/suggest_settings", rospy.Duration(1))
+    suggest_srv = rospy.ServiceProxy("/zivid_camera/capture_assistant/suggest_settings", service_class=CaptureAssistantSuggestSettings)
+    suggest_req = CaptureAssistantSuggestSettingsRequest()
+    suggest_req.ambient_light_frequency = suggest_req.AMBIENT_LIGHT_FREQUENCY_50HZ
+    suggest_req.max_capture_time = rospy.Duration(3)
+    suggest_srv.call(suggest_req)
+
+    # Capture with suggested settings
+    print("Perfoming capture with obtained parameters")
+    rospy.wait_for_service("/zivid_camera/capture_assistant/suggest_settings", rospy.Duration(1))
+    capture_srv = rospy.ServiceProxy("/zivid_camera/capture", service_class=Capture)
+    capture_req = CaptureRequest()
+    capture_srv.call(CaptureRequest())
+
+
     print("Finished!")
