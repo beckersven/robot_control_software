@@ -3,6 +3,8 @@
   name="ur10e" >
 
   <xacro:arg name="transmission_hw_interface" default="hardware_interface/PositionJointInterface"/>
+  <xacro:arg name="endeffector" default="none"/>
+  <xacro:property name="endeffector" value="$(arg endeffector)"/>
 
   <!-- common stuff -->
   <xacro:include filename="$(find ur_e_description)/urdf/common.gazebo.xacro" />
@@ -12,77 +14,55 @@
 
   <!-- arm -->
   <xacro:arg name="kinematics_config" default="$(find ur_e_description)/config/ur10e_default.yaml"/>
+  <!-- Use numerical values instead of "pi" to assert coherence with the joint_limits.yaml -->
   <xacro:ur10e_robot prefix="" joint_limited="true"
-    shoulder_pan_lower_limit="${-pi}" shoulder_pan_upper_limit="${pi}"
-    shoulder_lift_lower_limit="${-pi}" shoulder_lift_upper_limit="${pi}"
-    elbow_joint_lower_limit="${-pi}" elbow_joint_upper_limit="${pi}"
-    wrist_1_lower_limit="${-pi}" wrist_1_upper_limit="${pi}"
-    wrist_2_lower_limit="${-pi}" wrist_2_upper_limit="${pi}"
-    wrist_3_lower_limit="${-pi}" wrist_3_upper_limit="${pi}"
+    shoulder_pan_lower_limit="-6.283" shoulder_pan_upper_limit="6.283"
+    shoulder_lift_lower_limit="-3.14"    shoulder_lift_upper_limit="0.52"
+    elbow_joint_lower_limit="-2.9"    elbow_joint_upper_limit="0.1"
+    wrist_1_lower_limit="-6.283"      wrist_1_upper_limit="6.283"
+    wrist_2_lower_limit="-6.283"      wrist_2_upper_limit="6.283"
+    wrist_3_lower_limit="-6.283"      wrist_3_upper_limit="6.283"
     transmission_hw_interface="$(arg transmission_hw_interface)"
     kinematics_file="${load_yaml('$(arg kinematics_config)')}"
     />
-
-
-   <!-- added by Adem: TO DO: create a separate file -->
-  <material name="gray">
+  
+  
+   <!-- added by Adem, modified by Sven -->
+  <material name="white">
     <color rgba="1 1 1 1"/>
   </material>
-  <material name="blue">
-    <color rgba="0 0 1 1"/>
+  <material name="end_effector_dark_gray">
+    <color rgba="0.1 0.1 0.1 1"/>
   </material>
+  
   <link name="table">
     <visual>
       <geometry>
-        <box size="1 1 1.1"/>
+        <box size="1 1 0.9"/>
       </geometry>
-      <material name="gray"/>
+      <material name="white"/>
     </visual>
+    <collision>
+      <origin rpy="0 0 0" xyz="0.0 0.0 0.0"/>
+      <geometry>
+        <box size="1 1 0.9"/>
+      </geometry>
+    </collision>
   </link>
 
   <joint name="table_base" type="fixed">
     <parent link="table"/>
     <child link="base_link"/>
-    <origin xyz="0.36 0.36 0.55" rpy="0 0 0" />
+    <origin xyz="0.36 0.36 0.45" rpy="0 0 0" />
   </joint>
+  
+  <!-- add fixture -->
+  <xacro:include filename="$(find ur_e_description)/urdf/fixture.xacro" />
+  
+  <!-- Load endeffector config -->
+  <xacro:include filename="$(find ur_e_description)/urdf/endeffector_$(arg endeffector).xacro" />
 
-  <link name="zivid_camera">
-    <visual>
-      <geometry>
-        <box size="0.23 0.10 0.16"/>
-      </geometry>
-      <material name="blue"/>
-      <origin rpy="0 0 0" xyz="0.08 0 -0.075"/>  <!--"0 0 0" xyz="0.08 0 -0.075" -->
-    </visual>
-    <collision>
-      <origin rpy="0 0 0" xyz="0.08 0 -0.075"/>
-      <geometry>
-        <box size="0.25 0.12 0.18"/>     <!--size="0.23 0.09 0.15" -->
-      </geometry>
-    </collision>
-  </link>
-  <link name="camera_halterung">
-    <visual>
-      <geometry>
-        <box size=" 0.11 0.065 0.035"/>
-      </geometry>
-      <material name="blue"/>
-    </visual>
-  </link>
-
-  <joint name="h_cam" type="fixed">
-    <parent link="camera_halterung"/>
-    <child link="zivid_camera"/>
-    <origin xyz="${-(0.11/2)-(0.085/2) - 0.01} -0.08 0.06" rpy="0 0 ${pi/2}" /> 
-  </joint>
-
-  <joint name="ee_h" type="fixed">
-    <parent link="tool0"/>
-    <child link="camera_halterung"/>
-    <origin xyz="0 -0.031 0.018" rpy="0 0.0 ${pi/2}" />
-  </joint>
-
- <!--added by Adem: END       <origin xyz="${-(0.125/2)-(0.11/2)} -0.01 0" rpy="0 0 ${pi/2}" /> -->
+ 
 
 
   <link name="world" />
@@ -90,7 +70,7 @@
   <joint name="world_joint" type="fixed">
     <parent link="world" />
     <child link = "table" />
-    <origin xyz="0.5 -0.5 0.55" rpy="0.0 0.0 0.0" />
+    <origin xyz="0.5 -0.5 0.45" rpy="0.0 0.0 0.0" />
   </joint>
 
 </robot>

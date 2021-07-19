@@ -1,0 +1,44 @@
+<?xml version="1.0"?>
+<robot xmlns:xacro="http://ros.org/wiki/xacro" >
+  <!-- See corresponding Bachelor Thesis for the origin of these numbers / geometries / ... -->
+  <link name="laser_scanner">
+    <visual>
+      <geometry>
+        <mesh scale="0.001 0.001 0.001" filename="package://ur_e_description/meshes/custom/zeiss_tscan_visual.stl" />
+      </geometry>
+      <material name="wbk_green"/>
+      <!-- Those parameters have been optimized heuristically so that the visual model is apprx. enclosed by the collision model-->
+      <origin rpy="0 -1.5707963267948966 -1.5707963267948966" xyz="-0.05 0 0.013"/>  
+    </visual>
+    <!--Handle-->
+    <collision>
+      <origin rpy="0 0 0" xyz="0.0 0.0 0.083"/>
+      <geometry>
+        <box size="0.125 0.052 0.058"/>     
+      </geometry>
+      <material name="wbk_green"/>
+    </collision>
+    <!--Body-->
+    <collision>
+      <origin rpy="0 0 0" xyz=" 0.155 0.0 0.09"/>
+      <geometry>
+        <box size="0.185 0.16 0.18"/>     <!--size="0.23 0.09 0.15" -->
+      </geometry>
+      <material name="wbk_green"/>
+    </collision>
+  </link>
+  
+  <joint name="scanner_connection" type="fixed">
+    <parent link="tool0"/>
+    <child link="laser_scanner"/>
+    <origin xyz="0 0 0" rpy="0.0 0.0 0.0" />
+  </joint>
+  
+  <link name="tool_center_point" ></link>
+  <joint name="scanner_internal" type="fixed">
+    <parent link="laser_scanner"/>
+    <child link="tool_center_point"/>
+    <origin xyz="0.1665 0.0 0.14318" rpy="0 0 0"/>
+  </joint>
+
+</robot>

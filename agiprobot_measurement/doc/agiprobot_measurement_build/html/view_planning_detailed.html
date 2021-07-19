@@ -1,0 +1,311 @@
+
+
+<!DOCTYPE html>
+<html class="writer-html4" lang="en" >
+<head>
+  <meta charset="utf-8" />
+  
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  
+  <title>Path Planning Detailed &mdash; Agiprobot Measurement 1.0 documentation</title>
+  
+
+  
+  <link rel="stylesheet" href="_static/css/theme.css" type="text/css" />
+  <link rel="stylesheet" href="_static/pygments.css" type="text/css" />
+
+  
+  
+
+  
+  
+
+  
+
+  
+  <!--[if lt IE 9]>
+    <script src="_static/js/html5shiv.min.js"></script>
+  <![endif]-->
+  
+    
+      <script type="text/javascript">
+          var DOCUMENTATION_OPTIONS = {
+              URL_ROOT:'./',
+              VERSION:'1.0',
+              LANGUAGE:'None',
+              COLLAPSE_INDEX:false,
+              FILE_SUFFIX:'.html',
+              HAS_SOURCE:  true,
+              SOURCELINK_SUFFIX: '.txt'
+          };
+      </script>
+        <script type="text/javascript" src="_static/jquery.js"></script>
+        <script type="text/javascript" src="_static/underscore.js"></script>
+        <script type="text/javascript" src="_static/doctools.js"></script>
+        <script type="text/javascript" src="https://cdnjs.cloudflare.com/ajax/libs/mathjax/2.7.1/MathJax.js?config=TeX-AMS-MML_HTMLorMML"></script>
+    
+    <script type="text/javascript" src="_static/js/theme.js"></script>
+
+    
+    <link rel="index" title="Index" href="genindex.html" />
+    <link rel="search" title="Search" href="search.html" />
+    <link rel="next" title="Trajectory Manager" href="module_trajectory_manager.html" />
+    <link rel="prev" title="Overview" href="overview.html" /> 
+</head>
+
+<body class="wy-body-for-nav">
+
+   
+  <div class="wy-grid-for-nav">
+    
+    <nav data-toggle="wy-nav-shift" class="wy-nav-side">
+      <div class="wy-side-scroll">
+        <div class="wy-side-nav-search" >
+          
+
+          
+            <a href="index.html" class="icon icon-home"> Agiprobot Measurement
+          
+
+          
+          </a>
+
+          
+            
+            
+              <div class="version">
+                1.0
+              </div>
+            
+          
+
+          
+<div role="search">
+  <form id="rtd-search-form" class="wy-form" action="search.html" method="get">
+    <input type="text" name="q" placeholder="Search docs" />
+    <input type="hidden" name="check_keywords" value="yes" />
+    <input type="hidden" name="area" value="default" />
+  </form>
+</div>
+
+          
+        </div>
+
+        
+        <div class="wy-menu wy-menu-vertical" data-spy="affix" role="navigation" aria-label="main navigation">
+          
+            
+            
+              
+            
+            
+              <p class="caption"><span class="caption-text">Explanation</span></p>
+<ul class="current">
+<li class="toctree-l1"><a class="reference internal" href="overview.html">Overview</a></li>
+<li class="toctree-l1 current"><a class="current reference internal" href="#">Path Planning Detailed</a><ul>
+<li class="toctree-l2"><a class="reference internal" href="#load-the-task">0. Load the Task</a></li>
+<li class="toctree-l2"><a class="reference internal" href="#preprocessing-and-sampling">1. Preprocessing and Sampling</a></li>
+<li class="toctree-l2"><a class="reference internal" href="#viewpoint-generation-and-evaluation">2. ViewPoint-Generation and -Evaluation</a><ul>
+<li class="toctree-l3"><a class="reference internal" href="#metrological-evaluation">Metrological Evaluation</a></li>
+<li class="toctree-l3"><a class="reference internal" href="#mechanical-evaluation">Mechanical Evaluation</a></li>
+</ul>
+</li>
+<li class="toctree-l2"><a class="reference internal" href="#viewpoint-selection-set-covering-problem">3. ViewPoint-Selection (Set Covering Problem)</a></li>
+<li class="toctree-l2"><a class="reference internal" href="#connecting-the-viewpoints">4. Connecting the ViewPoints</a></li>
+</ul>
+</li>
+</ul>
+<p class="caption"><span class="caption-text">Components</span></p>
+<ul>
+<li class="toctree-l1"><a class="reference internal" href="module_trajectory_manager.html">Trajectory Manager</a></li>
+<li class="toctree-l1"><a class="reference internal" href="module_sensor_model.html">Sensor Model</a></li>
+<li class="toctree-l1"><a class="reference internal" href="module_view.html">ViewPoint</a></li>
+</ul>
+
+            
+          
+        </div>
+        
+      </div>
+    </nav>
+
+    <section data-toggle="wy-nav-shift" class="wy-nav-content-wrap">
+
+      
+      <nav class="wy-nav-top" aria-label="top navigation">
+        
+          <i data-toggle="wy-nav-top" class="fa fa-bars"></i>
+          <a href="index.html">Agiprobot Measurement</a>
+        
+      </nav>
+
+
+      <div class="wy-nav-content">
+        
+        <div class="rst-content">
+        
+          
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+<div role="navigation" aria-label="breadcrumbs navigation">
+
+  <ul class="wy-breadcrumbs">
+    
+      <li><a href="index.html" class="icon icon-home"></a> &raquo;</li>
+        
+      <li>Path Planning Detailed</li>
+    
+    
+      <li class="wy-breadcrumbs-aside">
+        
+          
+            <a href="_sources/view_planning_detailed.rst.txt" rel="nofollow"> View page source</a>
+          
+        
+      </li>
+    
+  </ul>
+
+  
+  <hr/>
+</div>
+          <div role="main" class="document" itemscope="itemscope" itemtype="http://schema.org/Article">
+           <div itemprop="articleBody">
+            
+  <div class="section" id="path-planning-detailed">
+<span id="view-planning-detailed"></span><h1>Path Planning Detailed<a class="headerlink" href="#path-planning-detailed" title="Permalink to this headline">¶</a></h1>
+<div class="section" id="load-the-task">
+<h2>0. Load the Task<a class="headerlink" href="#load-the-task" title="Permalink to this headline">¶</a></h2>
+<p>Read in the given CAD-file of the target-object as well as its pose. The mesh is made available to the local trimesh-handler and loaded into the motion-planning-framework
+<a class="reference external" href="https://moveit.ros.org">MoveIt</a> so that it will be considered for collision-checks.</p>
+<div class="figure">
+<img alt="_images/moveit_collision_added.png" src="_images/moveit_collision_added.png" />
+</div>
+</div>
+<div class="section" id="preprocessing-and-sampling">
+<h2>1. Preprocessing and Sampling<a class="headerlink" href="#preprocessing-and-sampling" title="Permalink to this headline">¶</a></h2>
+<p>Removes all downward facing surface faces since they are not considered measurable. This is based on the common assumption that the fixture holds the target object from below.
+Use <a class="reference external" href="https://trimsh.org/">trimesh</a> to sample the mesh’s surface into discrete surface-points depending on a specified sampling-density. The samples, corresponding face-normals and the target-mesh are
+set as context in a <a class="reference internal" href="module_sensor_model.html#sensor-model"><span class="std std-ref">Sensor Model</span></a>-instance.</p>
+<div class="figure">
+<img alt="_images/sampling_trimesh.png" src="_images/sampling_trimesh.png" />
+</div>
+</div>
+<div class="section" id="viewpoint-generation-and-evaluation">
+<h2>2. ViewPoint-Generation and -Evaluation<a class="headerlink" href="#viewpoint-generation-and-evaluation" title="Permalink to this headline">¶</a></h2>
+<p>For each-sample, generate <a class="reference internal" href="module_view.html#viewpoint"><span class="std std-ref">ViewPoint</span></a>-objects by moving into the points face-normal and then applying rotations to get a variety of candidates per sampled surface point.
+The resulting point is the anchor of the viewpoint. Each viewpoint is assigned a straight trajectory-line.</p>
+<div class="figure">
+<img alt="_images/trajectory_generation.png" src="_images/trajectory_generation.png" />
+</div>
+<p>After that, 2 main evaluations are executed:</p>
+<div class="section" id="metrological-evaluation">
+<h3>Metrological Evaluation<a class="headerlink" href="#metrological-evaluation" title="Permalink to this headline">¶</a></h3>
+<ul class="simple">
+<li>Use the <a class="reference internal" href="module_sensor_model.html#sensor-model"><span class="std std-ref">Sensor Model</span></a>-instance to analyze, which other sample-points are visible from this trajectory, and at what uncertainty</li>
+<li>Result = Visibilities and uncertainties (will be stored in the <a class="reference internal" href="module_view.html#viewpoint"><span class="std std-ref">ViewPoint</span></a>-object)</li>
+</ul>
+<div class="figure" id="id3">
+<img alt="_images/measurement_example.png" src="_images/measurement_example.png" />
+<p class="caption"><span class="caption-text">Higher sampling density than previously for vividness. Red points are immeasurable; Green points are measurable at low uncertainty, blue ones at high uncertainty.</span></p>
+</div>
+</div>
+<div class="section" id="mechanical-evaluation">
+<h3>Mechanical Evaluation<a class="headerlink" href="#mechanical-evaluation" title="Permalink to this headline">¶</a></h3>
+<ul class="simple">
+<li>Utilize <a class="reference external" href="https://moveit.ros.org">MoveIt</a> to examine, if this trajectory is actually executable in the scene (collision, reacability, …).</li>
+<li><strong>Critical</strong>: If the mechanical evaluation fails, the viewpoint will not be considered any further</li>
+<li>Can also consider trajectory-parts: If e.g. 80% of the trajectory are be executable, this <a class="reference internal" href="module_view.html#viewpoint"><span class="std std-ref">ViewPoint</span></a>-object might not be rejected</li>
+<li>Result = List of actual joint-values (will be stored in the <a class="reference internal" href="module_view.html#viewpoint"><span class="std std-ref">ViewPoint</span></a>-object)</li>
+</ul>
+<div class="figure">
+<img alt="_images/collision_check.png" src="_images/collision_check.png" />
+</div>
+<p>The sequence of these evaluations is implemented in a way to minimize compute-time.</p>
+</div>
+</div>
+<div class="section" id="viewpoint-selection-set-covering-problem">
+<h2>3. ViewPoint-Selection (Set Covering Problem)<a class="headerlink" href="#viewpoint-selection-set-covering-problem" title="Permalink to this headline">¶</a></h2>
+<p>When a set of valid <a class="reference internal" href="module_view.html#viewpoint"><span class="std std-ref">ViewPoint</span></a> s has been found, not all <a class="reference internal" href="module_view.html#viewpoint"><span class="std std-ref">ViewPoint</span></a> -elements must be executed for a valid result: A subset must be found that
+covers the same surface-points as all the found <a class="reference internal" href="module_view.html#viewpoint"><span class="std std-ref">ViewPoint</span></a> s (= <em>Set Covering Problem</em>). This subset is in general much smaller than the original set and can be built using different algorithms:</p>
+<p>As the first option, ‘Greedy’ implementation (both used in the papers) selects in each iteration that new <a class="reference internal" href="module_view.html#viewpoint"><span class="std std-ref">ViewPoint</span></a> from the original set, that can contribute the most
+not-yet-visible surface-sample-points to the subset. If 2 or more <a class="reference internal" href="module_view.html#viewpoint"><span class="std std-ref">ViewPoint</span></a> -objects can contribute the same amount, the one with the lowest uncertainty will be selected.</p>
+<p>Another option is Integer Programming (IP):</p>
+<p>Minimize <span class="math">\(\sum_{\forall i} c_j v_j\)</span> subject to <span class="math">\(\sum_{\forall j} m_{i,j} v_j \ge 1~~~~\forall i\)</span></p>
+<p>where <span class="math">\(v_j \in \{0,1\}\)</span> indicates if viewpoint j is element of the subset and <span class="math">\(m_{i,j} \in \{0, 1\}\)</span>, if the sampled surface point i is measurable by the trajectory of viewpoint j.
+<span class="math">\(c_{j}\)</span> is a cost-term. If it is constant, the IP-problems is identically to the Greedy approach. However, by assigning <span class="math">\(c_{i}\)</span> the time of the measurement-trajectory
+of viewpoint i or its uncertainty, a bigger variety of solutions becomes possible than in the first option.</p>
+</div>
+<div class="section" id="connecting-the-viewpoints">
+<h2>4. Connecting the ViewPoints<a class="headerlink" href="#connecting-the-viewpoints" title="Permalink to this headline">¶</a></h2>
+<p>Lastly, the determined set of <a class="reference internal" href="module_view.html#viewpoint"><span class="std std-ref">ViewPoint</span></a>-objects must be ordered for optimal execution. To do so, the current robot-pose is enqueued in an ‘execution-list’.
+Paths from the endpoint of the last element of execution-list are calculated to every non-enqueued viewpoint’s trajectory-start- and -endpoint. The <a class="reference internal" href="module_view.html#viewpoint"><span class="std std-ref">ViewPoint</span></a> with the shortest path-time becomes enqueued.
+Also, the inter-viewpoint path will be stored in that <a class="reference internal" href="module_view.html#viewpoint"><span class="std std-ref">ViewPoint</span></a> so that it will perform the exact same path during execution (if the path would get planned again dynamically,
+it might be completely different due to the stochastic nature of path-planning). This step relies again on <a class="reference external" href="https://moveit.ros.org">MoveIt</a>.</p>
+</div>
+</div>
+
+
+           </div>
+           
+          </div>
+          <footer>
+    <div class="rst-footer-buttons" role="navigation" aria-label="footer navigation">
+        <a href="module_trajectory_manager.html" class="btn btn-neutral float-right" title="Trajectory Manager" accesskey="n" rel="next">Next <span class="fa fa-arrow-circle-right" aria-hidden="true"></span></a>
+        <a href="overview.html" class="btn btn-neutral float-left" title="Overview" accesskey="p" rel="prev"><span class="fa fa-arrow-circle-left" aria-hidden="true"></span> Previous</a>
+    </div>
+
+  <hr/>
+
+  <div role="contentinfo">
+    <p>
+        &#169; Copyright 2021, Sven Becker.
+
+    </p>
+  </div>
+    
+    
+    
+    Built with <a href="https://www.sphinx-doc.org/">Sphinx</a> using a
+    
+    <a href="https://github.com/readthedocs/sphinx_rtd_theme">theme</a>
+    
+    provided by <a href="https://readthedocs.org">Read the Docs</a>. 
+
+</footer>
+        </div>
+      </div>
+
+    </section>
+
+  </div>
+  
+
+  <script type="text/javascript">
+      jQuery(function () {
+          SphinxRtdTheme.Navigation.enable(true);
+      });
+  </script>
+
+  
+  
+    
+   
+
+</body>
+</html>

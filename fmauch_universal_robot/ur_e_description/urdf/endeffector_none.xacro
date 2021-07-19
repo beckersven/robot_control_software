@@ -1,0 +1,11 @@
+<?xml version="1.0"?>
+<robot xmlns:xacro="http://ros.org/wiki/xacro"
+  name="ur10e" >
+
+  <joint name="dummy_joint" type="fixed">
+    <origin xyz="0 0 0" rpy="0 0 0"/>
+    <parent link="tool0"/>
+    <child link="tool_center_point"/>
+  </joint>
+  <link name="tool_center_point"/>
+</robot>

@@ -1,0 +1,242 @@
+<?xml version='1.0' encoding='UTF-8' standalone='no'?>
+<doxygen xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xsi:noNamespaceSchemaLocation="compound.xsd" version="1.8.13">
+  <compounddef id="classcoppeliasim__interface_1_1SimulationSynchronizer" kind="class" language="C++" prot="public">
+    <compoundname>coppeliasim_interface::SimulationSynchronizer</compoundname>
+    <includes refid="simulation__synchronizer_8h" local="no">simulation_synchronizer.h</includes>
+      <sectiondef kind="private-attrib">
+      <memberdef kind="variable" id="classcoppeliasim__interface_1_1SimulationSynchronizer_1a2a3482e137aae520b77f3e036c3d4a20" prot="private" static="no" mutable="no">
+        <type>ros::NodeHandle</type>
+        <definition>ros::NodeHandle coppeliasim_interface::SimulationSynchronizer::nh_</definition>
+        <argsstring></argsstring>
+        <name>nh_</name>
+        <briefdescription>
+<para>Member to interact with the ROS-Framework. </para>        </briefdescription>
+        <detaileddescription>
+        </detaileddescription>
+        <inbodydescription>
+        </inbodydescription>
+        <location file="/home/svenbecker/Bachelorarbeit/code/catkin_ws/src/robot_control_software/coppeliasim_interface/include/simulation_synchronizer.h" line="54" column="1" bodyfile="/home/svenbecker/Bachelorarbeit/code/catkin_ws/src/robot_control_software/coppeliasim_interface/include/simulation_synchronizer.h" bodystart="54" bodyend="-1"/>
+      </memberdef>
+      <memberdef kind="variable" id="classcoppeliasim__interface_1_1SimulationSynchronizer_1a89f76a7b2d22f7b783f7154f329a621b" prot="private" static="no" mutable="no">
+        <type>simxInt</type>
+        <definition>simxInt coppeliasim_interface::SimulationSynchronizer::client_id</definition>
+        <argsstring></argsstring>
+        <name>client_id</name>
+        <briefdescription>
+<para>ID specifying the connection to CoppeliaSim (must be used for every remoteApi-Call) </para>        </briefdescription>
+        <detaileddescription>
+        </detaileddescription>
+        <inbodydescription>
+        </inbodydescription>
+        <location file="/home/svenbecker/Bachelorarbeit/code/catkin_ws/src/robot_control_software/coppeliasim_interface/include/simulation_synchronizer.h" line="59" column="1" bodyfile="/home/svenbecker/Bachelorarbeit/code/catkin_ws/src/robot_control_software/coppeliasim_interface/include/simulation_synchronizer.h" bodystart="59" bodyend="-1"/>
+      </memberdef>
+      <memberdef kind="variable" id="classcoppeliasim__interface_1_1SimulationSynchronizer_1a00373938bbe911de8217e946b94d1a56" prot="private" static="no" mutable="no">
+        <type>std::vector&lt; ros::ServiceClient &gt;</type>
+        <definition>std::vector&lt;ros::ServiceClient&gt; coppeliasim_interface::SimulationSynchronizer::explicit_sync_list</definition>
+        <argsstring></argsstring>
+        <name>explicit_sync_list</name>
+        <briefdescription>
+<para>ROS-Services (std_srvs/Trigger) that must be handled every simulation step. </para>        </briefdescription>
+        <detaileddescription>
+        </detaileddescription>
+        <inbodydescription>
+        </inbodydescription>
+        <location file="/home/svenbecker/Bachelorarbeit/code/catkin_ws/src/robot_control_software/coppeliasim_interface/include/simulation_synchronizer.h" line="64" column="1" bodyfile="/home/svenbecker/Bachelorarbeit/code/catkin_ws/src/robot_control_software/coppeliasim_interface/include/simulation_synchronizer.h" bodystart="64" bodyend="-1"/>
+      </memberdef>
+      <memberdef kind="variable" id="classcoppeliasim__interface_1_1SimulationSynchronizer_1a71180ecf3a60f137b818ab48df4a8def" prot="private" static="no" mutable="no">
+        <type>ros::Publisher</type>
+        <definition>ros::Publisher coppeliasim_interface::SimulationSynchronizer::clock_pub</definition>
+        <argsstring></argsstring>
+        <name>clock_pub</name>
+        <briefdescription>
+<para>ROS-Publisher used to publish the simulated time in &apos;/clock&apos;. </para>        </briefdescription>
+        <detaileddescription>
+        </detaileddescription>
+        <inbodydescription>
+        </inbodydescription>
+        <location file="/home/svenbecker/Bachelorarbeit/code/catkin_ws/src/robot_control_software/coppeliasim_interface/include/simulation_synchronizer.h" line="77" column="1" bodyfile="/home/svenbecker/Bachelorarbeit/code/catkin_ws/src/robot_control_software/coppeliasim_interface/include/simulation_synchronizer.h" bodystart="77" bodyend="-1"/>
+      </memberdef>
+      <memberdef kind="variable" id="classcoppeliasim__interface_1_1SimulationSynchronizer_1a6c0190d05cbef07756c0969b21b3f5bf" prot="private" static="no" mutable="no">
+        <type>double</type>
+        <definition>double coppeliasim_interface::SimulationSynchronizer::sim_dt</definition>
+        <argsstring></argsstring>
+        <name>sim_dt</name>
+        <briefdescription>
+<para>Time increment per simulation-step in CoppeliaSim. Is the same as &apos;/clock&apos; should increase per step in the ROS-domain. </para>        </briefdescription>
+        <detaileddescription>
+        </detaileddescription>
+        <inbodydescription>
+        </inbodydescription>
+        <location file="/home/svenbecker/Bachelorarbeit/code/catkin_ws/src/robot_control_software/coppeliasim_interface/include/simulation_synchronizer.h" line="82" column="1" bodyfile="/home/svenbecker/Bachelorarbeit/code/catkin_ws/src/robot_control_software/coppeliasim_interface/include/simulation_synchronizer.h" bodystart="82" bodyend="-1"/>
+      </memberdef>
+      <memberdef kind="variable" id="classcoppeliasim__interface_1_1SimulationSynchronizer_1ad542e018fc9a7333e16c073600e47494" prot="private" static="no" mutable="no">
+        <type>rosgraph_msgs::Clock</type>
+        <definition>rosgraph_msgs::Clock coppeliasim_interface::SimulationSynchronizer::current_time</definition>
+        <argsstring></argsstring>
+        <name>current_time</name>
+        <briefdescription>
+<para>For keeping track and publishing increasing time-messages. </para>        </briefdescription>
+        <detaileddescription>
+        </detaileddescription>
+        <inbodydescription>
+        </inbodydescription>
+        <location file="/home/svenbecker/Bachelorarbeit/code/catkin_ws/src/robot_control_software/coppeliasim_interface/include/simulation_synchronizer.h" line="87" column="1" bodyfile="/home/svenbecker/Bachelorarbeit/code/catkin_ws/src/robot_control_software/coppeliasim_interface/include/simulation_synchronizer.h" bodystart="87" bodyend="-1"/>
+      </memberdef>
+      <memberdef kind="variable" id="classcoppeliasim__interface_1_1SimulationSynchronizer_1a76f30c0cad7fe0250df843af8c795966" prot="private" static="no" mutable="no">
+        <type>bool</type>
+        <definition>bool coppeliasim_interface::SimulationSynchronizer::simulation_running</definition>
+        <argsstring></argsstring>
+        <name>simulation_running</name>
+        <briefdescription>
+<para>Flag indicating if the simulation is currently running in CoppeliaSim. </para>        </briefdescription>
+        <detaileddescription>
+        </detaileddescription>
+        <inbodydescription>
+        </inbodydescription>
+        <location file="/home/svenbecker/Bachelorarbeit/code/catkin_ws/src/robot_control_software/coppeliasim_interface/include/simulation_synchronizer.h" line="92" column="1" bodyfile="/home/svenbecker/Bachelorarbeit/code/catkin_ws/src/robot_control_software/coppeliasim_interface/include/simulation_synchronizer.h" bodystart="92" bodyend="-1"/>
+      </memberdef>
+      </sectiondef>
+      <sectiondef kind="public-func">
+      <memberdef kind="function" id="classcoppeliasim__interface_1_1SimulationSynchronizer_1ac18bb936436db0207cb883539542667b" prot="public" static="no" const="no" explicit="no" inline="no" virt="non-virtual">
+        <type></type>
+        <definition>coppeliasim_interface::SimulationSynchronizer::SimulationSynchronizer</definition>
+        <argsstring>()</argsstring>
+        <name>SimulationSynchronizer</name>
+        <briefdescription>
+<para>Construct a new Simulation Synchronizer object and initialize all members that do not necessarely need a ROS- or CoppeliaSim-connection. </para>        </briefdescription>
+        <detaileddescription>
+        </detaileddescription>
+        <inbodydescription>
+        </inbodydescription>
+        <location file="/home/svenbecker/Bachelorarbeit/code/catkin_ws/src/robot_control_software/coppeliasim_interface/include/simulation_synchronizer.h" line="23" column="1" bodyfile="/home/svenbecker/Bachelorarbeit/code/catkin_ws/src/robot_control_software/coppeliasim_interface/src/simulation_synchronizer.cpp" bodystart="17" bodyend="22"/>
+      </memberdef>
+      <memberdef kind="function" id="classcoppeliasim__interface_1_1SimulationSynchronizer_1afc14256edba11b6ef38de06292476f10" prot="public" static="no" const="no" explicit="no" inline="no" virt="non-virtual">
+        <type></type>
+        <definition>coppeliasim_interface::SimulationSynchronizer::~SimulationSynchronizer</definition>
+        <argsstring>()</argsstring>
+        <name>~SimulationSynchronizer</name>
+        <briefdescription>
+<para>Destroy the Simulation Synchronizer object and stop the CoppeliaSim-Simulation and close the connection to CoppeliaSim. </para>        </briefdescription>
+        <detaileddescription>
+        </detaileddescription>
+        <inbodydescription>
+        </inbodydescription>
+        <location file="/home/svenbecker/Bachelorarbeit/code/catkin_ws/src/robot_control_software/coppeliasim_interface/include/simulation_synchronizer.h" line="28" column="1" bodyfile="/home/svenbecker/Bachelorarbeit/code/catkin_ws/src/robot_control_software/coppeliasim_interface/src/simulation_synchronizer.cpp" bodystart="24" bodyend="37"/>
+      </memberdef>
+      <memberdef kind="function" id="classcoppeliasim__interface_1_1SimulationSynchronizer_1a511f8bf3569c7dce3dafb2a6f30dd6f2" prot="public" static="no" const="no" explicit="no" inline="no" virt="non-virtual">
+        <type>bool</type>
+        <definition>bool coppeliasim_interface::SimulationSynchronizer::advanceSimulation</definition>
+        <argsstring>()</argsstring>
+        <name>advanceSimulation</name>
+        <briefdescription>
+<para>Advances the simulation in CoppeliaSim exactly one time-step (dt = &apos;sim-dt&apos;). Blocks until CoppeliaSim has finished the calculations for this advancement. </para>        </briefdescription>
+        <detaileddescription>
+<para><simplesect kind="return"><para>Whether advancement was successful (could trigger calculations in CoppeliaSim and received success-feedback) </para></simplesect>
+</para>        </detaileddescription>
+        <inbodydescription>
+        </inbodydescription>
+        <location file="/home/svenbecker/Bachelorarbeit/code/catkin_ws/src/robot_control_software/coppeliasim_interface/include/simulation_synchronizer.h" line="34" column="1" bodyfile="/home/svenbecker/Bachelorarbeit/code/catkin_ws/src/robot_control_software/coppeliasim_interface/src/simulation_synchronizer.cpp" bodystart="115" bodyend="120"/>
+      </memberdef>
+      <memberdef kind="function" id="classcoppeliasim__interface_1_1SimulationSynchronizer_1a14e5777b6eacdd0a2d95603bad137ea0" prot="public" static="no" const="no" explicit="no" inline="no" virt="non-virtual">
+        <type>bool</type>
+        <definition>bool coppeliasim_interface::SimulationSynchronizer::synchronizeROS</definition>
+        <argsstring>()</argsstring>
+        <name>synchronizeROS</name>
+        <briefdescription>
+<para>Increases ROS-time with the same dt as CoppeliaSim&apos;s &apos;sim-dt&apos; and calls all ROS-services that should be handled during one time-step afterwards. </para>        </briefdescription>
+        <detaileddescription>
+<para><simplesect kind="return"><para>Whether all Services were called successfully </para></simplesect>
+</para>        </detaileddescription>
+        <inbodydescription>
+        </inbodydescription>
+        <location file="/home/svenbecker/Bachelorarbeit/code/catkin_ws/src/robot_control_software/coppeliasim_interface/include/simulation_synchronizer.h" line="40" column="1" bodyfile="/home/svenbecker/Bachelorarbeit/code/catkin_ws/src/robot_control_software/coppeliasim_interface/src/simulation_synchronizer.cpp" bodystart="122" bodyend="140"/>
+      </memberdef>
+      <memberdef kind="function" id="classcoppeliasim__interface_1_1SimulationSynchronizer_1a86f3212df7425b946c6148ab324fd2bc" prot="public" static="no" const="no" explicit="no" inline="no" virt="non-virtual">
+        <type>bool</type>
+        <definition>bool coppeliasim_interface::SimulationSynchronizer::init</definition>
+        <argsstring>(ros::NodeHandle &amp;nh)</argsstring>
+        <name>init</name>
+        <param>
+          <type>ros::NodeHandle &amp;</type>
+          <declname>nh</declname>
+        </param>
+        <briefdescription>
+<para>Connects instance to CoppeliaSim (registers it as client for the remoteApi and starts simulation in synchroneous mode) and ROS (preparing /clock-publication and registering Services that should be handled every simulation-step) </para>        </briefdescription>
+        <detaileddescription>
+<para><parameterlist kind="param"><parameteritem>
+<parameternamelist>
+<parametername>nh</parametername>
+</parameternamelist>
+<parameterdescription>
+<para>Nodehandle to that this instance uses to communicate with ROS</para></parameterdescription>
+</parameteritem>
+</parameterlist>
+<simplesect kind="return"><para>Whether the method could connect to ROS and CoppeliaSim </para></simplesect>
+</para>        </detaileddescription>
+        <inbodydescription>
+        </inbodydescription>
+        <location file="/home/svenbecker/Bachelorarbeit/code/catkin_ws/src/robot_control_software/coppeliasim_interface/include/simulation_synchronizer.h" line="48" column="1" bodyfile="/home/svenbecker/Bachelorarbeit/code/catkin_ws/src/robot_control_software/coppeliasim_interface/src/simulation_synchronizer.cpp" bodystart="39" bodyend="113"/>
+      </memberdef>
+      </sectiondef>
+      <sectiondef kind="private-func">
+      <memberdef kind="function" id="classcoppeliasim__interface_1_1SimulationSynchronizer_1a22e59e0e0465b7d41a0e64e0466dad5e" prot="private" static="no" const="no" explicit="no" inline="no" virt="non-virtual">
+        <type>bool</type>
+        <definition>bool coppeliasim_interface::SimulationSynchronizer::assertSimxCall</definition>
+        <argsstring>(simxInt return_value, std::string error_message=&quot;&quot;)</argsstring>
+        <name>assertSimxCall</name>
+        <param>
+          <type>simxInt</type>
+          <declname>return_value</declname>
+        </param>
+        <param>
+          <type>std::string</type>
+          <declname>error_message</declname>
+          <defval>&quot;&quot;</defval>
+        </param>
+        <briefdescription>
+<para>Checks if the return_value corresponds to a successful CoppeliaSim-remoteApi-call and returns false if not. Additionally, a custom ROS-error is in this case logged when provided. </para>        </briefdescription>
+        <detaileddescription>
+<para><parameterlist kind="param"><parameteritem>
+<parameternamelist>
+<parametername>return_value</parametername>
+</parameternamelist>
+<parameterdescription>
+<para>Return value of a simx...-Call (call of CoppeliaSim-remoteApi-function) </para></parameterdescription>
+</parameteritem>
+<parameteritem>
+<parameternamelist>
+<parametername>error_message</parametername>
+</parameternamelist>
+<parameterdescription>
+<para>Message logged as ROS-Error when the return_value represents a return_value from a failed CoppeliaSim-remoteApi-call </para></parameterdescription>
+</parameteritem>
+</parameterlist>
+<simplesect kind="return"><para>Whether return_value masks a successfull CoppeliaSim-remoteApi-call </para></simplesect>
+</para>        </detaileddescription>
+        <inbodydescription>
+        </inbodydescription>
+        <location file="/home/svenbecker/Bachelorarbeit/code/catkin_ws/src/robot_control_software/coppeliasim_interface/include/simulation_synchronizer.h" line="72" column="1" bodyfile="/home/svenbecker/Bachelorarbeit/code/catkin_ws/src/robot_control_software/coppeliasim_interface/src/simulation_synchronizer.cpp" bodystart="5" bodyend="16"/>
+      </memberdef>
+      </sectiondef>
+    <briefdescription>
+<para>Synchronizes the ROS-time with the CoppeliaSim-time in the sense, that both &apos;clocks&apos; are running at the same speed (but not necessarely at the same time), and ensures that time-critical tasks in the ROS-domain are performed in sync with each simulation-step. </para>    </briefdescription>
+    <detaileddescription>
+    </detaileddescription>
+    <location file="/home/svenbecker/Bachelorarbeit/code/catkin_ws/src/robot_control_software/coppeliasim_interface/include/simulation_synchronizer.h" line="17" column="1" bodyfile="/home/svenbecker/Bachelorarbeit/code/catkin_ws/src/robot_control_software/coppeliasim_interface/include/simulation_synchronizer.h" bodystart="17" bodyend="94"/>
+    <listofallmembers>
+      <member refid="classcoppeliasim__interface_1_1SimulationSynchronizer_1a511f8bf3569c7dce3dafb2a6f30dd6f2" prot="public" virt="non-virtual"><scope>coppeliasim_interface::SimulationSynchronizer</scope><name>advanceSimulation</name></member>
+      <member refid="classcoppeliasim__interface_1_1SimulationSynchronizer_1a22e59e0e0465b7d41a0e64e0466dad5e" prot="private" virt="non-virtual"><scope>coppeliasim_interface::SimulationSynchronizer</scope><name>assertSimxCall</name></member>
+      <member refid="classcoppeliasim__interface_1_1SimulationSynchronizer_1a89f76a7b2d22f7b783f7154f329a621b" prot="private" virt="non-virtual"><scope>coppeliasim_interface::SimulationSynchronizer</scope><name>client_id</name></member>
+      <member refid="classcoppeliasim__interface_1_1SimulationSynchronizer_1a71180ecf3a60f137b818ab48df4a8def" prot="private" virt="non-virtual"><scope>coppeliasim_interface::SimulationSynchronizer</scope><name>clock_pub</name></member>
+      <member refid="classcoppeliasim__interface_1_1SimulationSynchronizer_1ad542e018fc9a7333e16c073600e47494" prot="private" virt="non-virtual"><scope>coppeliasim_interface::SimulationSynchronizer</scope><name>current_time</name></member>
+      <member refid="classcoppeliasim__interface_1_1SimulationSynchronizer_1a00373938bbe911de8217e946b94d1a56" prot="private" virt="non-virtual"><scope>coppeliasim_interface::SimulationSynchronizer</scope><name>explicit_sync_list</name></member>
+      <member refid="classcoppeliasim__interface_1_1SimulationSynchronizer_1a86f3212df7425b946c6148ab324fd2bc" prot="public" virt="non-virtual"><scope>coppeliasim_interface::SimulationSynchronizer</scope><name>init</name></member>
+      <member refid="classcoppeliasim__interface_1_1SimulationSynchronizer_1a2a3482e137aae520b77f3e036c3d4a20" prot="private" virt="non-virtual"><scope>coppeliasim_interface::SimulationSynchronizer</scope><name>nh_</name></member>
+      <member refid="classcoppeliasim__interface_1_1SimulationSynchronizer_1a6c0190d05cbef07756c0969b21b3f5bf" prot="private" virt="non-virtual"><scope>coppeliasim_interface::SimulationSynchronizer</scope><name>sim_dt</name></member>
+      <member refid="classcoppeliasim__interface_1_1SimulationSynchronizer_1a76f30c0cad7fe0250df843af8c795966" prot="private" virt="non-virtual"><scope>coppeliasim_interface::SimulationSynchronizer</scope><name>simulation_running</name></member>
+      <member refid="classcoppeliasim__interface_1_1SimulationSynchronizer_1ac18bb936436db0207cb883539542667b" prot="public" virt="non-virtual"><scope>coppeliasim_interface::SimulationSynchronizer</scope><name>SimulationSynchronizer</name></member>
+      <member refid="classcoppeliasim__interface_1_1SimulationSynchronizer_1a14e5777b6eacdd0a2d95603bad137ea0" prot="public" virt="non-virtual"><scope>coppeliasim_interface::SimulationSynchronizer</scope><name>synchronizeROS</name></member>
+      <member refid="classcoppeliasim__interface_1_1SimulationSynchronizer_1afc14256edba11b6ef38de06292476f10" prot="public" virt="non-virtual"><scope>coppeliasim_interface::SimulationSynchronizer</scope><name>~SimulationSynchronizer</name></member>
+    </listofallmembers>
+  </compounddef>
+</doxygen>

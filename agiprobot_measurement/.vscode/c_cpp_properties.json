@@ -1,0 +1,41 @@
+{
+  "configurations": [
+    {
+      "browse": {
+        "databaseFilename": "",
+        "limitSymbolsToIncludedHeaders": true
+      },
+      "includePath": [
+        "/home/svenbecker/Bachelorarbeit/code/catkin_ws/devel/include/**",
+        "/home/svenbecker/ws_moveit/devel/include/**",
+        "/opt/ros/melodic/include/**",
+        "/home/svenbecker/ws_moveit/src/moveit/moveit_planners/chomp/chomp_motion_planner/include/**",
+        "/home/svenbecker/Bachelorarbeit/code/catkin_ws/src/robot_control_software/Universal_Robots_ROS_Driver/controller_stopper/include/**",
+        "/home/svenbecker/Bachelorarbeit/code/catkin_ws/src/robot_control_software/coppeliasim_interface/include/**",
+        "/home/svenbecker/ws_moveit/src/geometric_shapes/include/**",
+        "/home/svenbecker/ws_moveit/src/moveit/moveit_planners/chomp/chomp_interface/include/**",
+        "/home/svenbecker/ws_moveit/src/moveit_resources/prbt_ikfast_manipulator_plugin/include/**",
+        "/home/svenbecker/ws_moveit/src/moveit/moveit_ros/benchmarks/include/**",
+        "/home/svenbecker/ws_moveit/src/moveit/moveit_plugins/moveit_ros_control_interface/include/**",
+        "/home/svenbecker/ws_moveit/src/moveit/moveit_ros/move_group/include/**",
+        "/home/svenbecker/ws_moveit/src/moveit/moveit_ros/occupancy_map_monitor/include/**",
+        "/home/svenbecker/ws_moveit/src/moveit/moveit_ros/robot_interaction/include/**",
+        "/home/svenbecker/ws_moveit/src/moveit/moveit_ros/moveit_servo/include/**",
+        "/home/svenbecker/ws_moveit/src/moveit/moveit_setup_assistant/include/**",
+        "/home/svenbecker/ws_moveit/src/moveit/moveit_plugins/moveit_simple_controller_manager/include/**",
+        "/home/svenbecker/ws_moveit/src/moveit_visual_tools/include/**",
+        "/home/svenbecker/ws_moveit/src/moveit/moveit_planners/pilz_industrial_motion_planner/include/**",
+        "/home/svenbecker/ws_moveit/src/moveit/moveit_planners/pilz_industrial_motion_planner_testutils/include/**",
+        "/home/svenbecker/ws_moveit/src/rviz_visual_tools/include/**",
+        "/home/svenbecker/Bachelorarbeit/code/catkin_ws/src/robot_control_software/Universal_Robots_ROS_Driver/ur_calibration/include/**",
+        "/home/svenbecker/Bachelorarbeit/code/catkin_ws/src/robot_control_software/Universal_Robots_ROS_Driver/ur_controllers/include/**",
+        "/home/svenbecker/Bachelorarbeit/code/catkin_ws/src/robot_control_software/fmauch_universal_robot/ur_kinematics/include/**",
+        "/home/svenbecker/Bachelorarbeit/code/catkin_ws/src/robot_control_software/Universal_Robots_ROS_Driver/ur_robot_driver/include/**",
+        "/home/svenbecker/Bachelorarbeit/code/catkin_ws/src/robot_control_software/zivid-ros/zivid_camera/include/**",
+        "/usr/include/**"
+      ],
+      "name": "ROS"
+    }
+  ],
+  "version": 4
+}

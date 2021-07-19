@@ -1,0 +1,549 @@
+
+
+<!DOCTYPE html>
+<html class="writer-html4" lang="en" >
+<head>
+  <meta charset="utf-8" />
+  
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  
+  <title>Trajectory Manager &mdash; Agiprobot Measurement 1.0 documentation</title>
+  
+
+  
+  <link rel="stylesheet" href="_static/css/theme.css" type="text/css" />
+  <link rel="stylesheet" href="_static/pygments.css" type="text/css" />
+
+  
+  
+
+  
+  
+
+  
+
+  
+  <!--[if lt IE 9]>
+    <script src="_static/js/html5shiv.min.js"></script>
+  <![endif]-->
+  
+    
+      <script type="text/javascript">
+          var DOCUMENTATION_OPTIONS = {
+              URL_ROOT:'./',
+              VERSION:'1.0',
+              LANGUAGE:'None',
+              COLLAPSE_INDEX:false,
+              FILE_SUFFIX:'.html',
+              HAS_SOURCE:  true,
+              SOURCELINK_SUFFIX: '.txt'
+          };
+      </script>
+        <script type="text/javascript" src="_static/jquery.js"></script>
+        <script type="text/javascript" src="_static/underscore.js"></script>
+        <script type="text/javascript" src="_static/doctools.js"></script>
+        <script type="text/javascript" src="https://cdnjs.cloudflare.com/ajax/libs/mathjax/2.7.1/MathJax.js?config=TeX-AMS-MML_HTMLorMML"></script>
+    
+    <script type="text/javascript" src="_static/js/theme.js"></script>
+
+    
+    <link rel="index" title="Index" href="genindex.html" />
+    <link rel="search" title="Search" href="search.html" />
+    <link rel="next" title="Sensor Model" href="module_sensor_model.html" />
+    <link rel="prev" title="Path Planning Detailed" href="view_planning_detailed.html" /> 
+</head>
+
+<body class="wy-body-for-nav">
+
+   
+  <div class="wy-grid-for-nav">
+    
+    <nav data-toggle="wy-nav-shift" class="wy-nav-side">
+      <div class="wy-side-scroll">
+        <div class="wy-side-nav-search" >
+          
+
+          
+            <a href="index.html" class="icon icon-home"> Agiprobot Measurement
+          
+
+          
+          </a>
+
+          
+            
+            
+              <div class="version">
+                1.0
+              </div>
+            
+          
+
+          
+<div role="search">
+  <form id="rtd-search-form" class="wy-form" action="search.html" method="get">
+    <input type="text" name="q" placeholder="Search docs" />
+    <input type="hidden" name="check_keywords" value="yes" />
+    <input type="hidden" name="area" value="default" />
+  </form>
+</div>
+
+          
+        </div>
+
+        
+        <div class="wy-menu wy-menu-vertical" data-spy="affix" role="navigation" aria-label="main navigation">
+          
+            
+            
+              
+            
+            
+              <p class="caption"><span class="caption-text">Explanation</span></p>
+<ul>
+<li class="toctree-l1"><a class="reference internal" href="overview.html">Overview</a></li>
+<li class="toctree-l1"><a class="reference internal" href="Usage_Guide.html">Usage Guide</a></li>
+<li class="toctree-l1"><a class="reference internal" href="view_planning_detailed.html">Path Planning Detailed</a></li>
+</ul>
+<p class="caption"><span class="caption-text">Components</span></p>
+<ul class="current">
+<li class="toctree-l1 current"><a class="current reference internal" href="#">Trajectory Manager</a><ul>
+<li class="toctree-l2"><a class="reference internal" href="#introduction-and-basic-ideas">Introduction and Basic Ideas</a></li>
+<li class="toctree-l2"><a class="reference internal" href="#module-agiprobot_measurement.trajectory_manager">API-Specification</a></li>
+</ul>
+</li>
+<li class="toctree-l1"><a class="reference internal" href="module_sensor_model.html">Sensor Model</a></li>
+<li class="toctree-l1"><a class="reference internal" href="module_view.html">View Point</a></li>
+</ul>
+
+            
+          
+        </div>
+        
+      </div>
+    </nav>
+
+    <section data-toggle="wy-nav-shift" class="wy-nav-content-wrap">
+
+      
+      <nav class="wy-nav-top" aria-label="top navigation">
+        
+          <i data-toggle="wy-nav-top" class="fa fa-bars"></i>
+          <a href="index.html">Agiprobot Measurement</a>
+        
+      </nav>
+
+
+      <div class="wy-nav-content">
+        
+        <div class="rst-content">
+        
+          
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+<div role="navigation" aria-label="breadcrumbs navigation">
+
+  <ul class="wy-breadcrumbs">
+    
+      <li><a href="index.html" class="icon icon-home"></a> &raquo;</li>
+        
+      <li>Trajectory Manager</li>
+    
+    
+      <li class="wy-breadcrumbs-aside">
+        
+          
+            <a href="_sources/module_trajectory_manager.rst.txt" rel="nofollow"> View page source</a>
+          
+        
+      </li>
+    
+  </ul>
+
+  
+  <hr/>
+</div>
+          <div role="main" class="document" itemscope="itemscope" itemtype="http://schema.org/Article">
+           <div itemprop="articleBody">
+            
+  <div class="section" id="trajectory-manager">
+<span id="id1"></span><h1>Trajectory Manager<a class="headerlink" href="#trajectory-manager" title="Permalink to this headline">¶</a></h1>
+<div class="section" id="introduction-and-basic-ideas">
+<h2>Introduction and Basic Ideas<a class="headerlink" href="#introduction-and-basic-ideas" title="Permalink to this headline">¶</a></h2>
+<p>This module provides an configurable system to plan, execute, store and load measurement-trajectories for scanning objects with a laser-line-scanner mounted on a robotic arm.</p>
+<p>The planning is heavily inspired by <a class="reference external" href="https://iopscience.iop.org/article/10.1088/2051-672X/4/2/024009">“View and sensor planning for multi-sensor surface inspection” (Gronle et al., 2016)</a>
+and <a class="reference external" href="https://link.springer.com/article/10.1007/s00138-007-0110-2">“Model-based view planning” (Scott, 2009)</a>, however this module was adapted to fit this use-case and general improvements were incorporated.</p>
+<p>For a given task, the user can specifiy the mesh-to-measure, properties of the trajectory-segments (like lenght) and other parameters.
+Then, the planning-pipeline discussed in section <a class="reference internal" href="view_planning_detailed.html#view-planning-detailed"><span class="std std-ref">Path Planning Detailed</span></a>, will be performed. Afterwards, the generated total trajectory can be executed via
+<a class="reference external" href="https://moveit.ros.org">MoveIt</a> on the real robot or in a simulation (see CoppeliaSim-Interface’s documentation in that case). The trajectory can also be
+written to disk for later or repetitive execution. As ‘good’ trajectories currently require long calculations (&gt;30min),
+this module enables users to load and execute previously computed trajectories.</p>
+</div>
+<div class="section" id="module-agiprobot_measurement.trajectory_manager">
+<span id="api-specification"></span><h2>API-Specification<a class="headerlink" href="#module-agiprobot_measurement.trajectory_manager" title="Permalink to this headline">¶</a></h2>
+<dl class="class">
+<dt id="agiprobot_measurement.trajectory_manager.TrajectoryManager">
+<em class="property">class </em><code class="descclassname">agiprobot_measurement.trajectory_manager.</code><code class="descname">TrajectoryManager</code><a class="headerlink" href="#agiprobot_measurement.trajectory_manager.TrajectoryManager" title="Permalink to this definition">¶</a></dt>
+<dd><p>Completely integrated system for high-coverage and uncertainty-minimal scanning of given objects with an optical scanner. An instance can perform
+the entire planning pipeline - from the CAD-file and pose to a list of consecutively executable trajectories.</p>
+<dl class="method">
+<dt id="agiprobot_measurement.trajectory_manager.TrajectoryManager.connect_viewpoints">
+<code class="descname">connect_viewpoints</code><span class="sig-paren">(</span><em>unordered_viewpoints</em>, <em>ordered_viewpoints</em>, <em>min_planning_time=0.2</em><span class="sig-paren">)</span><a class="headerlink" href="#agiprobot_measurement.trajectory_manager.TrajectoryManager.connect_viewpoints" title="Permalink to this definition">¶</a></dt>
+<dd><p>Connect a set of unordered viewpoints with the current state and in between greedily so that they can be executed as fast as possible.
+Until all viewpoints are enqueued, do: From the end-point of the last enqueued trajetory, motion plans are calculated to the start-/end-poses
+of all unenqueued viewpoint’s measurement-trajectories and the shortest (in time domain) will be selected.</p>
+<table class="docutils field-list" frame="void" rules="none">
+<col class="field-name" />
+<col class="field-body" />
+<tbody valign="top">
+<tr class="field-odd field"><th class="field-name">Parameters:</th><td class="field-body"><ul class="first simple">
+<li><strong>unordered_viewpoints</strong> (<em>set</em><em>[</em><a class="reference internal" href="agiprobot_measurement.html#agiprobot_measurement.viewpoint.ViewPoint" title="agiprobot_measurement.viewpoint.ViewPoint"><em>ViewPoint</em></a><em>]</em>) – Set of viewpoints to be connected where each has a stored measurement-trajectory</li>
+<li><strong>min_planning_time</strong> (<em>float</em><em>, </em><em>optional</em>) – Planning time that is used for connection-path-planning in s (will be increased automatically if no plan was found at first), defaults to 0.2</li>
+</ul>
+</td>
+</tr>
+<tr class="field-even field"><th class="field-name">Returns:</th><td class="field-body"><p class="first">List of ordered and execution-ready ViewPoints</p>
+</td>
+</tr>
+<tr class="field-odd field"><th class="field-name">Return type:</th><td class="field-body"><p class="first last">list[<a class="reference internal" href="agiprobot_measurement.html#agiprobot_measurement.viewpoint.ViewPoint" title="agiprobot_measurement.viewpoint.ViewPoint">ViewPoint</a>]</p>
+</td>
+</tr>
+</tbody>
+</table>
+</dd></dl>
+
+<dl class="method">
+<dt id="agiprobot_measurement.trajectory_manager.TrajectoryManager.convert_viewpointlist_to_execution_plan">
+<code class="descname">convert_viewpointlist_to_execution_plan</code><span class="sig-paren">(</span><em>viewpointlist</em><span class="sig-paren">)</span><a class="headerlink" href="#agiprobot_measurement.trajectory_manager.TrajectoryManager.convert_viewpointlist_to_execution_plan" title="Permalink to this definition">¶</a></dt>
+<dd><p>Convert a list of ViewPoint-objects into a list of moveit_msgs/RobotTrajectory-entries so that the viewpoints can be stored.</p>
+<table class="docutils field-list" frame="void" rules="none">
+<col class="field-name" />
+<col class="field-body" />
+<tbody valign="top">
+<tr class="field-odd field"><th class="field-name">Parameters:</th><td class="field-body"><strong>viewpointlist</strong> – List of ViewPoint-objects with set trajectories for steering-to-viewpoint and measurement</td>
+</tr>
+<tr class="field-even field"><th class="field-name">Returns:</th><td class="field-body">List of moveit_msgs/RobotTrajectory with 2 entries per provided ViewPoint-object (first = steering-to-viewpoint-trajectory, second = measurement-trajectory)</td>
+</tr>
+<tr class="field-odd field"><th class="field-name">Return type:</th><td class="field-body">list</td>
+</tr>
+</tbody>
+</table>
+</dd></dl>
+
+<dl class="method">
+<dt id="agiprobot_measurement.trajectory_manager.TrajectoryManager.execute">
+<code class="descname">execute</code><span class="sig-paren">(</span><em>execution_list</em>, <em>surface_points=None</em><span class="sig-paren">)</span><a class="headerlink" href="#agiprobot_measurement.trajectory_manager.TrajectoryManager.execute" title="Permalink to this definition">¶</a></dt>
+<dd><p>Execute a list of RobotTrajectories or ViewPoints via MoveIt. When problems occur during execution,
+the robot will be stopped and an exception will be raised. When executing from a list of ViewPoints, the currently measured surface_points
+are published in “/currently_measured_points” during execution.</p>
+<table class="docutils field-list" frame="void" rules="none">
+<col class="field-name" />
+<col class="field-body" />
+<tbody valign="top">
+<tr class="field-odd field"><th class="field-name">Parameters:</th><td class="field-body"><ul class="first last simple">
+<li><strong>execution_list</strong> (<em>list</em><em>[</em><em>moveit_msgs/RobotTrajectory</em><em>] or </em><em>list</em><em>[</em><a class="reference internal" href="agiprobot_measurement.html#agiprobot_measurement.viewpoint.ViewPoint" title="agiprobot_measurement.viewpoint.ViewPoint"><em>ViewPoint</em></a><em>]</em>) – List of RobotTrajectories or ViewPoints that can be executed consecutively (the next segment’s start point is the last segment’s end point)</li>
+<li><strong>surface_points</strong> (<em>list</em><em>[</em><em>numpy.array</em><em>]</em><em>, </em><em>optional</em>) – List of the actual sampled surface points, defaults to None</li>
+</ul>
+</td>
+</tr>
+</tbody>
+</table>
+</dd></dl>
+
+<dl class="method">
+<dt id="agiprobot_measurement.trajectory_manager.TrajectoryManager.generate_samples_and_viewpoints">
+<code class="descname">generate_samples_and_viewpoints</code><span class="sig-paren">(</span><em>sampling_density</em>, <em>uncertainty_threshold</em>, <em>orientations_around_boresight</em>, <em>output_set</em>, <em>viewpoint_tilt_mode='full'</em>, <em>plan_path_to_check_reachability=False</em>, <em>minimum_trajectory_length=25</em>, <em>trajectory_sample_step=2</em>, <em>static_overmeasure=0</em><span class="sig-paren">)</span><a class="headerlink" href="#agiprobot_measurement.trajectory_manager.TrajectoryManager.generate_samples_and_viewpoints" title="Permalink to this definition">¶</a></dt>
+<dd><p>Samples the mesh’s surface into discrete points, generates viewpoints for each sample and processes these viewpoints metrologically and mechanically.
+Only viewpoints that do meet the contraints specified in the method’s parameters and in MoveIt (collision, reachability, …) will be addet to output_set. This method allows to generate
+multiple ViewPoint-objects for a single surface-point by varying the anchor-pose (the boresight is always focused on the corresponding surface_point).</p>
+<table class="docutils field-list" frame="void" rules="none">
+<col class="field-name" />
+<col class="field-body" />
+<tbody valign="top">
+<tr class="field-odd field"><th class="field-name">Parameters:</th><td class="field-body"><ul class="first simple">
+<li><strong>sampling_density</strong> (<em>float</em>) – Density of sampling to generate the points for measurement-calculations and viewpoint-generation in points per mm^2</li>
+<li><strong>orientations_around_boresight</strong> (<em>int</em>) – Number of orientations around the sensor’s boresight to be considered per sampled_surface_point</li>
+<li><strong>output_set</strong> (<em>set</em>) – Set where the generated viewpoints are stored (call by reference)</li>
+<li><strong>viewpoint_tilt_mode</strong> (<em>str</em><em>, </em><em>optional</em>) – <p>For each orientation, deviate the psi- and theta-values of the viewpoint-anchor-pose slightly from the optimum according to (one deviation-step per angle and orientation available right now):</p>
+<ul>
+<li>”none”: Do not perform any tilting.</li>
+<li>”limited”: When the optimal angle-configuration did not work, try deviations and stop after finding the first valid solution.</li>
+<li>”full”: Calculation for every possible angle-calculation. Every boresight orientation has 9 sub-viewpoints.</li>
+</ul>
+<p>, defaults to “full”</p>
+</li>
+<li><strong>plan_path_to_check_reachability</strong> (<em>bool</em><em>, </em><em>optional</em>) – Do not use one inverse-kinematics-request to check viewpoint-reachability but try to create complete plan from the current-state to the viewpoint’s anchor-pose, defaults to False</li>
+<li><strong>minimum_trajectory_length</strong> (<em>float</em><em>, </em><em>optional</em>) – Minimum length a generated trajectory has to have so that it is accepted in mm, defaults to 50</li>
+<li><strong>trajectory_sample_step</strong> (<em>float</em><em>, </em><em>optional</em>) – Euclidian distance between 2 trajectory-points in cartesian sapce in mm, defaults to 2</li>
+<li><strong>static_overmeasure</strong> (<em>float</em>) – Constant euclidian distance that is added at each end of the path in mm, defaults to 0</li>
+</ul>
+</td>
+</tr>
+<tr class="field-even field"><th class="field-name">Yields:</th><td class="field-body"><p class="first">Progress tuple ([current processed samples], [total samples to process])</p>
+</td>
+</tr>
+<tr class="field-odd field"><th class="field-name">Return type:</th><td class="field-body"><p class="first last">Iterator[tuple]</p>
+</td>
+</tr>
+</tbody>
+</table>
+</dd></dl>
+
+<dl class="method">
+<dt id="agiprobot_measurement.trajectory_manager.TrajectoryManager.load_execution_plan">
+<code class="descname">load_execution_plan</code><span class="sig-paren">(</span><em>file_path</em>, <em>adapt_to_current_start_pose=True</em><span class="sig-paren">)</span><a class="headerlink" href="#agiprobot_measurement.trajectory_manager.TrajectoryManager.load_execution_plan" title="Permalink to this definition">¶</a></dt>
+<dd><p>Extracts a list of moveit_msgs/RobotTrajectory specified in the yaml-file at the provided path.</p>
+<p>The trajectories can be executed consecutively, however if the execution should start from the current state (which is most
+likely the case), the parameter ‘adapt_to_current_start_pose’ should be set true to add movement from the current point (which
+in general deviates from the ‘current point’ during planning) to the trajectory start. The yaml-file must correspond to a list with the first
+entry being a dictionary for metadata and the following entries being dictionaries of ‘expanded’ RobotTrajectories with following structure:
+Trajecories connecting measurements (C) and measurement trajectories (M) themselves in an alternating fashion (C-M-C-M-C-…).</p>
+<table class="docutils field-list" frame="void" rules="none">
+<col class="field-name" />
+<col class="field-body" />
+<tbody valign="top">
+<tr class="field-odd field"><th class="field-name">Parameters:</th><td class="field-body"><ul class="first simple">
+<li><strong>file_path</strong> (<em>str</em>) – Where the yaml-file is located</li>
+<li><strong>adapt_to_current_start_pose</strong> (<em>bool</em>) – If true (default), the plan will be adapted so that it can start from the current state</li>
+</ul>
+</td>
+</tr>
+<tr class="field-even field"><th class="field-name">Returns:</th><td class="field-body"><p class="first">List of moveit_msgs/RobotTrajectory-ies that can be consecutively executed</p>
+</td>
+</tr>
+<tr class="field-odd field"><th class="field-name">Return type:</th><td class="field-body"><p class="first last">list</p>
+</td>
+</tr>
+</tbody>
+</table>
+</dd></dl>
+
+<dl class="method">
+<dt id="agiprobot_measurement.trajectory_manager.TrajectoryManager.load_target_mesh">
+<code class="descname">load_target_mesh</code><span class="sig-paren">(</span><em>file_name, transform=array([[1., 0., 0., 0.],        [0., 1., 0., 0.],        [0., 0., 1., 0.],        [0., 0., 0., 1.]]), add_wbk_mirrors=True, remove_downside=True, remove_threshold_angle_deg=20</em><span class="sig-paren">)</span><a class="headerlink" href="#agiprobot_measurement.trajectory_manager.TrajectoryManager.load_target_mesh" title="Permalink to this definition">¶</a></dt>
+<dd><p>Loads the mesh-to-measure from file into the instance’s target_mesh-member (to generate and evaluate viewpoint-trajectories) and into
+MoveIt (for collision-prevention). To move the mesh into a feasible measurement-pose, a transform may be applied to set the mesh’s
+reference frame specified in CAD with respect to the ‘world’ frame</p>
+<table class="docutils field-list" frame="void" rules="none">
+<col class="field-name" />
+<col class="field-body" />
+<tbody valign="top">
+<tr class="field-odd field"><th class="field-name">Parameters:</th><td class="field-body"><ul class="first simple">
+<li><strong>file_name</strong> (<em>str</em>) – Where the target_mesh’s CAD file is located (should be given starting at root-level: ‘/X/Y/…’)</li>
+<li><strong>transform</strong> (<em>numpy.array</em><em>, </em><em>optional</em>) – Homogeneous 4x4-matrix to move the mesh into the desired pose with translation in mm, defaults to identity-matrix</li>
+<li><strong>add_wbk_mirrors</strong> (<em>bool</em><em>, </em><em>optional</em>) – Adds hard-coded collision objects to MoveIt as the robot station at the institute is placed besides 2 fragile mirrors, defaults to True</li>
+<li><strong>remove_downside</strong> (<em>bool</em><em>, </em><em>optional</em>) – Whether to remove downfacing triangles of the CAD-mesh, defaults to True</li>
+<li><strong>remove_threshold_angle_deg</strong> (<em>float</em>) – Threshold angle to identify downfacing surface normals with respect to the world-z-axis in degree, defaults to 20</li>
+</ul>
+</td>
+</tr>
+<tr class="field-even field"><th class="field-name">Returns:</th><td class="field-body"><p class="first">Whether all operations (esp. loading from file into trimesh and MoveIt) were successful</p>
+</td>
+</tr>
+<tr class="field-odd field"><th class="field-name">Return type:</th><td class="field-body"><p class="first last">bool</p>
+</td>
+</tr>
+</tbody>
+</table>
+</dd></dl>
+
+<dl class="method">
+<dt id="agiprobot_measurement.trajectory_manager.TrajectoryManager.postprocess_trajectory">
+<code class="descname">postprocess_trajectory</code><span class="sig-paren">(</span><em>trajectory</em><span class="sig-paren">)</span><a class="headerlink" href="#agiprobot_measurement.trajectory_manager.TrajectoryManager.postprocess_trajectory" title="Permalink to this definition">¶</a></dt>
+<dd><p>Check if trajectory meets the limits specified in ‘joint_limits.yaml’ and if the time between two points is increasing.
+MoveIt does not apply the values from ‘joint_limits.yaml’ when computing a cartesian path, which is dangerous for trajectory-execution.
+For prevention, trajectories with too heavy violations will be rejected. However, specifying the joint-limits from the yaml in the xacro-urdf as
+well seems to have eliminated this problem (but this code is still active for safety purposes).</p>
+<table class="docutils field-list" frame="void" rules="none">
+<col class="field-name" />
+<col class="field-body" />
+<tbody valign="top">
+<tr class="field-odd field"><th class="field-name">Parameters:</th><td class="field-body"><strong>trajectory</strong> (<em>moveit_msgs/RobotTrajectory</em>) – RobotTrajectory to check and improve</td>
+</tr>
+<tr class="field-even field"><th class="field-name">Returns:</th><td class="field-body">Boolean value indicating if the trajectory could be post-processed reasonably or if it has to be rejected</td>
+</tr>
+<tr class="field-odd field"><th class="field-name">Return type:</th><td class="field-body">bool</td>
+</tr>
+</tbody>
+</table>
+</dd></dl>
+
+<dl class="method">
+<dt id="agiprobot_measurement.trajectory_manager.TrajectoryManager.process_viewpoint">
+<code class="descname">process_viewpoint</code><span class="sig-paren">(</span><em>viewpoint</em>, <em>ik_service</em>, <em>uncertainty_threshold</em>, <em>minimum_required_overmeasure=5</em>, <em>trajectory_sample_step=2</em>, <em>joint_jump_threshold=1.5</em>, <em>minimum_trajectory_length=50</em><span class="sig-paren">)</span><a class="headerlink" href="#agiprobot_measurement.trajectory_manager.TrajectoryManager.process_viewpoint" title="Permalink to this definition">¶</a></dt>
+<dd><p>Processes a single viewpoint entirely. Starting on a simple reachability-analysis of the anchor-pose, a metrological evaluation is performed using the sensor_model to
+reviewpoint the measurement-gain this viewpoint can contribute in theory. Then, the actual meausrement-trajectories are calculated and examined regarding the
+provided contraints. In the end, the processing-result (trajectory and metrological values) are stored in the viewpoint object</p>
+<table class="docutils field-list" frame="void" rules="none">
+<col class="field-name" />
+<col class="field-body" />
+<tbody valign="top">
+<tr class="field-odd field"><th class="field-name">Parameters:</th><td class="field-body"><ul class="first simple">
+<li><strong>viewpoint</strong> (<a class="reference internal" href="agiprobot_measurement.html#agiprobot_measurement.viewpoint.ViewPoint" title="agiprobot_measurement.viewpoint.ViewPoint"><em>ViewPoint</em></a>) – ViewPoint to be processed (if processing was successful, members of this viewpoint-object will be changed)</li>
+<li><strong>ik_service</strong> (<em>rospy.ServiceProxy</em>) – ROS-Serviceproxy that can resolve inverse-kinematics via moveit_msgs/GetPositionIK</li>
+<li><strong>uncertainty_threshold</strong> (<em>float</em>) – Maximum permissible uncertainty in mm</li>
+<li><strong>minimum_required_overmeasure</strong> (<em>float</em><em>, </em><em>optional</em>) – How much to add to the trajectory in trajectory-direction in mm after the last measurable sample_point is measured (as samples usually do not occur exactly at edges), defaults to 5</li>
+<li><strong>trajectory_sample_step</strong> (<em>float</em><em>, </em><em>optional</em>) – Euclidian distance between 2 trajectory-points in cartesian sapce in mm, defaults to 2</li>
+<li><strong>joint_jump_threshold</strong> (<em>float</em><em>, </em><em>optional</em>) – Maximum change in joint values allowed between 2 trajectory-points in rad (since all joints are revolute), defaults to 1.5</li>
+<li><strong>minimum_trajectory_length</strong> (<em>float</em><em>, </em><em>optional</em>) – Minimum length a generated trajectory has to have so that it is accepted in mm, defaults to 50</li>
+</ul>
+</td>
+</tr>
+<tr class="field-even field"><th class="field-name">Returns:</th><td class="field-body"><p class="first">Boolean value that is true, if the viewpoint could be processed and all contraints were met, and false otherwise</p>
+</td>
+</tr>
+<tr class="field-odd field"><th class="field-name">Return type:</th><td class="field-body"><p class="first last">bool</p>
+</td>
+</tr>
+</tbody>
+</table>
+</dd></dl>
+
+<dl class="method">
+<dt id="agiprobot_measurement.trajectory_manager.TrajectoryManager.solve_scp">
+<code class="descname">solve_scp</code><span class="sig-paren">(</span><em>provided_viewpoints</em>, <em>solver_type='greedy'</em><span class="sig-paren">)</span><a class="headerlink" href="#agiprobot_measurement.trajectory_manager.TrajectoryManager.solve_scp" title="Permalink to this definition">¶</a></dt>
+<dd><p>Solve Set Covering Problem to cover all measurable surface_points with a fraction of the set of provided viewpoints.
+Possible solver_types are:</p>
+<ul class="simple">
+<li>“greedy”: Fills return set at each step with the trajectory that delivers the most
+additional coverage compared to the points already in the set. If this additional coverage is
+identical in size for several new optimal viewpointpoint-candidates, the one with the lowest maximum
+uncertainty will be added similarly to the improvement introduced in chapter 4.4 of 
+“ViewPoint and sensor planning for multi-sensor surface inspection” (Gronle et al., 2016)  (default)</li>
+<li>“IP_basic”: Solves the SCP-Problem with integer programming (IP) using the formulation in
+“Model-based viewpoint planning” (Scott, 2009), i.e. the objective function is the number of all
+selected viewpointpoints whereas the constraint is that every surface point must be covered at least by one viewpointpoint</li>
+<li>“IP_uncertainty”: Solves the SCP using IP with respect to the uncertainty. The formulas are similar to “IP_basic”
+but in the objective, costs corresponding to the worst uncertainty are assigned to every viewpointpoint-trajectory.</li>
+<li>“IP_time”: Solves the SCP using IP with respect to the time of trajectory-execution. The formulas are similar to “IP_basic”
+but in the objective, costs corresponding to the duration of the trajectory are assigned to every viewpointpoint.</li>
+</ul>
+<table class="docutils field-list" frame="void" rules="none">
+<col class="field-name" />
+<col class="field-body" />
+<tbody valign="top">
+<tr class="field-odd field"><th class="field-name">Parameters:</th><td class="field-body"><ul class="first simple">
+<li><strong>provided_viewpoints</strong> (<em>set</em><em>[</em><a class="reference internal" href="agiprobot_measurement.html#agiprobot_measurement.viewpoint.ViewPoint" title="agiprobot_measurement.viewpoint.ViewPoint"><em>ViewPoint</em></a><em>] or </em><em>list</em><em>[</em><a class="reference internal" href="agiprobot_measurement.html#agiprobot_measurement.viewpoint.ViewPoint" title="agiprobot_measurement.viewpoint.ViewPoint"><em>ViewPoint</em></a><em>]</em>) – All processed viewpoints where each has a valid measurement-trajectory and information about the measurable surface_points</li>
+<li><strong>solver_type</strong> (<em>str</em><em>, </em><em>optional</em>) – See function description, defaults to “greedy”</li>
+</ul>
+</td>
+</tr>
+<tr class="field-even field"><th class="field-name">Returns:</th><td class="field-body"><p class="first">Set of viewpoints that can measure the union of measurable surface points of all provided viewpoints</p>
+</td>
+</tr>
+<tr class="field-odd field"><th class="field-name">Return type:</th><td class="field-body"><p class="first last">set[<a class="reference internal" href="agiprobot_measurement.html#agiprobot_measurement.viewpoint.ViewPoint" title="agiprobot_measurement.viewpoint.ViewPoint">ViewPoint</a>]</p>
+</td>
+</tr>
+</tbody>
+</table>
+</dd></dl>
+
+<dl class="method">
+<dt id="agiprobot_measurement.trajectory_manager.TrajectoryManager.store_execution_plan">
+<code class="descname">store_execution_plan</code><span class="sig-paren">(</span><em>file_path</em>, <em>execution_plan</em>, <em>metadata={}</em><span class="sig-paren">)</span><a class="headerlink" href="#agiprobot_measurement.trajectory_manager.TrajectoryManager.store_execution_plan" title="Permalink to this definition">¶</a></dt>
+<dd><p>Stores the provided execution_plan segments (= moveit_msgs/RobotTrajectory) in a yaml-file at the provided file_path formatted so that it can be read in by the class’s ‘load_execution_plan’-method.</p>
+<table class="docutils field-list" frame="void" rules="none">
+<col class="field-name" />
+<col class="field-body" />
+<tbody valign="top">
+<tr class="field-odd field"><th class="field-name">Parameters:</th><td class="field-body"><ul class="first simple">
+<li><strong>file_path</strong> (<em>str</em>) – Path specifying where to safe the generated file at</li>
+<li><strong>execution_plan</strong> (<em>list of moveit_msgs/RobotTrajectory</em>) – List of path-segments that can be executed consecutively (i.e. joint-values at the last point of any entry = joint-values at the beginning of the next entry).</li>
+<li><strong>metadata</strong> (<em>dict</em>) – Dictionary of information about this plan in key-value-fashion (e.g. {‘sampling_density’: 0.01, ‘timestamp’: ‘12:00, 01.01.2021’, ‘planning_duration_in_s’:42}”)#</li>
+</ul>
+</td>
+</tr>
+<tr class="field-even field"><th class="field-name">Returns:</th><td class="field-body"><p class="first">True (always)</p>
+</td>
+</tr>
+<tr class="field-odd field"><th class="field-name">Return type:</th><td class="field-body"><p class="first last">bool</p>
+</td>
+</tr>
+</tbody>
+</table>
+</dd></dl>
+
+<dl class="method">
+<dt id="agiprobot_measurement.trajectory_manager.TrajectoryManager.user_guide">
+<code class="descname">user_guide</code><span class="sig-paren">(</span><span class="sig-paren">)</span><a class="headerlink" href="#agiprobot_measurement.trajectory_manager.TrajectoryManager.user_guide" title="Permalink to this definition">¶</a></dt>
+<dd><p>Console program for execution of the algorithm. The user is asked all required information via questions so that the algorihtm can be
+launched properly. For suitable inputs, tab-completion is available. This is the recommended way to use the algorithm.</p>
+<table class="docutils field-list" frame="void" rules="none">
+<col class="field-name" />
+<col class="field-body" />
+<tbody valign="top">
+<tr class="field-odd field"><th class="field-name">Return type:</th><td class="field-body">None</td>
+</tr>
+</tbody>
+</table>
+</dd></dl>
+
+</dd></dl>
+
+</div>
+</div>
+
+
+           </div>
+           
+          </div>
+          <footer>
+    <div class="rst-footer-buttons" role="navigation" aria-label="footer navigation">
+        <a href="module_sensor_model.html" class="btn btn-neutral float-right" title="Sensor Model" accesskey="n" rel="next">Next <span class="fa fa-arrow-circle-right" aria-hidden="true"></span></a>
+        <a href="view_planning_detailed.html" class="btn btn-neutral float-left" title="Path Planning Detailed" accesskey="p" rel="prev"><span class="fa fa-arrow-circle-left" aria-hidden="true"></span> Previous</a>
+    </div>
+
+  <hr/>
+
+  <div role="contentinfo">
+    <p>
+        &#169; Copyright 2021, Sven Becker.
+
+    </p>
+  </div>
+    
+    
+    
+    Built with <a href="https://www.sphinx-doc.org/">Sphinx</a> using a
+    
+    <a href="https://github.com/readthedocs/sphinx_rtd_theme">theme</a>
+    
+    provided by <a href="https://readthedocs.org">Read the Docs</a>. 
+
+</footer>
+        </div>
+      </div>
+
+    </section>
+
+  </div>
+  
+
+  <script type="text/javascript">
+      jQuery(function () {
+          SphinxRtdTheme.Navigation.enable(true);
+      });
+  </script>
+
+  
+  
+    
+   
+
+</body>
+</html>

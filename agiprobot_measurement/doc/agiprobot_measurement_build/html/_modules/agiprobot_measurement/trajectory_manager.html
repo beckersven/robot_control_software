@@ -1,0 +1,992 @@
+
+
+<!DOCTYPE html>
+<html class="writer-html4" lang="en" >
+<head>
+  <meta charset="utf-8" />
+  
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  
+  <title>agiprobot_measurement.trajectory_manager &mdash; Agiprobot Measurement 1.0 documentation</title>
+  
+
+  
+  <link rel="stylesheet" href="../../_static/css/theme.css" type="text/css" />
+  <link rel="stylesheet" href="../../_static/pygments.css" type="text/css" />
+
+  
+  
+
+  
+  
+
+  
+
+  
+  <!--[if lt IE 9]>
+    <script src="../../_static/js/html5shiv.min.js"></script>
+  <![endif]-->
+  
+    
+      <script type="text/javascript">
+          var DOCUMENTATION_OPTIONS = {
+              URL_ROOT:'../../',
+              VERSION:'1.0',
+              LANGUAGE:'None',
+              COLLAPSE_INDEX:false,
+              FILE_SUFFIX:'.html',
+              HAS_SOURCE:  true,
+              SOURCELINK_SUFFIX: '.txt'
+          };
+      </script>
+        <script type="text/javascript" src="../../_static/jquery.js"></script>
+        <script type="text/javascript" src="../../_static/underscore.js"></script>
+        <script type="text/javascript" src="../../_static/doctools.js"></script>
+        <script type="text/javascript" src="https://cdnjs.cloudflare.com/ajax/libs/mathjax/2.7.1/MathJax.js?config=TeX-AMS-MML_HTMLorMML"></script>
+    
+    <script type="text/javascript" src="../../_static/js/theme.js"></script>
+
+    
+    <link rel="index" title="Index" href="../../genindex.html" />
+    <link rel="search" title="Search" href="../../search.html" /> 
+</head>
+
+<body class="wy-body-for-nav">
+
+   
+  <div class="wy-grid-for-nav">
+    
+    <nav data-toggle="wy-nav-shift" class="wy-nav-side">
+      <div class="wy-side-scroll">
+        <div class="wy-side-nav-search" >
+          
+
+          
+            <a href="../../index.html" class="icon icon-home"> Agiprobot Measurement
+          
+
+          
+          </a>
+
+          
+            
+            
+              <div class="version">
+                1.0
+              </div>
+            
+          
+
+          
+<div role="search">
+  <form id="rtd-search-form" class="wy-form" action="../../search.html" method="get">
+    <input type="text" name="q" placeholder="Search docs" />
+    <input type="hidden" name="check_keywords" value="yes" />
+    <input type="hidden" name="area" value="default" />
+  </form>
+</div>
+
+          
+        </div>
+
+        
+        <div class="wy-menu wy-menu-vertical" data-spy="affix" role="navigation" aria-label="main navigation">
+          
+            
+            
+              
+            
+            
+              <p class="caption"><span class="caption-text">Explanation</span></p>
+<ul>
+<li class="toctree-l1"><a class="reference internal" href="../../overview.html">Overview</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../Usage_Guide.html">Usage Guide</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../view_planning_detailed.html">Path Planning Detailed</a></li>
+</ul>
+<p class="caption"><span class="caption-text">Components</span></p>
+<ul>
+<li class="toctree-l1"><a class="reference internal" href="../../module_trajectory_manager.html">Trajectory Manager</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../module_sensor_model.html">Sensor Model</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../module_view.html">View Point</a></li>
+</ul>
+
+            
+          
+        </div>
+        
+      </div>
+    </nav>
+
+    <section data-toggle="wy-nav-shift" class="wy-nav-content-wrap">
+
+      
+      <nav class="wy-nav-top" aria-label="top navigation">
+        
+          <i data-toggle="wy-nav-top" class="fa fa-bars"></i>
+          <a href="../../index.html">Agiprobot Measurement</a>
+        
+      </nav>
+
+
+      <div class="wy-nav-content">
+        
+        <div class="rst-content">
+        
+          
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+<div role="navigation" aria-label="breadcrumbs navigation">
+
+  <ul class="wy-breadcrumbs">
+    
+      <li><a href="../../index.html" class="icon icon-home"></a> &raquo;</li>
+        
+          <li><a href="../index.html">Module code</a> &raquo;</li>
+        
+      <li>agiprobot_measurement.trajectory_manager</li>
+    
+    
+      <li class="wy-breadcrumbs-aside">
+        
+      </li>
+    
+  </ul>
+
+  
+  <hr/>
+</div>
+          <div role="main" class="document" itemscope="itemscope" itemtype="http://schema.org/Article">
+           <div itemprop="articleBody">
+            
+  <h1>Source code for agiprobot_measurement.trajectory_manager</h1><div class="highlight"><pre>
+<span></span><span class="ch">#! /usr/bin/python</span>
+
+<span class="kn">import</span> <span class="nn">trimesh</span>
+<span class="kn">import</span> <span class="nn">numpy</span> <span class="k">as</span> <span class="nn">np</span>
+<span class="kn">import</span> <span class="nn">rospy</span>
+<span class="kn">import</span> <span class="nn">moveit_commander</span>
+<span class="kn">import</span> <span class="nn">moveit_msgs.msg</span>
+<span class="kn">import</span> <span class="nn">geometry_msgs.msg</span>
+<span class="kn">import</span> <span class="nn">sys</span>
+<span class="kn">import</span> <span class="nn">signal</span>
+<span class="kn">import</span> <span class="nn">time</span>
+<span class="kn">from</span> <span class="nn">geometry_msgs.msg</span> <span class="k">import</span> <span class="n">Quaternion</span>
+<span class="kn">import</span> <span class="nn">trajectory_msgs.msg</span>
+<span class="kn">import</span> <span class="nn">time</span>
+<span class="kn">import</span> <span class="nn">sensor_msgs.msg</span>
+<span class="kn">from</span> <span class="nn">std_srvs.srv</span> <span class="k">import</span> <span class="n">SetBoolRequest</span><span class="p">,</span> <span class="n">SetBool</span>
+<span class="kn">import</span> <span class="nn">pulp</span>
+<span class="kn">import</span> <span class="nn">itertools</span>
+<span class="kn">from</span> <span class="nn">moveit_msgs.srv</span> <span class="k">import</span> <span class="n">GetPositionIK</span><span class="p">,</span> <span class="n">GetPositionIKRequest</span><span class="p">,</span> <span class="n">GetPositionIKResponse</span>
+<span class="kn">import</span> <span class="nn">array</span>
+<span class="kn">from</span> <span class="nn">multiprocessing</span> <span class="k">import</span> <span class="n">Process</span><span class="p">,</span> <span class="n">Array</span>
+<span class="kn">from</span> <span class="nn">agiprobot_measurement.viewpoint</span> <span class="k">import</span> <span class="n">ViewPoint</span>
+<span class="kn">from</span> <span class="nn">agiprobot_measurement.sensor_model</span> <span class="k">import</span> <span class="n">SensorModel</span>
+<span class="kn">import</span> <span class="nn">yaml</span>
+<span class="kn">from</span> <span class="nn">rospy_message_converter</span> <span class="k">import</span> <span class="n">message_converter</span>
+<span class="kn">import</span> <span class="nn">click</span>
+<span class="kn">import</span> <span class="nn">os</span>
+<span class="kn">import</span> <span class="nn">rospkg</span>
+
+<span class="n">OFFSET</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">array</span><span class="p">([</span><span class="mi">450</span><span class="p">,</span> <span class="o">-</span><span class="mi">550</span><span class="p">,</span> <span class="mi">1200</span><span class="p">])</span>
+
+<div class="viewcode-block" id="TrajectoryManager"><a class="viewcode-back" href="../../module_trajectory_manager.html#agiprobot_measurement.trajectory_manager.TrajectoryManager">[docs]</a><span class="k">class</span> <span class="nc">TrajectoryManager</span><span class="p">:</span>
+    <span class="sd">&quot;&quot;&quot;</span>
+<span class="sd">    Completely integrated system for high-coverage and uncertainty-minimal scanning of given objects with an optical scanner. An instance can perform</span>
+<span class="sd">    the entire planning pipeline - from the CAD-file and pose to a list of consecutively executable trajectories.</span>
+<span class="sd">    &quot;&quot;&quot;</span>
+    <span class="k">def</span> <span class="nf">__init__</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
+        <span class="sd">&quot;&quot;&quot;</span>
+<span class="sd">        Initialize planner by connecting to ROS and MoveIt, configuring the latter and creating a sensor_model.</span>
+<span class="sd">        &quot;&quot;&quot;</span>
+        <span class="c1"># Initialization</span>
+        <span class="n">moveit_commander</span><span class="o">.</span><span class="n">roscpp_initialize</span><span class="p">(</span><span class="n">sys</span><span class="o">.</span><span class="n">argv</span><span class="p">)</span>
+        <span class="n">rospy</span><span class="o">.</span><span class="n">init_node</span><span class="p">(</span><span class="s2">&quot;trajectory_manager&quot;</span><span class="p">)</span>
+        
+        <span class="c1"># Configuring MoveIt</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">group</span> <span class="o">=</span> <span class="n">moveit_commander</span><span class="o">.</span><span class="n">MoveGroupCommander</span><span class="p">(</span><span class="s2">&quot;manipulator&quot;</span><span class="p">)</span>
+        <span class="c1"># Enables multi-query-planning (see corresponding literature)</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">group</span><span class="o">.</span><span class="n">set_planner_id</span><span class="p">(</span><span class="s2">&quot;PersistentPRMstar&quot;</span><span class="p">)</span> 
+        <span class="bp">self</span><span class="o">.</span><span class="n">scene</span> <span class="o">=</span> <span class="n">moveit_commander</span><span class="o">.</span><span class="n">PlanningSceneInterface</span><span class="p">(</span><span class="n">synchronous</span><span class="o">=</span><span class="kc">True</span><span class="p">)</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">group</span><span class="o">.</span><span class="n">set_max_velocity_scaling_factor</span><span class="p">(</span><span class="mi">1</span><span class="p">)</span>
+        
+        
+
+        <span class="c1"># Create a sensor-model instance</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">sensor_model</span> <span class="o">=</span> <span class="n">SensorModel</span><span class="p">(</span><span class="n">rospy</span><span class="o">.</span><span class="n">get_param</span><span class="p">(</span><span class="s2">&quot;/sensor_model_parameters&quot;</span><span class="p">))</span>
+        
+        <span class="c1"># Mesh containing the object-to-measure geometrically transformed so that its pose in trimesh-coordinates are the same as in real life (but mm instead of m)</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">target_mesh</span> <span class="o">=</span> <span class="n">trimesh</span><span class="o">.</span><span class="n">Trimesh</span><span class="p">()</span>
+        <span class="c1"># Corresponding homogeneous 4x4-matrix</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">target_mesh_transform</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">eye</span><span class="p">(</span><span class="mi">4</span><span class="p">)</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">max_edge</span> <span class="o">=</span> <span class="mf">1e6</span>
+
+
+
+<div class="viewcode-block" id="TrajectoryManager.load_execution_plan"><a class="viewcode-back" href="../../module_trajectory_manager.html#agiprobot_measurement.trajectory_manager.TrajectoryManager.load_execution_plan">[docs]</a>    <span class="k">def</span> <span class="nf">load_execution_plan</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">file_path</span><span class="p">,</span> <span class="n">adapt_to_current_start_pose</span> <span class="o">=</span> <span class="kc">True</span><span class="p">):</span>
+        <span class="sd">&quot;&quot;&quot; </span>
+<span class="sd">        Extracts a list of moveit_msgs/RobotTrajectory specified in the yaml-file at the provided path.</span>
+
+<span class="sd">        The trajectories can be executed consecutively, however if the execution should start from the current state (which is most</span>
+<span class="sd">        likely the case), the parameter &#39;adapt_to_current_start_pose&#39; should be set true to add movement from the current point (which</span>
+<span class="sd">        in general deviates from the &#39;current point&#39; during planning) to the trajectory start. The yaml-file must correspond to a list with the first</span>
+<span class="sd">        entry being a dictionary for metadata and the following entries being dictionaries of &#39;expanded&#39; RobotTrajectories with following structure:</span>
+<span class="sd">        Trajecories connecting measurements (C) and measurement trajectories (M) themselves in an alternating fashion (C-M-C-M-C-...).</span>
+<span class="sd">            </span>
+<span class="sd">        :param file_path: Where the yaml-file is located</span>
+<span class="sd">        :type file_path: str</span>
+<span class="sd">        :param adapt_to_current_start_pose: If true (default), the plan will be adapted so that it can start from the current state</span>
+<span class="sd">        :type adapt_to_current_start_pose: bool</span>
+<span class="sd">        :return: List of moveit_msgs/RobotTrajectory-ies that can be consecutively executed</span>
+<span class="sd">        :rtype: list</span>
+<span class="sd">        &quot;&quot;&quot;</span>
+        <span class="n">execution_plan</span> <span class="o">=</span> <span class="p">[]</span>
+        <span class="k">with</span> <span class="nb">open</span><span class="p">(</span><span class="n">file_path</span><span class="p">,</span> <span class="s1">&#39;r&#39;</span><span class="p">)</span> <span class="k">as</span> <span class="n">plan_file</span><span class="p">:</span>
+            <span class="n">plan_list</span> <span class="o">=</span> <span class="n">yaml</span><span class="o">.</span><span class="n">safe_load</span><span class="p">(</span><span class="n">plan_file</span><span class="p">)</span>
+            <span class="k">assert</span> <span class="nb">isinstance</span><span class="p">(</span><span class="n">plan_list</span><span class="p">,</span> <span class="nb">list</span><span class="p">)</span>
+            <span class="c1"># First entry contains dict of meta-data (like date/time, target-mesh-pose, ...)</span>
+            <span class="k">assert</span> <span class="nb">isinstance</span><span class="p">(</span><span class="n">plan_list</span><span class="p">[</span><span class="mi">0</span><span class="p">],</span> <span class="nb">dict</span><span class="p">)</span>
+            <span class="nb">print</span><span class="p">(</span><span class="s2">&quot;Metadata of loaded path:&quot;</span><span class="p">)</span>
+            <span class="k">for</span> <span class="n">key</span><span class="p">,</span> <span class="n">value</span> <span class="ow">in</span> <span class="n">plan_list</span><span class="p">[</span><span class="mi">0</span><span class="p">]</span><span class="o">.</span><span class="n">items</span><span class="p">():</span>
+                <span class="nb">print</span><span class="p">(</span><span class="s2">&quot;</span><span class="si">{}</span><span class="s2">:</span><span class="se">\t</span><span class="si">{}</span><span class="s2">&quot;</span><span class="o">.</span><span class="n">format</span><span class="p">(</span><span class="n">key</span><span class="p">,</span> <span class="n">value</span><span class="p">))</span>
+            <span class="k">for</span> <span class="n">path_segment</span> <span class="ow">in</span> <span class="n">plan_list</span><span class="p">[</span><span class="mi">1</span><span class="p">:]:</span>
+                <span class="k">assert</span> <span class="nb">isinstance</span><span class="p">(</span><span class="n">path_segment</span><span class="p">,</span> <span class="nb">dict</span><span class="p">)</span>
+                <span class="n">execution_plan</span><span class="o">.</span><span class="n">append</span><span class="p">(</span><span class="n">message_converter</span><span class="o">.</span><span class="n">convert_dictionary_to_ros_message</span><span class="p">(</span><span class="s2">&quot;moveit_msgs/RobotTrajectory&quot;</span><span class="p">,</span> <span class="n">path_segment</span><span class="p">))</span>
+        <span class="k">if</span> <span class="n">adapt_to_current_start_pose</span><span class="p">:</span>
+            <span class="c1"># Replace the first &quot;steering to measurement trajectory&quot; (= first segment) as</span>
+            <span class="c1"># it was calculated from the current pose during planning to the first measurement-trajectory (i.e. nothing critical happens here)</span>
+            <span class="bp">self</span><span class="o">.</span><span class="n">group</span><span class="o">.</span><span class="n">set_start_state_to_current_state</span><span class="p">()</span>
+            <span class="bp">self</span><span class="o">.</span><span class="n">group</span><span class="o">.</span><span class="n">set_joint_value_target</span><span class="p">(</span><span class="n">execution_plan</span><span class="p">[</span><span class="mi">0</span><span class="p">]</span><span class="o">.</span><span class="n">joint_trajectory</span><span class="o">.</span><span class="n">points</span><span class="p">[</span><span class="o">-</span><span class="mi">1</span><span class="p">]</span><span class="o">.</span><span class="n">positions</span><span class="p">)</span>
+            <span class="n">plan_result</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">group</span><span class="o">.</span><span class="n">plan</span><span class="p">()</span>
+            <span class="k">if</span> <span class="n">plan_result</span><span class="p">[</span><span class="mi">0</span><span class="p">]:</span>
+                <span class="n">execution_plan</span><span class="p">[</span><span class="mi">0</span><span class="p">]</span> <span class="o">=</span> <span class="n">plan_result</span><span class="p">[</span><span class="mi">1</span><span class="p">]</span>
+            <span class="k">else</span><span class="p">:</span>
+                <span class="k">raise</span> <span class="ne">Exception</span><span class="p">(</span><span class="s2">&quot;Could not connect execution plan to current start pose!&quot;</span><span class="p">)</span>
+        <span class="k">return</span> <span class="n">execution_plan</span></div>
+
+<div class="viewcode-block" id="TrajectoryManager.store_execution_plan"><a class="viewcode-back" href="../../module_trajectory_manager.html#agiprobot_measurement.trajectory_manager.TrajectoryManager.store_execution_plan">[docs]</a>    <span class="k">def</span> <span class="nf">store_execution_plan</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">file_path</span><span class="p">,</span> <span class="n">execution_plan</span><span class="p">,</span> <span class="n">metadata</span><span class="o">=</span><span class="p">{}):</span>
+        <span class="sd">&quot;&quot;&quot;</span>
+<span class="sd">        Stores the provided execution_plan segments (= moveit_msgs/RobotTrajectory) in a yaml-file at the provided file_path formatted so that it can be read in by the class&#39;s &#39;load_execution_plan&#39;-method.</span>
+
+<span class="sd">        :param file_path: Path specifying where to safe the generated file at</span>
+<span class="sd">        :type file_path: str</span>
+<span class="sd">        :param execution_plan: List of path-segments that can be executed consecutively (i.e. joint-values at the last point of any entry = joint-values at the beginning of the next entry).</span>
+<span class="sd">        :type execution_plan: list of moveit_msgs/RobotTrajectory</span>
+<span class="sd">        :param metadata: Dictionary of information about this plan in key-value-fashion (e.g. {&#39;sampling_density&#39;: 0.01, &#39;timestamp&#39;: &#39;12:00, 01.01.2021&#39;, &#39;planning_duration_in_s&#39;:42}&quot;)#</span>
+<span class="sd">        :type metadata: dict</span>
+<span class="sd">        :return: True (always)</span>
+<span class="sd">        :rtype: bool</span>
+<span class="sd">        &quot;&quot;&quot;</span>
+        <span class="k">assert</span> <span class="nb">isinstance</span><span class="p">(</span><span class="n">metadata</span><span class="p">,</span> <span class="nb">dict</span><span class="p">)</span>
+        <span class="k">assert</span> <span class="nb">isinstance</span><span class="p">(</span><span class="n">execution_plan</span><span class="p">,</span> <span class="nb">list</span><span class="p">)</span>
+        <span class="n">plan_to_store</span> <span class="o">=</span> <span class="p">[</span><span class="n">metadata</span><span class="p">]</span>
+        <span class="k">for</span> <span class="n">path_segment</span> <span class="ow">in</span> <span class="n">execution_plan</span><span class="p">:</span>
+            <span class="k">assert</span> <span class="nb">isinstance</span><span class="p">(</span><span class="n">path_segment</span><span class="p">,</span> <span class="n">moveit_msgs</span><span class="o">.</span><span class="n">msg</span><span class="o">.</span><span class="n">RobotTrajectory</span><span class="p">)</span>
+            <span class="n">plan_to_store</span><span class="o">.</span><span class="n">append</span><span class="p">(</span><span class="n">message_converter</span><span class="o">.</span><span class="n">convert_ros_message_to_dictionary</span><span class="p">(</span><span class="n">path_segment</span><span class="p">))</span>
+        <span class="k">with</span> <span class="nb">open</span><span class="p">(</span><span class="n">file_path</span><span class="p">,</span> <span class="s1">&#39;w&#39;</span><span class="p">)</span> <span class="k">as</span> <span class="n">plan_file</span><span class="p">:</span>
+            <span class="n">yaml</span><span class="o">.</span><span class="n">safe_dump</span><span class="p">(</span><span class="n">plan_to_store</span><span class="p">,</span> <span class="n">plan_file</span><span class="p">,</span> <span class="n">default_flow_style</span><span class="o">=</span><span class="kc">False</span><span class="p">)</span>
+        <span class="k">return</span> <span class="kc">True</span></div>
+    
+<div class="viewcode-block" id="TrajectoryManager.convert_viewpointlist_to_execution_plan"><a class="viewcode-back" href="../../module_trajectory_manager.html#agiprobot_measurement.trajectory_manager.TrajectoryManager.convert_viewpointlist_to_execution_plan">[docs]</a>    <span class="k">def</span> <span class="nf">convert_viewpointlist_to_execution_plan</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">viewpointlist</span><span class="p">):</span>
+        <span class="sd">&quot;&quot;&quot;</span>
+<span class="sd">        Convert a list of ViewPoint-objects into a list of moveit_msgs/RobotTrajectory-entries so that the viewpoints can be executed consecutively.</span>
+<span class="sd">        </span>
+<span class="sd">        :param viewpointlist: List of ViewPoint-objects with set trajectories for steering-to-viewpoint and measurement</span>
+<span class="sd">        :type vievlist: list</span>
+<span class="sd">        :returns: List of moveit_msgs/RobotTrajectory with 2 entries per provided ViewPoint-object (first = steering-to-viewpoint-trajectory, second = measurement-trajectory)</span>
+<span class="sd">        :rtype: list</span>
+<span class="sd">        &quot;&quot;&quot;</span>
+        <span class="k">assert</span> <span class="nb">isinstance</span><span class="p">(</span><span class="n">viewpointlist</span><span class="p">,</span> <span class="nb">list</span><span class="p">)</span>
+        <span class="n">execution_plan</span> <span class="o">=</span> <span class="p">[]</span>
+        <span class="k">for</span> <span class="n">viewpoint</span> <span class="ow">in</span> <span class="n">viewpointlist</span><span class="p">:</span>
+            <span class="k">assert</span> <span class="nb">isinstance</span><span class="p">(</span><span class="n">viewpoint</span><span class="p">,</span> <span class="n">ViewPoint</span><span class="p">)</span>
+            <span class="n">execution_plan</span><span class="o">.</span><span class="n">append</span><span class="p">(</span><span class="n">viewpointpoint</span><span class="o">.</span><span class="n">get_trajectory_to_viewpoint</span><span class="p">())</span>
+            <span class="n">execution_plan</span><span class="o">.</span><span class="n">append</span><span class="p">(</span><span class="n">viewpoint</span><span class="o">.</span><span class="n">get_trajectory_for_measurement</span><span class="p">())</span>
+        <span class="k">return</span> <span class="n">execution_plan</span></div>
+
+
+
+    
+<div class="viewcode-block" id="TrajectoryManager.load_target_mesh"><a class="viewcode-back" href="../../module_trajectory_manager.html#agiprobot_measurement.trajectory_manager.TrajectoryManager.load_target_mesh">[docs]</a>    <span class="k">def</span> <span class="nf">load_target_mesh</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">file_name</span><span class="p">,</span> <span class="n">transform</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">eye</span><span class="p">(</span><span class="mi">4</span><span class="p">),</span> <span class="n">add_wbk_mirrors</span><span class="o">=</span><span class="kc">True</span><span class="p">,</span> <span class="n">remove_downside</span><span class="o">=</span><span class="kc">True</span><span class="p">,</span> <span class="n">remove_threshold_angle_deg</span><span class="o">=</span><span class="mi">20</span><span class="p">):</span>
+        <span class="sd">&quot;&quot;&quot;</span>
+<span class="sd">        Loads the mesh-to-measure from file into the instance&#39;s target_mesh-member (to generate and evaluate viewpoint-trajectories) and into</span>
+<span class="sd">        MoveIt (for collision-prevention). To move the mesh into a feasible measurement-pose, a transform may be applied to set the mesh&#39;s</span>
+<span class="sd">        reference frame specified in CAD with respect to the &#39;world&#39; frame</span>
+
+<span class="sd">        :param file_name: Where the target_mesh&#39;s CAD file is located (should be given starting at root-level: &#39;/X/Y/...&#39;)</span>
+<span class="sd">        :type file_name: str</span>
+<span class="sd">        :param transform: Homogeneous 4x4-matrix to move the mesh into the desired pose with translation in mm, defaults to identity-matrix</span>
+<span class="sd">        :type transform: numpy.array, optional</span>
+<span class="sd">        :param add_wbk_mirrors: Adds hard-coded collision objects to MoveIt as the robot station at the institute is placed besides 2 fragile mirrors, defaults to True</span>
+<span class="sd">        :type add_wbk_mirrors: bool, optional</span>
+<span class="sd">        :return: Whether all operations (esp. loading from file into trimesh and MoveIt) were successful</span>
+<span class="sd">        :rtype: bool</span>
+<span class="sd">        &quot;&quot;&quot;</span>
+        <span class="c1"># Load mesh via trimesh to class member for further processing</span>
+        <span class="k">try</span><span class="p">:</span>
+            <span class="bp">self</span><span class="o">.</span><span class="n">target_mesh</span> <span class="o">=</span> <span class="n">trimesh</span><span class="o">.</span><span class="n">load_mesh</span><span class="p">(</span><span class="n">file_name</span><span class="p">)</span>
+        <span class="k">except</span><span class="p">:</span>
+            <span class="n">rospy</span><span class="o">.</span><span class="n">logerr</span><span class="p">(</span><span class="s2">&quot;Trimesh could not load mesh </span><span class="si">{}</span><span class="s2">&quot;</span><span class="o">.</span><span class="n">format</span><span class="p">(</span><span class="n">file_name</span><span class="p">))</span>
+            <span class="k">return</span> <span class="kc">False</span>
+        
+        <span class="bp">self</span><span class="o">.</span><span class="n">target_mesh_transform</span> <span class="o">=</span> <span class="n">transform</span>
+        
+        <span class="c1"># Move the mesh&#39;s origin (usually identically with the origin of the provided CAD-file)</span>
+        <span class="c1"># to where it is mounted with respect to the &quot;world&quot;-frame of MoveIt</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">target_mesh</span><span class="o">.</span><span class="n">apply_transform</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">target_mesh_transform</span><span class="p">)</span>
+
+        <span class="c1"># If specified, remove the downside faces of the CAD-Model (this is where the fixture is located)</span>
+        <span class="k">if</span> <span class="n">remove_downside</span><span class="p">:</span>
+            <span class="n">comp</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">cos</span><span class="p">(</span><span class="n">np</span><span class="o">.</span><span class="n">deg2rad</span><span class="p">(</span><span class="n">remove_threshold_angle_deg</span><span class="p">))</span>
+            <span class="n">mask</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">array</span><span class="p">([</span><span class="o">-</span><span class="bp">self</span><span class="o">.</span><span class="n">target_mesh</span><span class="o">.</span><span class="n">face_normals</span><span class="p">[</span><span class="n">i</span><span class="p">][</span><span class="mi">2</span><span class="p">]</span> <span class="o">&lt;</span> <span class="n">comp</span> <span class="k">for</span> <span class="n">i</span> <span class="ow">in</span> <span class="nb">range</span><span class="p">(</span><span class="nb">len</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">target_mesh</span><span class="o">.</span><span class="n">faces</span><span class="p">))])</span>
+            <span class="bp">self</span><span class="o">.</span><span class="n">target_mesh</span><span class="o">.</span><span class="n">update_faces</span><span class="p">(</span><span class="n">mask</span><span class="p">)</span>        
+
+        <span class="c1"># Add mesh to MoveIt so that it will be considered as a collision object during planning</span>
+        <span class="c1"># (here, the given transform also needs to be applied via a ROS-pose-message)</span>
+        <span class="n">target_mesh_pose_stamped</span> <span class="o">=</span> <span class="n">geometry_msgs</span><span class="o">.</span><span class="n">msg</span><span class="o">.</span><span class="n">PoseStamped</span><span class="p">()</span>
+        <span class="n">q</span> <span class="o">=</span> <span class="n">trimesh</span><span class="o">.</span><span class="n">transformations</span><span class="o">.</span><span class="n">quaternion_from_matrix</span><span class="p">(</span><span class="n">transform</span><span class="p">)</span>
+        <span class="n">target_mesh_pose_stamped</span><span class="o">.</span><span class="n">pose</span><span class="o">.</span><span class="n">orientation</span><span class="o">.</span><span class="n">w</span> <span class="o">=</span> <span class="n">q</span><span class="p">[</span><span class="mi">0</span><span class="p">]</span>
+        <span class="n">target_mesh_pose_stamped</span><span class="o">.</span><span class="n">pose</span><span class="o">.</span><span class="n">orientation</span><span class="o">.</span><span class="n">x</span> <span class="o">=</span> <span class="n">q</span><span class="p">[</span><span class="mi">1</span><span class="p">]</span>
+        <span class="n">target_mesh_pose_stamped</span><span class="o">.</span><span class="n">pose</span><span class="o">.</span><span class="n">orientation</span><span class="o">.</span><span class="n">y</span> <span class="o">=</span> <span class="n">q</span><span class="p">[</span><span class="mi">2</span><span class="p">]</span>
+        <span class="n">target_mesh_pose_stamped</span><span class="o">.</span><span class="n">pose</span><span class="o">.</span><span class="n">orientation</span><span class="o">.</span><span class="n">z</span> <span class="o">=</span> <span class="n">q</span><span class="p">[</span><span class="mi">3</span><span class="p">]</span>
+        <span class="n">target_mesh_pose_stamped</span><span class="o">.</span><span class="n">pose</span><span class="o">.</span><span class="n">position</span> <span class="o">=</span> <span class="n">geometry_msgs</span><span class="o">.</span><span class="n">msg</span><span class="o">.</span><span class="n">Point</span><span class="p">(</span><span class="o">*</span><span class="p">(</span><span class="n">trimesh</span><span class="o">.</span><span class="n">transformations</span><span class="o">.</span><span class="n">translation_from_matrix</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">target_mesh_transform</span><span class="p">)</span> <span class="o">/</span> <span class="mi">1000</span><span class="p">))</span>
+        <span class="n">target_mesh_pose_stamped</span><span class="o">.</span><span class="n">header</span><span class="o">.</span><span class="n">frame_id</span> <span class="o">=</span> <span class="s2">&quot;world&quot;</span>
+        
+        <span class="k">try</span><span class="p">:</span>
+            <span class="c1"># Reduce size as meshes used here a specified in millimeters whereas MoveIt interprets them as meters</span>
+            <span class="bp">self</span><span class="o">.</span><span class="n">scene</span><span class="o">.</span><span class="n">add_mesh</span><span class="p">(</span><span class="s2">&quot;target&quot;</span><span class="p">,</span> <span class="n">target_mesh_pose_stamped</span><span class="p">,</span> <span class="n">file_name</span><span class="p">,</span> <span class="n">size</span><span class="o">=</span><span class="p">(</span><span class="mf">1e-3</span><span class="p">,</span> <span class="mf">1e-3</span><span class="p">,</span> <span class="mf">1e-3</span><span class="p">))</span>
+            <span class="k">pass</span>
+        <span class="k">except</span><span class="p">:</span>
+            <span class="c1"># add_mesh has troubles with &quot;non-root&quot; filenames (e.g. ~/cadfiles/target.stl)</span>
+            <span class="n">rospy</span><span class="o">.</span><span class="n">logerr</span><span class="p">(</span><span class="s2">&quot;Moveit could not load mesh </span><span class="si">{}</span><span class="s2">.</span><span class="se">\n</span><span class="s2">Have you tried specifying it with a file path starting at root /...?&quot;</span><span class="o">.</span><span class="n">format</span><span class="p">(</span><span class="n">file_name</span><span class="p">))</span>
+            <span class="k">return</span> <span class="kc">False</span>
+
+        <span class="k">if</span> <span class="n">add_wbk_mirrors</span><span class="p">:</span>
+            <span class="c1"># Add collision objects representing the mirrors beside the robot at the institute to MoveIt</span>
+            <span class="n">box_pose</span> <span class="o">=</span> <span class="n">geometry_msgs</span><span class="o">.</span><span class="n">msg</span><span class="o">.</span><span class="n">PoseStamped</span><span class="p">()</span>
+            <span class="n">box_pose</span><span class="o">.</span><span class="n">header</span><span class="o">.</span><span class="n">frame_id</span> <span class="o">=</span> <span class="s2">&quot;world&quot;</span>
+            <span class="n">box_pose</span><span class="o">.</span><span class="n">pose</span><span class="o">.</span><span class="n">orientation</span><span class="o">.</span><span class="n">w</span> <span class="o">=</span> <span class="mf">1.0</span>
+            <span class="n">box_pose</span><span class="o">.</span><span class="n">pose</span><span class="o">.</span><span class="n">position</span><span class="o">.</span><span class="n">x</span> <span class="o">=</span> <span class="mi">2</span>
+            <span class="n">box_pose</span><span class="o">.</span><span class="n">pose</span><span class="o">.</span><span class="n">position</span><span class="o">.</span><span class="n">y</span> <span class="o">=</span> <span class="mi">0</span>
+            <span class="n">box_pose</span><span class="o">.</span><span class="n">pose</span><span class="o">.</span><span class="n">position</span><span class="o">.</span><span class="n">z</span> <span class="o">=</span> <span class="mf">1.5</span>
+            <span class="bp">self</span><span class="o">.</span><span class="n">scene</span><span class="o">.</span><span class="n">add_box</span><span class="p">(</span><span class="s2">&quot;mirror1&quot;</span><span class="p">,</span> <span class="n">box_pose</span><span class="p">,</span> <span class="p">(</span><span class="mf">0.1</span><span class="p">,</span> <span class="mf">1.9</span><span class="p">,</span> <span class="mi">3</span><span class="p">))</span>
+            <span class="n">box_pose</span><span class="o">.</span><span class="n">pose</span><span class="o">.</span><span class="n">position</span><span class="o">.</span><span class="n">x</span> <span class="o">=</span> <span class="mi">1</span>
+            <span class="n">box_pose</span><span class="o">.</span><span class="n">pose</span><span class="o">.</span><span class="n">position</span><span class="o">.</span><span class="n">y</span> <span class="o">=</span> <span class="mi">1</span>
+            <span class="n">box_pose</span><span class="o">.</span><span class="n">pose</span><span class="o">.</span><span class="n">position</span><span class="o">.</span><span class="n">z</span> <span class="o">=</span> <span class="mf">1.5</span>
+            <span class="bp">self</span><span class="o">.</span><span class="n">scene</span><span class="o">.</span><span class="n">add_box</span><span class="p">(</span><span class="s2">&quot;mirror2&quot;</span><span class="p">,</span> <span class="n">box_pose</span><span class="p">,</span> <span class="n">size</span><span class="o">=</span><span class="p">(</span><span class="mi">2</span><span class="p">,</span> <span class="mf">0.1</span><span class="p">,</span> <span class="mi">3</span><span class="p">))</span>
+        <span class="k">return</span> <span class="kc">True</span></div>
+
+<div class="viewcode-block" id="TrajectoryManager.generate_samples_and_viewpoints"><a class="viewcode-back" href="../../module_trajectory_manager.html#agiprobot_measurement.trajectory_manager.TrajectoryManager.generate_samples_and_viewpoints">[docs]</a>    <span class="k">def</span> <span class="nf">generate_samples_and_viewpoints</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">sampling_density</span><span class="p">,</span> <span class="n">uncertainty_threshold</span><span class="p">,</span> <span class="n">orientations_around_boresight</span><span class="p">,</span> <span class="n">viewpoint_tilt_mode</span><span class="o">=</span><span class="s2">&quot;full&quot;</span><span class="p">,</span> <span class="n">plan_path_to_check_reachability</span> <span class="o">=</span> <span class="kc">False</span><span class="p">,</span> <span class="n">minimum_trajectory_length</span> <span class="o">=</span> <span class="mi">25</span><span class="p">,</span> <span class="n">trajectory_sample_step</span> <span class="o">=</span> <span class="mi">2</span><span class="p">):</span>
+        <span class="sd">&quot;&quot;&quot;</span>
+<span class="sd">        Samples the mesh&#39;s surface into discrete points, generates viewpoints for each sample and processes these viewpoints metrologically and mechanically.</span>
+<span class="sd">        Only viewpoints that do meet the contraints specified in the method&#39;s parameters and in MoveIt (collision, reachability, ...) will be returned. This method allows to generate</span>
+<span class="sd">        multiple ViewPoint-objects for a single surface-point by varying the anchor-pose (the boresight is always focused on the corresponding surface_point).</span>
+
+<span class="sd">        :param sampling_density: Density of sampling to generate the points for measurement-calculations and viewpoint-generation in points per mm^2</span>
+<span class="sd">        :type sampling_density: float</span>
+<span class="sd">        :param orientations_around_boresight: Number of orientations around the sensor&#39;s boresight to be considered per sampled_surface_point</span>
+<span class="sd">        :type orientations_around_boresight: int</span>
+<span class="sd">        :param viewpoint_tilt_mode: For each orientation, deviate the psi- and theta-values of the viewpoint-anchor-pose slightly from the optimum according to (one deviation-step per angle and orientation available right now):\n</span>
+<span class="sd">            - &quot;none&quot;: Do not perform any tilting.\n</span>
+<span class="sd">            - &quot;limited&quot;: When the optimal angle-configuration did not work, try deviations and stop after finding the first valid solution.\n</span>
+<span class="sd">            - &quot;full&quot;: Calculation for every possible angle-calculation. Every boresight orientation has 9 sub-viewpoints.</span>
+<span class="sd">            , defaults to &quot;full&quot;</span>
+<span class="sd">        :type viewpoint_tilt_mode: str, optional</span>
+<span class="sd">        :param plan_path_to_check_reachability: Do not use one inverse-kinematics-request to check viewpoint-reachability but try to create complete plan from the current-state to the viewpoint&#39;s anchor-pose, defaults to False</span>
+<span class="sd">        :type plan_path_to_check_reachability: bool, optional</span>
+<span class="sd">        :param minimum_trajectory_length: Minimum length a generated trajectory has to have so that it is accepted in mm, defaults to 50</span>
+<span class="sd">        :type minimum_trajectory_length: float, optional</span>
+<span class="sd">        :param trajectory_sample_step: Euclidian distance between 2 trajectory-points in cartesian sapce in mm, defaults to 2</span>
+<span class="sd">        :type trajectory_sample_step: float, optional</span>
+<span class="sd">        :return: 2 lists with the first containing all sampled_surface_points and the second containing all viewpoints that were processed successfully</span>
+<span class="sd">        :rtype: list[numpy.array], list[ViewPoint]</span>
+<span class="sd">        &quot;&quot;&quot;</span>
+        <span class="c1"># Sample points on the target mesh&#39;s surface based on the given density through rejection sampling</span>
+        <span class="n">sampled_surface_points</span><span class="p">,</span> <span class="n">sampled_face_indices</span> <span class="o">=</span> <span class="n">trimesh</span><span class="o">.</span><span class="n">sample</span><span class="o">.</span><span class="n">sample_surface_even</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">target_mesh</span><span class="p">,</span> <span class="nb">int</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">target_mesh</span><span class="o">.</span><span class="n">area</span> <span class="o">*</span> <span class="n">sampling_density</span><span class="p">))</span>
+        <span class="nb">print</span><span class="p">(</span><span class="s2">&quot;Sampled target mesh&#39;s surface into </span><span class="si">{}</span><span class="s2"> surface points&quot;</span><span class="o">.</span><span class="n">format</span><span class="p">(</span><span class="nb">len</span><span class="p">(</span><span class="n">sampled_surface_points</span><span class="p">)))</span>
+        
+       
+        <span class="n">orientations_around_boresight</span>
+        <span class="nb">print</span><span class="p">(</span><span class="n">orientations_around_boresight</span><span class="p">)</span>
+        
+
+        <span class="c1"># Use the sampling results to set the processing context of the sensor model</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">sensor_model</span><span class="o">.</span><span class="n">set_processing_context</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">target_mesh</span><span class="p">,</span> <span class="n">sampled_surface_points</span><span class="p">,</span> <span class="n">sampled_face_indices</span><span class="p">)</span>
+        <span class="c1"># Very conservative limit of the maximum length in and againts trajectory_direction of </span>
+        <span class="c1"># the each viewpoint&#39;s measurement-trajectory so that the target-object is covered for sure</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">max_edge</span> <span class="o">=</span> <span class="nb">max</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">target_mesh</span><span class="o">.</span><span class="n">bounding_box_oriented</span><span class="o">.</span><span class="n">edges_unique_length</span><span class="p">)</span>
+
+        <span class="c1"># Publish the sampled_surface_points via ROS so that they can be visualized in RVIZ for user feedback</span>
+        <span class="n">pub</span> <span class="o">=</span> <span class="n">rospy</span><span class="o">.</span><span class="n">Publisher</span><span class="p">(</span><span class="s2">&quot;sampled_surface_points&quot;</span><span class="p">,</span> <span class="n">sensor_msgs</span><span class="o">.</span><span class="n">msg</span><span class="o">.</span><span class="n">PointCloud</span><span class="p">,</span> <span class="n">latch</span><span class="o">=</span><span class="kc">True</span><span class="p">,</span> <span class="n">queue_size</span><span class="o">=</span><span class="mi">1</span><span class="p">)</span>
+        <span class="n">surface_points_message</span> <span class="o">=</span> <span class="n">sensor_msgs</span><span class="o">.</span><span class="n">msg</span><span class="o">.</span><span class="n">PointCloud</span><span class="p">()</span>
+        <span class="n">surface_points_message</span><span class="o">.</span><span class="n">header</span><span class="o">.</span><span class="n">frame_id</span> <span class="o">=</span> <span class="s2">&quot;world&quot;</span>
+        <span class="k">for</span> <span class="n">surface_point</span> <span class="ow">in</span> <span class="n">sampled_surface_points</span><span class="p">:</span>
+            <span class="n">surface_points_message</span><span class="o">.</span><span class="n">points</span><span class="o">.</span><span class="n">append</span><span class="p">(</span><span class="n">geometry_msgs</span><span class="o">.</span><span class="n">msg</span><span class="o">.</span><span class="n">Point</span><span class="p">(</span><span class="o">*</span><span class="p">(</span><span class="n">surface_point</span> <span class="o">/</span> <span class="mi">1000</span><span class="p">)))</span>
+        <span class="n">pub</span><span class="o">.</span><span class="n">publish</span><span class="p">(</span><span class="n">surface_points_message</span><span class="p">)</span>
+
+        
+        
+        <span class="c1"># How much a trajctory has to be longer than the maximum defliction to reliably scan the object (as sampled_surface_points are most likely not on edges).</span>
+        <span class="c1"># Estimated as circle radius according to density + safety offset.</span>
+        <span class="n">minimum_required_overmeasure</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">sqrt</span><span class="p">(</span><span class="mi">1</span> <span class="o">/</span> <span class="p">(</span><span class="n">np</span><span class="o">.</span><span class="n">pi</span> <span class="o">*</span> <span class="n">sampling_density</span><span class="p">))</span> <span class="o">+</span> <span class="mi">5</span>
+        
+        
+        <span class="k">if</span> <span class="n">plan_path_to_check_reachability</span><span class="p">:</span>
+            <span class="c1"># Reduce planning time so that reachablity checks do not take too much time</span>
+            <span class="bp">self</span><span class="o">.</span><span class="n">group</span><span class="o">.</span><span class="n">set_planning_time</span><span class="p">(</span><span class="mf">0.05</span><span class="p">)</span>
+            <span class="n">ik_service</span> <span class="o">=</span> <span class="kc">None</span> 
+        <span class="k">else</span><span class="p">:</span> 
+            <span class="c1"># Enable persistent inverse-kinematics-service to time-efficiently compute joint-values of cartesian poses</span>
+            <span class="n">ik_service</span> <span class="o">=</span> <span class="n">rospy</span><span class="o">.</span><span class="n">ServiceProxy</span><span class="p">(</span><span class="s2">&quot;/compute_ik&quot;</span><span class="p">,</span> <span class="n">GetPositionIK</span><span class="p">,</span> <span class="n">persistent</span><span class="o">=</span><span class="kc">True</span><span class="p">)</span>
+        
+        <span class="c1"># Set variables to organize the iteration</span>
+        <span class="n">valid_viewpoints</span> <span class="o">=</span> <span class="p">[]</span>
+        <span class="n">processed</span> <span class="o">=</span> <span class="mi">0</span>
+    
+        <span class="n">START</span> <span class="o">=</span><span class="n">time</span><span class="o">.</span><span class="n">time</span><span class="p">()</span>
+        <span class="c1"># For every sampled_surface_point: Generate viewpoint with anchor_point in normal-direction of the surface-point&#39;s face-triangle.</span>
+        <span class="c1"># Then, rotate the orientation of the viewpoint&#39;s laser_emitter_frame around the z-Axis (= boresight) with respect to the anchor point (-&gt; Changes only orientation).</span>
+        <span class="c1"># If specified, apply tilting to the viewpoint for every orientation, so that the viewpoint&#39;s anchor point is turned around the laser_emitter_frame&#39;s x-/y-axis but </span>
+        <span class="c1"># with respect to the corresponding surface point (-&gt; Changes orientation and position of viewpoint-anchor).</span>
+        <span class="k">for</span> <span class="p">(</span><span class="n">surface_point</span><span class="p">,</span> <span class="n">face_index</span><span class="p">)</span> <span class="ow">in</span> <span class="nb">zip</span><span class="p">(</span><span class="n">sampled_surface_points</span><span class="p">,</span> <span class="n">sampled_face_indices</span><span class="p">):</span>
+            <span class="k">for</span> <span class="n">angle</span> <span class="ow">in</span> <span class="n">np</span><span class="o">.</span><span class="n">linspace</span><span class="p">(</span><span class="mi">0</span><span class="p">,</span> <span class="mi">360</span><span class="p">,</span> <span class="n">orientations_around_boresight</span> <span class="o">+</span> <span class="mi">1</span><span class="p">)[:</span><span class="o">-</span><span class="mi">1</span><span class="p">]:</span>
+                <span class="n">new_viewpoint</span> <span class="o">=</span> <span class="n">ViewPoint</span><span class="p">(</span><span class="n">surface_point</span><span class="p">,</span> <span class="bp">self</span><span class="o">.</span><span class="n">target_mesh</span><span class="o">.</span><span class="n">face_normals</span><span class="p">[</span><span class="n">face_index</span><span class="p">],</span> <span class="n">np</span><span class="o">.</span><span class="n">deg2rad</span><span class="p">(</span><span class="n">angle</span><span class="p">),</span> <span class="bp">self</span><span class="o">.</span><span class="n">sensor_model</span><span class="o">.</span><span class="n">get_optimal_standoff</span><span class="p">())</span>
+                <span class="k">if</span> <span class="n">viewpoint_tilt_mode</span> <span class="o">==</span> <span class="s2">&quot;none&quot;</span><span class="p">:</span>
+                    <span class="k">if</span> <span class="bp">self</span><span class="o">.</span><span class="n">process_viewpoint</span><span class="p">(</span><span class="n">new_viewpoint</span><span class="p">,</span> <span class="n">ik_service</span><span class="p">,</span> <span class="n">uncertainty_threshold</span><span class="p">,</span> <span class="n">minimum_required_overmeasure</span><span class="p">):</span>
+                        <span class="n">valid_viewpoints</span><span class="o">.</span><span class="n">append</span><span class="p">(</span><span class="n">new_viewpoint</span><span class="p">)</span>
+                <span class="k">elif</span> <span class="n">viewpoint_tilt_mode</span> <span class="o">==</span> <span class="s2">&quot;limited&quot;</span><span class="p">:</span>
+                    <span class="c1"># angle_config = tuple describing (tilt around x-axis, tilt around y-axis) from the set of 2-element permutations with repitions of all valid tilt-angles</span>
+                    <span class="k">for</span> <span class="n">angle_config</span> <span class="ow">in</span> <span class="n">itertools</span><span class="o">.</span><span class="n">product</span><span class="p">([</span><span class="mi">0</span><span class="p">,</span> <span class="bp">self</span><span class="o">.</span><span class="n">sensor_model</span><span class="o">.</span><span class="n">get_median_deviation_angle</span><span class="p">(),</span> <span class="o">-</span><span class="mi">1</span> <span class="o">*</span> <span class="bp">self</span><span class="o">.</span><span class="n">sensor_model</span><span class="o">.</span><span class="n">get_median_deviation_angle</span><span class="p">()],</span> <span class="n">repeat</span><span class="o">=</span><span class="mi">2</span><span class="p">):</span>
+                        <span class="n">new_viewpoint</span> <span class="o">=</span> <span class="n">ViewPoint</span><span class="p">(</span><span class="n">surface_point</span><span class="p">,</span> <span class="bp">self</span><span class="o">.</span><span class="n">target_mesh</span><span class="o">.</span><span class="n">face_normals</span><span class="p">[</span><span class="n">face_index</span><span class="p">],</span> <span class="n">np</span><span class="o">.</span><span class="n">deg2rad</span><span class="p">(</span><span class="n">angle</span><span class="p">),</span> <span class="bp">self</span><span class="o">.</span><span class="n">sensor_model</span><span class="o">.</span><span class="n">get_optimal_standoff</span><span class="p">(),</span> <span class="n">angle_config</span><span class="p">[</span><span class="mi">0</span><span class="p">],</span> <span class="n">angle_config</span><span class="p">[</span><span class="mi">1</span><span class="p">])</span>
+                        <span class="c1"># When valid viewpoint could be obtained through tilting -&gt; Continue to next orientation</span>
+                        <span class="k">if</span> <span class="bp">self</span><span class="o">.</span><span class="n">process_viewpoint</span><span class="p">(</span><span class="n">new_viewpoint</span><span class="p">,</span> <span class="n">ik_service</span><span class="p">,</span> <span class="n">uncertainty_threshold</span><span class="p">,</span> <span class="n">minimum_required_overmeasure</span><span class="p">):</span>
+                            <span class="n">valid_viewpoints</span><span class="o">.</span><span class="n">append</span><span class="p">(</span><span class="n">new_viewpoint</span><span class="p">)</span>
+                            <span class="k">break</span>
+                <span class="k">elif</span> <span class="n">viewpoint_tilt_mode</span> <span class="o">==</span> <span class="s2">&quot;full&quot;</span><span class="p">:</span>
+                    <span class="c1"># angle_config = tuple describing (tilt around x-axis, tilt around y-axis) from the set of 2-element permutations with repitions of all valid tilt-angles</span>
+                    <span class="k">for</span> <span class="n">angle_config</span> <span class="ow">in</span> <span class="n">itertools</span><span class="o">.</span><span class="n">product</span><span class="p">([</span><span class="mi">0</span><span class="p">,</span> <span class="bp">self</span><span class="o">.</span><span class="n">sensor_model</span><span class="o">.</span><span class="n">get_median_deviation_angle</span><span class="p">(),</span> <span class="o">-</span><span class="mi">1</span> <span class="o">*</span> <span class="bp">self</span><span class="o">.</span><span class="n">sensor_model</span><span class="o">.</span><span class="n">get_median_deviation_angle</span><span class="p">()],</span> <span class="n">repeat</span><span class="o">=</span><span class="mi">2</span><span class="p">):</span>
+                        <span class="n">new_viewpoint</span> <span class="o">=</span> <span class="n">ViewPoint</span><span class="p">(</span><span class="n">surface_point</span><span class="p">,</span> <span class="bp">self</span><span class="o">.</span><span class="n">target_mesh</span><span class="o">.</span><span class="n">face_normals</span><span class="p">[</span><span class="n">face_index</span><span class="p">],</span> <span class="n">np</span><span class="o">.</span><span class="n">deg2rad</span><span class="p">(</span><span class="n">angle</span><span class="p">),</span> <span class="bp">self</span><span class="o">.</span><span class="n">sensor_model</span><span class="o">.</span><span class="n">get_optimal_standoff</span><span class="p">(),</span> <span class="n">angle_config</span><span class="p">[</span><span class="mi">0</span><span class="p">],</span> <span class="n">angle_config</span><span class="p">[</span><span class="mi">1</span><span class="p">])</span>
+                        <span class="k">if</span> <span class="bp">self</span><span class="o">.</span><span class="n">process_viewpoint</span><span class="p">(</span><span class="n">new_viewpoint</span><span class="p">,</span> <span class="n">ik_service</span><span class="p">,</span> <span class="n">uncertainty_threshold</span><span class="p">,</span> <span class="n">minimum_required_overmeasure</span><span class="p">):</span>
+                            <span class="n">valid_viewpoints</span><span class="o">.</span><span class="n">append</span><span class="p">(</span><span class="n">new_viewpoint</span><span class="p">)</span>
+                <span class="k">else</span><span class="p">:</span>
+                    <span class="k">raise</span> <span class="ne">ValueError</span><span class="p">(</span><span class="s2">&quot;viewpoint_tilt_mode has to be &#39;none&#39;, &#39;limited&#39; or &#39;full&#39;. You entered: &#39;</span><span class="si">{}</span><span class="s2">&#39;&quot;</span><span class="o">.</span><span class="n">format</span><span class="p">(</span><span class="n">viewpoint_tilt_mode</span><span class="p">))</span>
+                <span class="n">processed</span> <span class="o">+=</span> <span class="mi">1</span>
+                <span class="nb">print</span><span class="p">(</span><span class="s2">&quot;Processed viewpoint </span><span class="si">{}</span><span class="s2"> of </span><span class="si">{}</span><span class="s2"> (</span><span class="si">{}</span><span class="s2"> %, </span><span class="si">{}</span><span class="s2"> of them are usable for measurement)&quot;</span><span class="o">.</span><span class="n">format</span><span class="p">(</span>
+                    <span class="n">processed</span><span class="p">,</span> 
+                    <span class="nb">len</span><span class="p">(</span><span class="n">sampled_surface_points</span><span class="p">)</span> <span class="o">*</span> <span class="n">orientations_around_boresight</span><span class="p">,</span> 
+                    <span class="n">np</span><span class="o">.</span><span class="n">round</span><span class="p">(</span><span class="mf">100.0</span> <span class="o">*</span> <span class="n">processed</span> <span class="o">/</span> <span class="p">(</span><span class="nb">len</span><span class="p">(</span><span class="n">sampled_surface_points</span><span class="p">)</span> <span class="o">*</span> <span class="n">orientations_around_boresight</span><span class="p">),</span> <span class="mi">2</span><span class="p">),</span>
+                    <span class="nb">len</span><span class="p">(</span><span class="n">valid_viewpoints</span><span class="p">)</span>
+                <span class="p">))</span>
+                
+        <span class="c1"># Because the service was created &quot;persistent&quot;, it must be closed properly</span>
+        <span class="k">if</span> <span class="ow">not</span> <span class="n">plan_path_to_check_reachability</span><span class="p">:</span>
+            <span class="n">ik_service</span><span class="o">.</span><span class="n">close</span><span class="p">()</span>
+
+        <span class="nb">print</span><span class="p">(</span><span class="s2">&quot;</span><span class="se">\n</span><span class="s2">&quot;</span> <span class="o">+</span> <span class="s2">&quot;*&quot;</span> <span class="o">*</span> <span class="mi">20</span> <span class="o">+</span> <span class="s2">&quot;</span><span class="se">\n</span><span class="s2">Generated </span><span class="si">{}</span><span class="s2"> valid viewpoints with fully evaluated measurement-trajectory/-ies&quot;</span><span class="o">.</span><span class="n">format</span><span class="p">(</span><span class="nb">len</span><span class="p">(</span><span class="n">valid_viewpoints</span><span class="p">)))</span>
+        <span class="nb">print</span><span class="p">(</span><span class="s2">&quot;DURATION WAS &quot;</span><span class="p">,</span> <span class="n">time</span><span class="o">.</span><span class="n">time</span><span class="p">()</span> <span class="o">-</span> <span class="n">START</span><span class="p">)</span>
+        <span class="k">return</span> <span class="n">sampled_surface_points</span><span class="p">,</span> <span class="n">valid_viewpoints</span></div>
+
+
+<div class="viewcode-block" id="TrajectoryManager.process_viewpoint"><a class="viewcode-back" href="../../module_trajectory_manager.html#agiprobot_measurement.trajectory_manager.TrajectoryManager.process_viewpoint">[docs]</a>    <span class="k">def</span> <span class="nf">process_viewpoint</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">viewpoint</span><span class="p">,</span> <span class="n">ik_service</span><span class="p">,</span> <span class="n">uncertainty_threshold</span><span class="p">,</span> <span class="n">minimum_required_overmeasure</span> <span class="o">=</span> <span class="mi">5</span><span class="p">,</span> <span class="n">trajectory_sample_step</span> <span class="o">=</span> <span class="mi">2</span><span class="p">,</span> <span class="n">joint_jump_threshold</span> <span class="o">=</span> <span class="mf">1.5</span><span class="p">,</span> <span class="n">minimum_trajectory_length</span> <span class="o">=</span> <span class="mi">50</span><span class="p">):</span>
+        <span class="sd">&quot;&quot;&quot;</span>
+<span class="sd">        Processes a single viewpoint entirely. Starting on a simple reachability-analysis of the anchor-pose, a metrological evaluation is performed using the sensor_model to</span>
+<span class="sd">        reviewpoint the measurement-gain this viewpoint can contribute in theory. Then, the actual meausrement-trajectories are calculated and examined regarding the</span>
+<span class="sd">        provided contraints. In the end, the processing-result (trajectory and metrological values) are stored in the viewpoint object</span>
+
+<span class="sd">        :param viewpoint: ViewPoint to be processed (if processing was successful, members of this viewpoint-object will be changed)</span>
+<span class="sd">        :type viewpoint: ViewPoint</span>
+<span class="sd">        :param ik_service: ROS-Serviceproxy that can resolve inverse-kinematics via moveit_msgs/GetPositionIK </span>
+<span class="sd">        :type ik_service: rospy.ServiceProxy</span>
+<span class="sd">        :param minimum_required_overmeasure: How much to add to the trajectory in trajectory-direction in mm after the last measurable sample_point is measured (as samples usually do not occur exactly at edges), defaults to 5</span>
+<span class="sd">        :type minimum_required_overmeasure: float, optional</span>
+<span class="sd">        :param trajectory_sample_step: Euclidian distance between 2 trajectory-points in cartesian sapce in mm, defaults to 2</span>
+<span class="sd">        :type trajectory_sample_step: float, optional</span>
+<span class="sd">        :param joint_jump_threshold: Maximum change in joint values allowed between 2 trajectory-points in rad (since all joints are revolute), defaults to 1.5</span>
+<span class="sd">        :type joint_jump_threshold: float, optional</span>
+<span class="sd">        :param minimum_trajectory_length: Minimum length a generated trajectory has to have so that it is accepted in mm, defaults to 50</span>
+<span class="sd">        :type minimum_trajectory_length: float, optional</span>
+<span class="sd">        :return: Boolean value that is true, if the viewpoint could be processed and all contraints were met, and false otherwise</span>
+<span class="sd">        :rtype: bool</span>
+<span class="sd">        &quot;&quot;&quot;</span>
+
+        <span class="k">assert</span> <span class="nb">isinstance</span><span class="p">(</span><span class="n">viewpoint</span><span class="p">,</span> <span class="n">ViewPoint</span><span class="p">)</span>
+        
+
+        <span class="c1"># Build a mathematical model of the trajectory (= straight line)</span>
+        <span class="n">trajectory_origin</span> <span class="o">=</span> <span class="n">viewpoint</span><span class="o">.</span><span class="n">get_anchor_position</span><span class="p">()</span>
+        <span class="c1"># The scanner moves along the x-axis of the laser_emitter_frame</span>
+        <span class="n">trajectory_direction</span> <span class="o">=</span> <span class="n">viewpoint</span><span class="o">.</span><span class="n">get_orientation_matrix</span><span class="p">()</span><span class="o">.</span><span class="n">dot</span><span class="p">([</span><span class="mi">1</span><span class="p">,</span> <span class="mi">0</span><span class="p">,</span> <span class="mi">0</span><span class="p">,</span> <span class="mi">1</span><span class="p">])[</span><span class="mi">0</span><span class="p">:</span><span class="mi">3</span><span class="p">]</span>
+
+        <span class="c1"># Implementation of a line equation (t is in mm, but result is in m)</span>
+        <span class="n">trajectory_in_m</span> <span class="o">=</span> <span class="k">lambda</span> <span class="n">t</span><span class="p">:</span> <span class="p">(</span><span class="n">trajectory_origin</span> <span class="o">+</span> <span class="n">trajectory_direction</span> <span class="o">*</span> <span class="n">t</span><span class="p">)</span> <span class="o">/</span> <span class="mi">1000</span>
+        
+        <span class="c1"># Check if anchor of viewpoint is reachable</span>
+
+        <span class="n">q</span> <span class="o">=</span> <span class="n">trimesh</span><span class="o">.</span><span class="n">transformations</span><span class="o">.</span><span class="n">quaternion_from_matrix</span><span class="p">(</span><span class="n">viewpoint</span><span class="o">.</span><span class="n">get_orientation_matrix</span><span class="p">())</span>
+        <span class="n">viewpoint_anchor_pose</span> <span class="o">=</span> <span class="n">geometry_msgs</span><span class="o">.</span><span class="n">msg</span><span class="o">.</span><span class="n">PoseStamped</span><span class="p">()</span>
+        <span class="n">viewpoint_anchor_pose</span><span class="o">.</span><span class="n">pose</span><span class="o">.</span><span class="n">orientation</span><span class="o">.</span><span class="n">w</span> <span class="o">=</span> <span class="n">q</span><span class="p">[</span><span class="mi">0</span><span class="p">]</span>
+        <span class="n">viewpoint_anchor_pose</span><span class="o">.</span><span class="n">pose</span><span class="o">.</span><span class="n">orientation</span><span class="o">.</span><span class="n">x</span> <span class="o">=</span> <span class="n">q</span><span class="p">[</span><span class="mi">1</span><span class="p">]</span>
+        <span class="n">viewpoint_anchor_pose</span><span class="o">.</span><span class="n">pose</span><span class="o">.</span><span class="n">orientation</span><span class="o">.</span><span class="n">y</span> <span class="o">=</span> <span class="n">q</span><span class="p">[</span><span class="mi">2</span><span class="p">]</span>
+        <span class="n">viewpoint_anchor_pose</span><span class="o">.</span><span class="n">pose</span><span class="o">.</span><span class="n">orientation</span><span class="o">.</span><span class="n">z</span> <span class="o">=</span> <span class="n">q</span><span class="p">[</span><span class="mi">3</span><span class="p">]</span>
+        <span class="n">viewpoint_anchor_pose</span><span class="o">.</span><span class="n">header</span><span class="o">.</span><span class="n">frame_id</span> <span class="o">=</span> <span class="s2">&quot;world&quot;</span>
+        <span class="n">viewpoint_anchor_pose</span><span class="o">.</span><span class="n">pose</span><span class="o">.</span><span class="n">position</span><span class="o">.</span><span class="n">x</span> <span class="o">=</span> <span class="n">trajectory_in_m</span><span class="p">(</span><span class="mi">0</span><span class="p">)[</span><span class="mi">0</span><span class="p">]</span>
+        <span class="n">viewpoint_anchor_pose</span><span class="o">.</span><span class="n">pose</span><span class="o">.</span><span class="n">position</span><span class="o">.</span><span class="n">y</span> <span class="o">=</span> <span class="n">trajectory_in_m</span><span class="p">(</span><span class="mi">0</span><span class="p">)[</span><span class="mi">1</span><span class="p">]</span>
+        <span class="n">viewpoint_anchor_pose</span><span class="o">.</span><span class="n">pose</span><span class="o">.</span><span class="n">position</span><span class="o">.</span><span class="n">z</span> <span class="o">=</span> <span class="n">trajectory_in_m</span><span class="p">(</span><span class="mi">0</span><span class="p">)[</span><span class="mi">2</span><span class="p">]</span>
+        <span class="k">if</span> <span class="n">ik_service</span> <span class="ow">is</span> <span class="kc">None</span><span class="p">:</span>
+            <span class="bp">self</span><span class="o">.</span><span class="n">group</span><span class="o">.</span><span class="n">set_start_state_to_current_state</span><span class="p">()</span>
+            <span class="bp">self</span><span class="o">.</span><span class="n">group</span><span class="o">.</span><span class="n">set_pose_target</span><span class="p">(</span><span class="n">viewpoint_anchor_pose</span><span class="p">)</span>
+            <span class="n">initial_plan</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">group</span><span class="o">.</span><span class="n">plan</span><span class="p">()</span>
+            <span class="k">if</span> <span class="ow">not</span> <span class="n">initial_plan</span><span class="p">[</span><span class="mi">0</span><span class="p">]:</span>
+                <span class="k">return</span> <span class="kc">False</span>
+            <span class="c1"># Use final joint-values (= joint values, where the sensor&#39;s frame is in the viewpointpoint)</span>
+            <span class="c1"># as planning-start-point for the trajectory calculations</span>
+            <span class="n">viewpoint_anchor_state</span> <span class="o">=</span> <span class="n">moveit_msgs</span><span class="o">.</span><span class="n">msg</span><span class="o">.</span><span class="n">RobotState</span><span class="p">()</span>
+            <span class="n">viewpoint_anchor_state</span><span class="o">.</span><span class="n">joint_state</span><span class="o">.</span><span class="n">position</span> <span class="o">=</span> <span class="n">initial_plan</span><span class="p">[</span><span class="mi">1</span><span class="p">]</span><span class="o">.</span><span class="n">joint_trajectory</span><span class="o">.</span><span class="n">points</span><span class="p">[</span><span class="o">-</span><span class="mi">1</span><span class="p">]</span><span class="o">.</span><span class="n">positions</span>
+            <span class="n">viewpoint_anchor_state</span><span class="o">.</span><span class="n">joint_state</span><span class="o">.</span><span class="n">name</span> <span class="o">=</span> <span class="n">initial_plan</span><span class="p">[</span><span class="mi">1</span><span class="p">]</span><span class="o">.</span><span class="n">joint_trajectory</span><span class="o">.</span><span class="n">joint_names</span>
+        <span class="k">else</span><span class="p">:</span>
+            <span class="n">req</span> <span class="o">=</span> <span class="n">GetPositionIKRequest</span><span class="p">()</span>
+            <span class="n">req</span><span class="o">.</span><span class="n">ik_request</span><span class="o">.</span><span class="n">group_name</span> <span class="o">=</span> <span class="s2">&quot;manipulator&quot;</span>
+            <span class="n">req</span><span class="o">.</span><span class="n">ik_request</span><span class="o">.</span><span class="n">avoid_collisions</span> <span class="o">=</span> <span class="kc">True</span>
+            <span class="n">req</span><span class="o">.</span><span class="n">ik_request</span><span class="o">.</span><span class="n">pose_stamped</span> <span class="o">=</span> <span class="n">viewpoint_anchor_pose</span>   
+            <span class="c1"># Perform 20 calls as inverse_kinematics is a stochastic process to improve chances of finding an</span>
+            <span class="k">for</span> <span class="n">_</span> <span class="ow">in</span> <span class="nb">range</span><span class="p">(</span><span class="mi">20</span><span class="p">):</span>
+                <span class="n">resp</span> <span class="o">=</span> <span class="n">ik_service</span><span class="o">.</span><span class="n">call</span><span class="p">(</span><span class="n">req</span><span class="p">)</span>
+                <span class="k">if</span> <span class="n">resp</span><span class="o">.</span><span class="n">error_code</span><span class="o">.</span><span class="n">val</span> <span class="o">==</span> <span class="n">GetPositionIKResponse</span><span class="p">()</span><span class="o">.</span><span class="n">error_code</span><span class="o">.</span><span class="n">SUCCESS</span><span class="p">:</span>
+                    <span class="k">break</span>
+            <span class="k">if</span> <span class="ow">not</span> <span class="n">resp</span><span class="o">.</span><span class="n">error_code</span><span class="o">.</span><span class="n">val</span> <span class="o">==</span> <span class="n">GetPositionIKResponse</span><span class="p">()</span><span class="o">.</span><span class="n">error_code</span><span class="o">.</span><span class="n">SUCCESS</span><span class="p">:</span>
+                <span class="k">return</span> <span class="kc">False</span>
+            <span class="n">viewpoint_anchor_state</span><span class="o">=</span> <span class="n">resp</span><span class="o">.</span><span class="n">solution</span>
+        
+        <span class="c1"># Use the computed joint-values as basis for joint-trajectory-planning</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">group</span><span class="o">.</span><span class="n">set_start_state</span><span class="p">(</span><span class="n">viewpoint_anchor_state</span><span class="p">)</span>
+
+        <span class="c1"># Perform metrological evaluation</span>
+        <span class="n">measurable_surface_point_indices</span><span class="p">,</span> <span class="n">uncertainties</span><span class="p">,</span> <span class="n">trajectory_line_arguments_selected</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">sensor_model</span><span class="o">.</span><span class="n">process_viewpoint_metrologically</span><span class="p">(</span><span class="n">viewpoint</span><span class="p">,</span> <span class="n">uncertainty_threshold</span><span class="p">,</span> <span class="bp">self</span><span class="o">.</span><span class="n">max_edge</span><span class="p">)</span>
+        <span class="k">if</span> <span class="nb">len</span><span class="p">(</span><span class="n">measurable_surface_point_indices</span><span class="p">)</span> <span class="o">==</span> <span class="mi">0</span><span class="p">:</span>
+            <span class="k">return</span> <span class="kc">False</span>
+
+        <span class="c1"># Check if the trajectory&#39;s lenght (when cut down so that only measurable surface-points are covered with no overhead where nothing is scanned anymore) is long enough</span>
+        <span class="n">max_deflection</span> <span class="o">=</span> <span class="nb">max</span><span class="p">(</span><span class="n">trajectory_line_arguments_selected</span><span class="p">)</span> <span class="o">+</span> <span class="n">minimum_required_overmeasure</span>
+        <span class="n">min_deflection</span> <span class="o">=</span> <span class="nb">min</span><span class="p">(</span><span class="n">trajectory_line_arguments_selected</span><span class="p">)</span> <span class="o">-</span> <span class="n">minimum_required_overmeasure</span>
+        <span class="k">if</span> <span class="n">max_deflection</span> <span class="o">-</span> <span class="n">min_deflection</span> <span class="o">&lt;</span> <span class="n">minimum_trajectory_length</span><span class="p">:</span>
+            <span class="k">return</span> <span class="kc">False</span>
+        
+        <span class="c1"># Compute cartesian path into the viewpoint&#39;s trajectory_direction from the previously found start &#39;anchor&#39;-state to the cartesian pose</span>
+        <span class="c1"># of the laser_emitter_frame where the last surface point can be measured (+ tiny overmeasure) at pose_a</span>
+        <span class="n">viewpoint_deflection_pose_a</span> <span class="o">=</span> <span class="n">geometry_msgs</span><span class="o">.</span><span class="n">msg</span><span class="o">.</span><span class="n">Pose</span><span class="p">()</span>
+        <span class="n">viewpoint_deflection_pose_a</span><span class="o">.</span><span class="n">orientation</span> <span class="o">=</span> <span class="n">viewpoint_anchor_pose</span><span class="o">.</span><span class="n">pose</span><span class="o">.</span><span class="n">orientation</span>
+        <span class="n">viewpoint_deflection_pose_a</span><span class="o">.</span><span class="n">position</span> <span class="o">=</span> <span class="n">geometry_msgs</span><span class="o">.</span><span class="n">msg</span><span class="o">.</span><span class="n">Point</span><span class="p">(</span><span class="o">*</span><span class="n">trajectory_in_m</span><span class="p">(</span><span class="n">max_deflection</span><span class="p">))</span>
+        <span class="c1"># Info: fraction is the portion of the request to be executable by the returned trajectory</span>
+        <span class="c1"># (e.g. 0.5 means that the trajectory only covers half the euklidian distance between the start and endpose)</span>
+        <span class="p">(</span><span class="n">trajectory</span><span class="p">,</span> <span class="n">fraction_a</span><span class="p">)</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">group</span><span class="o">.</span><span class="n">compute_cartesian_path</span><span class="p">([</span><span class="n">viewpoint_anchor_pose</span><span class="o">.</span><span class="n">pose</span><span class="p">,</span> <span class="n">viewpoint_deflection_pose_a</span><span class="p">],</span> <span class="n">trajectory_sample_step</span> <span class="o">*</span> <span class="mf">1e-3</span><span class="p">,</span> <span class="n">joint_jump_threshold</span><span class="p">)</span>
+        
+        <span class="c1"># Use the end-state of this trajectory as a start state of the trajectory to plan a trajectory against the trajectory direction to where the last</span>
+        <span class="c1"># surface point can be measured (+ tiny overmeasure) at pose_b</span>
+        <span class="n">viewpoint_deflection_state_a</span> <span class="o">=</span> <span class="n">moveit_msgs</span><span class="o">.</span><span class="n">msg</span><span class="o">.</span><span class="n">RobotState</span><span class="p">()</span>
+        <span class="n">viewpoint_deflection_state_a</span><span class="o">.</span><span class="n">joint_state</span><span class="o">.</span><span class="n">name</span> <span class="o">=</span> <span class="n">trajectory</span><span class="o">.</span><span class="n">joint_trajectory</span><span class="o">.</span><span class="n">joint_names</span>
+        <span class="n">viewpoint_deflection_state_a</span><span class="o">.</span><span class="n">joint_state</span><span class="o">.</span><span class="n">position</span> <span class="o">=</span> <span class="n">trajectory</span><span class="o">.</span><span class="n">joint_trajectory</span><span class="o">.</span><span class="n">points</span><span class="p">[</span><span class="o">-</span><span class="mi">1</span><span class="p">]</span><span class="o">.</span><span class="n">positions</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">group</span><span class="o">.</span><span class="n">set_start_state</span><span class="p">(</span><span class="n">viewpoint_deflection_state_a</span><span class="p">)</span>
+        <span class="c1"># pose_a has to adapted to be the last actually reachable pose in trajectory direction</span>
+        <span class="n">viewpoint_deflection_pose_a</span><span class="o">.</span><span class="n">position</span> <span class="o">=</span> <span class="n">geometry_msgs</span><span class="o">.</span><span class="n">msg</span><span class="o">.</span><span class="n">Point</span><span class="p">(</span><span class="o">*</span><span class="n">trajectory_in_m</span><span class="p">(</span><span class="n">fraction_a</span> <span class="o">*</span> <span class="n">max_deflection</span><span class="p">))</span>
+        <span class="n">viewpoint_deflection_pose_b</span> <span class="o">=</span> <span class="n">geometry_msgs</span><span class="o">.</span><span class="n">msg</span><span class="o">.</span><span class="n">Pose</span><span class="p">()</span>
+        <span class="n">viewpoint_deflection_pose_b</span><span class="o">.</span><span class="n">orientation</span> <span class="o">=</span> <span class="n">viewpoint_deflection_pose_a</span><span class="o">.</span><span class="n">orientation</span>
+        <span class="n">viewpoint_deflection_pose_b</span><span class="o">.</span><span class="n">position</span> <span class="o">=</span> <span class="n">geometry_msgs</span><span class="o">.</span><span class="n">msg</span><span class="o">.</span><span class="n">Point</span><span class="p">(</span><span class="o">*</span><span class="n">trajectory_in_m</span><span class="p">(</span><span class="n">min_deflection</span><span class="p">))</span>
+        <span class="p">(</span><span class="n">trajectory</span><span class="p">,</span> <span class="n">fraction_total</span><span class="p">)</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">group</span><span class="o">.</span><span class="n">compute_cartesian_path</span><span class="p">([</span><span class="n">viewpoint_deflection_pose_a</span><span class="p">,</span> <span class="n">viewpoint_deflection_pose_b</span><span class="p">],</span> <span class="n">trajectory_sample_step</span> <span class="o">*</span> <span class="mf">1e-3</span><span class="p">,</span> <span class="n">joint_jump_threshold</span><span class="p">)</span>
+
+        <span class="c1"># Calculate the length of the trajectory that is actual executable with respect to joint-limits, collision, ... and check if post-processing was successful</span>
+        <span class="n">fraction_b</span> <span class="o">=</span> <span class="p">(</span><span class="n">fraction_total</span> <span class="o">*</span> <span class="p">(</span><span class="n">fraction_a</span> <span class="o">*</span> <span class="n">max_deflection</span> <span class="o">-</span> <span class="n">min_deflection</span><span class="p">)</span> <span class="o">-</span> <span class="n">fraction_a</span> <span class="o">*</span> <span class="n">max_deflection</span><span class="p">)</span> <span class="o">/</span> <span class="nb">abs</span><span class="p">(</span><span class="n">min_deflection</span><span class="p">)</span>
+        <span class="k">if</span> <span class="p">(</span><span class="n">fraction_a</span> <span class="o">*</span> <span class="n">max_deflection</span> <span class="o">-</span> <span class="n">fraction_b</span> <span class="o">*</span> <span class="n">min_deflection</span><span class="p">)</span> <span class="o">&lt;</span> <span class="n">minimum_trajectory_length</span> <span class="ow">or</span> <span class="ow">not</span> <span class="bp">self</span><span class="o">.</span><span class="n">postprocess_trajectory</span><span class="p">(</span><span class="n">trajectory</span><span class="p">):</span>
+            <span class="k">return</span> <span class="kc">False</span>
+        
+        <span class="c1"># Remove points that were covered by a theoretical trajectory however are not measurable in practice as the actual trajectory can be shorter due to constraints</span>
+        <span class="k">for</span> <span class="n">i</span> <span class="ow">in</span> <span class="nb">reversed</span><span class="p">(</span><span class="nb">range</span><span class="p">(</span><span class="nb">len</span><span class="p">(</span><span class="n">trajectory_line_arguments_selected</span><span class="p">))):</span>
+            <span class="k">if</span> <span class="n">trajectory_line_arguments_selected</span><span class="p">[</span><span class="n">i</span><span class="p">]</span> <span class="o">&gt;</span> <span class="n">fraction_a</span> <span class="o">*</span> <span class="n">max_deflection</span> <span class="ow">or</span> <span class="n">trajectory_line_arguments_selected</span><span class="p">[</span><span class="n">i</span><span class="p">]</span> <span class="o">&lt;</span> <span class="n">fraction_b</span> <span class="o">*</span> <span class="n">min_deflection</span><span class="p">:</span>
+                <span class="n">measurable_surface_point_indices</span><span class="o">.</span><span class="n">pop</span><span class="p">(</span><span class="n">i</span><span class="p">)</span>
+                <span class="n">uncertainties</span><span class="o">.</span><span class="n">pop</span><span class="p">(</span><span class="n">i</span><span class="p">)</span>
+
+        <span class="c1"># If restrictions are satisfied, store the measurement-trajectory and metrological information in the viewpoint</span>
+        <span class="n">viewpoint</span><span class="o">.</span><span class="n">set_trajectory_for_measurement</span><span class="p">(</span><span class="n">trajectory</span><span class="p">)</span>
+        <span class="n">viewpoint</span><span class="o">.</span><span class="n">set_measurable_surface_point_indices_and_uncertainties</span><span class="p">(</span><span class="n">measurable_surface_point_indices</span><span class="p">,</span> <span class="n">uncertainties</span><span class="p">)</span>
+        <span class="k">return</span> <span class="kc">True</span></div>
+
+<div class="viewcode-block" id="TrajectoryManager.postprocess_trajectory"><a class="viewcode-back" href="../../module_trajectory_manager.html#agiprobot_measurement.trajectory_manager.TrajectoryManager.postprocess_trajectory">[docs]</a>    <span class="k">def</span> <span class="nf">postprocess_trajectory</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">trajectory</span><span class="p">):</span>
+        <span class="sd">&quot;&quot;&quot;</span>
+<span class="sd">        Check if trajectory meets the limits specified in &#39;joint_limits.yaml&#39; and if the time between two points is increasing.</span>
+<span class="sd">        MoveIt does not apply the values from &#39;joint_limits.yaml&#39; when computing a cartesian path, which is dangerous for trajectory-execution.</span>
+<span class="sd">        For prevention, trajectories with too heavy violations will be rejected. However, specifying the joint-limits from the yaml in the xacro-urdf as</span>
+<span class="sd">        well seems to have eliminated this problem (but this code is still active for safety purposes).</span>
+
+<span class="sd">        :param trajectory: RobotTrajectory to check and improve</span>
+<span class="sd">        :type trajectory: moveit_msgs/RobotTrajectory</span>
+<span class="sd">        :return: Boolean value indicating if the trajectory could be post-processed reasonably or if it has to be rejected</span>
+<span class="sd">        :rtype: bool</span>
+<span class="sd">        &quot;&quot;&quot;</span>
+
+        <span class="n">params</span> <span class="o">=</span> <span class="n">rospy</span><span class="o">.</span><span class="n">get_param</span><span class="p">(</span><span class="s2">&quot;/robot_description_planning/joint_limits&quot;</span><span class="p">)</span>
+        
+        <span class="n">point_indices_to_pop</span> <span class="o">=</span> <span class="p">[]</span>
+        <span class="c1"># For every point in the trajectory check for every joint_position if there are limits and examinate if they are violated.</span>
+        <span class="c1"># When there are only very small violations, the value is set to the limit&#39;s value.</span>
+        <span class="k">for</span> <span class="n">i</span> <span class="ow">in</span> <span class="nb">range</span><span class="p">(</span><span class="nb">len</span><span class="p">(</span><span class="n">trajectory</span><span class="o">.</span><span class="n">joint_trajectory</span><span class="o">.</span><span class="n">points</span><span class="p">)):</span>
+            <span class="k">for</span> <span class="n">j</span><span class="p">,</span> <span class="n">position</span> <span class="ow">in</span> <span class="nb">enumerate</span><span class="p">(</span><span class="n">trajectory</span><span class="o">.</span><span class="n">joint_trajectory</span><span class="o">.</span><span class="n">points</span><span class="p">[</span><span class="n">i</span><span class="p">]</span><span class="o">.</span><span class="n">positions</span><span class="p">):</span>
+                <span class="k">if</span> <span class="n">params</span><span class="p">[</span><span class="n">trajectory</span><span class="o">.</span><span class="n">joint_trajectory</span><span class="o">.</span><span class="n">joint_names</span><span class="p">[</span><span class="n">j</span><span class="p">]]</span><span class="o">.</span><span class="n">has_key</span><span class="p">(</span><span class="s2">&quot;max_position&quot;</span><span class="p">):</span>
+                    <span class="n">diff</span> <span class="o">=</span> <span class="n">position</span> <span class="o">-</span> <span class="n">params</span><span class="p">[</span><span class="n">trajectory</span><span class="o">.</span><span class="n">joint_trajectory</span><span class="o">.</span><span class="n">joint_names</span><span class="p">[</span><span class="n">j</span><span class="p">]][</span><span class="s2">&quot;max_position&quot;</span><span class="p">]</span>
+                    <span class="k">if</span> <span class="n">diff</span> <span class="o">&gt;=</span> <span class="mf">1e-3</span><span class="p">:</span>
+                        <span class="nb">print</span><span class="p">(</span><span class="n">trajectory</span><span class="o">.</span><span class="n">joint_trajectory</span><span class="o">.</span><span class="n">joint_names</span><span class="p">[</span><span class="n">j</span><span class="p">],</span> <span class="n">position</span><span class="p">)</span>
+                        <span class="k">return</span> <span class="kc">False</span>
+                    <span class="k">elif</span> <span class="n">diff</span> <span class="o">&gt;</span> <span class="mi">0</span> <span class="ow">and</span> <span class="n">diff</span> <span class="o">&lt;</span> <span class="mf">1e-3</span><span class="p">:</span>
+                        <span class="c1"># Use non-intuitive assignment as positions (a tuple value) must not be </span>
+                        <span class="c1"># changed elementwise. It has to be replaced entirely... (same below)</span>
+                        <span class="n">trajectory</span><span class="o">.</span><span class="n">joint_trajectory</span><span class="o">.</span><span class="n">points</span><span class="p">[</span><span class="n">i</span><span class="p">]</span><span class="o">.</span><span class="n">positions</span> <span class="o">=</span> <span class="nb">tuple</span><span class="p">(</span>
+                            <span class="nb">list</span><span class="p">(</span><span class="n">trajectory</span><span class="o">.</span><span class="n">joint_trajectory</span><span class="o">.</span><span class="n">points</span><span class="p">[</span><span class="n">i</span><span class="p">]</span><span class="o">.</span><span class="n">positions</span><span class="p">[:</span><span class="n">j</span><span class="p">])</span>
+                            <span class="o">+</span> <span class="p">[</span><span class="n">params</span><span class="p">[</span><span class="n">trajectory</span><span class="o">.</span><span class="n">joint_trajectory</span><span class="o">.</span><span class="n">joint_names</span><span class="p">[</span><span class="n">j</span><span class="p">]][</span><span class="s2">&quot;max_position&quot;</span><span class="p">]]</span>
+                            <span class="o">+</span> <span class="nb">list</span><span class="p">(</span><span class="n">trajectory</span><span class="o">.</span><span class="n">joint_trajectory</span><span class="o">.</span><span class="n">points</span><span class="p">[</span><span class="n">i</span><span class="p">]</span><span class="o">.</span><span class="n">positions</span><span class="p">)[</span><span class="n">j</span> <span class="o">+</span> <span class="mi">1</span><span class="p">:]</span>
+                        <span class="p">)</span>
+                <span class="k">if</span> <span class="n">params</span><span class="p">[</span><span class="n">trajectory</span><span class="o">.</span><span class="n">joint_trajectory</span><span class="o">.</span><span class="n">joint_names</span><span class="p">[</span><span class="n">j</span><span class="p">]]</span><span class="o">.</span><span class="n">has_key</span><span class="p">(</span><span class="s2">&quot;min_position&quot;</span><span class="p">):</span>
+                    <span class="n">diff</span> <span class="o">=</span> <span class="n">position</span> <span class="o">-</span> <span class="n">params</span><span class="p">[</span><span class="n">trajectory</span><span class="o">.</span><span class="n">joint_trajectory</span><span class="o">.</span><span class="n">joint_names</span><span class="p">[</span><span class="n">j</span><span class="p">]][</span><span class="s2">&quot;min_position&quot;</span><span class="p">]</span>
+                    <span class="k">if</span> <span class="n">diff</span> <span class="o">&lt;=</span> <span class="o">-</span><span class="mf">1e-3</span><span class="p">:</span>
+                        <span class="nb">print</span><span class="p">(</span><span class="n">trajectory</span><span class="o">.</span><span class="n">joint_trajectory</span><span class="o">.</span><span class="n">joint_names</span><span class="p">[</span><span class="n">j</span><span class="p">],</span> <span class="n">position</span><span class="p">)</span>
+                        <span class="k">return</span> <span class="kc">False</span>
+                    <span class="k">elif</span> <span class="n">diff</span> <span class="o">&lt;</span> <span class="mi">0</span> <span class="ow">and</span> <span class="n">diff</span> <span class="o">&gt;</span> <span class="o">-</span><span class="mf">1e-3</span><span class="p">:</span>     
+                        <span class="n">trajectory</span><span class="o">.</span><span class="n">joint_trajectory</span><span class="o">.</span><span class="n">points</span><span class="p">[</span><span class="n">i</span><span class="p">]</span><span class="o">.</span><span class="n">positions</span> <span class="o">=</span> <span class="nb">tuple</span><span class="p">(</span>
+                            <span class="nb">list</span><span class="p">(</span><span class="n">trajectory</span><span class="o">.</span><span class="n">joint_trajectory</span><span class="o">.</span><span class="n">points</span><span class="p">[</span><span class="n">i</span><span class="p">]</span><span class="o">.</span><span class="n">positions</span><span class="p">[:</span><span class="n">j</span><span class="p">])</span>
+                            <span class="o">+</span> <span class="p">[</span><span class="n">params</span><span class="p">[</span><span class="n">trajectory</span><span class="o">.</span><span class="n">joint_trajectory</span><span class="o">.</span><span class="n">joint_names</span><span class="p">[</span><span class="n">j</span><span class="p">]][</span><span class="s2">&quot;min_position&quot;</span><span class="p">]]</span>
+                            <span class="o">+</span> <span class="nb">list</span><span class="p">(</span><span class="n">trajectory</span><span class="o">.</span><span class="n">joint_trajectory</span><span class="o">.</span><span class="n">points</span><span class="p">[</span><span class="n">i</span><span class="p">]</span><span class="o">.</span><span class="n">positions</span><span class="p">)[</span><span class="n">j</span> <span class="o">+</span> <span class="mi">1</span><span class="p">:]</span>
+                        <span class="p">)</span>
+            <span class="c1"># Check if time is monotone ascending (if not -&gt; Delete the point)</span>
+            <span class="k">if</span> <span class="n">i</span> <span class="o">&lt;</span> <span class="nb">len</span><span class="p">(</span><span class="n">trajectory</span><span class="o">.</span><span class="n">joint_trajectory</span><span class="o">.</span><span class="n">points</span><span class="p">)</span> <span class="o">-</span> <span class="mi">1</span><span class="p">:</span>
+                <span class="k">if</span> <span class="n">trajectory</span><span class="o">.</span><span class="n">joint_trajectory</span><span class="o">.</span><span class="n">points</span><span class="p">[</span><span class="n">i</span><span class="p">]</span><span class="o">.</span><span class="n">time_from_start</span> <span class="o">==</span> <span class="n">trajectory</span><span class="o">.</span><span class="n">joint_trajectory</span><span class="o">.</span><span class="n">points</span><span class="p">[</span><span class="n">i</span> <span class="o">+</span> <span class="mi">1</span><span class="p">]</span><span class="o">.</span><span class="n">time_from_start</span><span class="p">:</span>
+                    <span class="n">point_indices_to_pop</span><span class="o">.</span><span class="n">append</span><span class="p">(</span><span class="n">i</span><span class="p">)</span>
+        
+
+        <span class="k">for</span> <span class="n">point_index_to_pop</span> <span class="ow">in</span> <span class="nb">sorted</span><span class="p">(</span><span class="n">point_indices_to_pop</span><span class="p">,</span> <span class="n">reverse</span><span class="o">=</span><span class="kc">True</span><span class="p">):</span>
+            <span class="n">trajectory</span><span class="o">.</span><span class="n">joint_trajectory</span><span class="o">.</span><span class="n">points</span><span class="o">.</span><span class="n">pop</span><span class="p">(</span><span class="n">point_index_to_pop</span><span class="p">)</span>
+
+        <span class="k">return</span> <span class="kc">True</span></div>
+
+<div class="viewcode-block" id="TrajectoryManager.solve_scp"><a class="viewcode-back" href="../../module_trajectory_manager.html#agiprobot_measurement.trajectory_manager.TrajectoryManager.solve_scp">[docs]</a>    <span class="k">def</span> <span class="nf">solve_scp</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">provided_viewpoints</span><span class="p">,</span> <span class="n">solver_type</span><span class="o">=</span><span class="s2">&quot;greedy&quot;</span><span class="p">):</span>
+        <span class="sd">&quot;&quot;&quot;</span>
+<span class="sd">        Solve Set Covering Problem to cover all measurable surface_points with a fraction of the set of provided viewpoints.</span>
+<span class="sd">        Possible solver_types are:\n</span>
+<span class="sd">        -   &quot;greedy&quot;: Fills return set at each step with the trajectory that delivers the most</span>
+<span class="sd">            additional coverage compared to the points already in the set. If this additional coverage is</span>
+<span class="sd">            identical in size for several new optimal viewpointpoint-candidates, the one with the lowest maximum</span>
+<span class="sd">            uncertainty will be added similarly to the improvement introduced in chapter 4.4 of </span>
+<span class="sd">            &quot;ViewPoint and sensor planning for multi-sensor surface inspection&quot; (Gronle et al., 2016)  (default)\n</span>
+<span class="sd">        -   &quot;IP_basic&quot;: Solves the SCP-Problem with integer programming (IP) using the formulation in</span>
+<span class="sd">            &quot;Model-based viewpoint planning&quot; (Scott, 2009), i.e. the objective function is the number of all</span>
+<span class="sd">            selected viewpointpoints whereas the constraint is that every surface point must be covered at least by one viewpointpoint\n</span>
+<span class="sd">        -   &quot;IP_uncertainty&quot;: Solves the SCP using IP with respect to the uncertainty. The formulas are similar to &quot;IP_basic&quot;</span>
+<span class="sd">            but in the objective, costs corresponding to the worst uncertainty are assigned to every viewpointpoint-trajectory.\n</span>
+<span class="sd">        -   &quot;IP_time&quot;: Solves the SCP using IP with respect to the time of trajectory-execution. The formulas are similar to &quot;IP_basic&quot;</span>
+<span class="sd">            but in the objective, costs corresponding to the duration of the trajectory are assigned to every viewpointpoint.</span>
+
+<span class="sd">        :param provided_viewpoints: All processed viewpoints where each has a valid measurement-trajectory and information about the measurable surface_points</span>
+<span class="sd">        :type provided_viewpoints: set[ViewPoint] or list[ViewPoint]</span>
+<span class="sd">        :param solver_type: See function description, defaults to &quot;greedy&quot;</span>
+<span class="sd">        :type solver_type: str, optional</span>
+<span class="sd">        :return: Set of viewpoints that can measure the union of measurable surface points of all provided viewpoints</span>
+<span class="sd">        :rtype: set[ViewPoint]</span>
+<span class="sd">        &quot;&quot;&quot;</span>
+        <span class="c1"># Get set of all measurable surface points by all provided_viewpoints (this is most likely smaller than the set of sampled_surface_points)</span>
+        <span class="n">measurable_surface_point_indices</span> <span class="o">=</span> <span class="nb">set</span><span class="p">(</span>
+                <span class="n">itertools</span><span class="o">.</span><span class="n">chain</span><span class="o">.</span><span class="n">from_iterable</span><span class="p">(</span>
+                    <span class="p">[</span><span class="n">viewpoint</span><span class="o">.</span><span class="n">get_measurable_surface_point_indices</span><span class="p">()</span> <span class="k">for</span> <span class="n">viewpoint</span> <span class="ow">in</span> <span class="n">provided_viewpoints</span><span class="p">]</span>
+                <span class="p">))</span>
+        <span class="nb">print</span><span class="p">(</span><span class="s2">&quot;Can cover </span><span class="si">{}</span><span class="s2"> surface-points&quot;</span><span class="o">.</span><span class="n">format</span><span class="p">(</span><span class="nb">len</span><span class="p">(</span><span class="n">measurable_surface_point_indices</span><span class="p">)))</span>
+        <span class="k">if</span> <span class="n">solver_type</span> <span class="o">==</span> <span class="s2">&quot;greedy&quot;</span><span class="p">:</span>
+            <span class="n">measured_surface_point_indices</span> <span class="o">=</span> <span class="nb">set</span><span class="p">()</span>
+            <span class="n">used_viewpoints</span> <span class="o">=</span> <span class="nb">set</span><span class="p">()</span>
+            <span class="n">maximum_uncertainty</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">sensor_model</span><span class="o">.</span><span class="n">get_max_uncertainty</span><span class="p">()</span>
+            <span class="k">while</span> <span class="nb">len</span><span class="p">(</span><span class="n">provided_viewpoints</span><span class="p">)</span> <span class="o">&gt;</span> <span class="mi">0</span><span class="p">:</span>
+                <span class="c1"># The sort-key-function is designed as follows: Pre-decimal-point numbers indicate the amount of newly measurable surface contributed by this viewpoint.</span>
+                <span class="c1"># Post-decimal-point-values indicate the lowest overall uncertainty of this viewpoint (in [0,1]) scaled by 0.9. That way, when multiple viewpoints provide</span>
+                <span class="c1"># the same amount of new measurements, the uncertainty will be compared as in Gronle et al.&#39;s paper.</span>
+                <span class="n">provided_viewpoints</span> <span class="o">=</span> <span class="nb">sorted</span><span class="p">(</span><span class="n">provided_viewpoints</span><span class="p">,</span> <span class="n">key</span> <span class="o">=</span> <span class="k">lambda</span> <span class="n">viewpoint</span><span class="p">:</span> <span class="nb">len</span><span class="p">(</span><span class="n">measured_surface_point_indices</span> <span class="o">|</span> <span class="nb">set</span><span class="p">(</span><span class="n">viewpoint</span><span class="o">.</span><span class="n">get_measurable_surface_point_indices</span><span class="p">()))</span> <span class="o">+</span> <span class="p">(</span><span class="n">maximum_uncertainty</span> <span class="o">-</span> <span class="nb">max</span><span class="p">(</span><span class="n">viewpoint</span><span class="o">.</span><span class="n">get_measurable_surface_point_uncertainties</span><span class="p">()))</span> <span class="o">/</span> <span class="n">maximum_uncertainty</span> <span class="o">*</span> <span class="mf">0.9</span><span class="p">,</span> <span class="n">reverse</span><span class="o">=</span><span class="kc">True</span><span class="p">)</span>
+                <span class="n">next_viewpoint</span> <span class="o">=</span> <span class="n">provided_viewpoints</span><span class="o">.</span><span class="n">pop</span><span class="p">(</span><span class="mi">0</span><span class="p">)</span>
+                <span class="n">measured_surface_point_indices</span> <span class="o">|=</span> <span class="nb">set</span><span class="p">(</span><span class="n">next_viewpoint</span><span class="o">.</span><span class="n">get_measurable_surface_point_indices</span><span class="p">())</span>
+                <span class="n">used_viewpoints</span><span class="o">.</span><span class="n">add</span><span class="p">(</span><span class="n">next_viewpoint</span><span class="p">)</span>
+                <span class="c1"># Check if optimal situation is reached, i.e. all measurable surface points are covered</span>
+                <span class="k">if</span> <span class="n">measured_surface_point_indices</span> <span class="o">==</span> <span class="n">measurable_surface_point_indices</span><span class="p">:</span>
+                    <span class="nb">print</span><span class="p">(</span><span class="s2">&quot;Covered </span><span class="si">{}</span><span class="s2"> surface points. Continuing with this solution ...&quot;</span><span class="o">.</span><span class="n">format</span><span class="p">(</span><span class="nb">len</span><span class="p">(</span><span class="n">measured_surface_point_indices</span><span class="p">)))</span>
+                    <span class="k">return</span> <span class="n">used_viewpoints</span>
+            <span class="k">raise</span> <span class="ne">Exception</span><span class="p">(</span><span class="s2">&quot;Greedy algorithm failed. All viewpoints were used but not all measurable points were covered!&quot;</span><span class="p">)</span>
+
+        <span class="k">elif</span> <span class="n">solver_type</span><span class="p">[</span><span class="mi">0</span><span class="p">:</span><span class="mi">3</span><span class="p">]</span> <span class="o">==</span> <span class="s2">&quot;IP_&quot;</span><span class="p">:</span>
+            <span class="c1"># This is an implementation of the problem stated in Scott&#39;s paper with some additions.        </span>
+            <span class="n">viewpointpoint_indices</span> <span class="o">=</span> <span class="nb">range</span><span class="p">(</span><span class="nb">len</span><span class="p">(</span><span class="n">provided_viewpoints</span><span class="p">))</span>
+            
+            <span class="c1"># Create problem</span>
+            <span class="n">ip_problem</span> <span class="o">=</span> <span class="n">pulp</span><span class="o">.</span><span class="n">LpProblem</span><span class="p">(</span><span class="n">sense</span><span class="o">=</span><span class="n">pulp</span><span class="o">.</span><span class="n">const</span><span class="o">.</span><span class="n">LpMinimize</span><span class="p">)</span>
+            
+            <span class="c1"># Create IP-Variables (viewpointpoint_variables[i] is 1, if provided_viewpoint[i] is part of the solution and 0 otherwise)</span>
+            <span class="n">viewpointpoint_variables</span> <span class="o">=</span> <span class="n">pulp</span><span class="o">.</span><span class="n">LpVariable</span><span class="o">.</span><span class="n">dicts</span><span class="p">(</span><span class="n">name</span><span class="o">=</span><span class="s2">&quot;viewpointpoint_variables&quot;</span><span class="p">,</span> <span class="n">indexs</span><span class="o">=</span><span class="n">viewpointpoint_indices</span><span class="p">,</span> <span class="n">cat</span><span class="o">=</span><span class="n">pulp</span><span class="o">.</span><span class="n">const</span><span class="o">.</span><span class="n">LpInteger</span><span class="p">)</span>
+            
+            <span class="c1"># Add objective function</span>
+            <span class="k">if</span> <span class="n">solver_type</span> <span class="o">==</span> <span class="s2">&quot;IP_basic&quot;</span><span class="p">:</span>
+                <span class="c1"># Optimize only for the total amount of viewpointpoints</span>
+                <span class="n">ip_problem</span> <span class="o">+=</span> <span class="n">pulp</span><span class="o">.</span><span class="n">lpSum</span><span class="p">([</span><span class="n">viewpointpoint_variables</span><span class="p">[</span><span class="n">i</span><span class="p">]</span> <span class="k">for</span> <span class="n">i</span> <span class="ow">in</span> <span class="n">viewpointpoint_indices</span><span class="p">])</span>
+            <span class="k">elif</span> <span class="n">solver_type</span> <span class="o">==</span> <span class="s2">&quot;IP_time&quot;</span><span class="p">:</span>
+                <span class="c1"># Goal is that the combined measurement-trajectory-execution-time of all measurement-trajectories becomes minimal</span>
+                <span class="n">ip_problem</span> <span class="o">+=</span> <span class="n">pulp</span><span class="o">.</span><span class="n">lpSum</span><span class="p">([</span><span class="n">viewpointpoint_variables</span><span class="p">[</span><span class="n">i</span><span class="p">]</span> <span class="o">*</span> <span class="n">provided_viewpoints</span><span class="p">[</span><span class="n">i</span><span class="p">]</span><span class="o">.</span><span class="n">get_trajectory_for_measurement</span><span class="p">()</span><span class="o">.</span><span class="n">joint_trajectory</span><span class="o">.</span><span class="n">points</span><span class="p">[</span><span class="o">-</span><span class="mi">1</span><span class="p">]</span><span class="o">.</span><span class="n">time_from_start</span><span class="o">.</span><span class="n">to_sec</span><span class="p">()</span> <span class="k">for</span> <span class="n">i</span> <span class="ow">in</span> <span class="n">viewpointpoint_indices</span><span class="p">])</span>
+            <span class="k">elif</span> <span class="n">solver_type</span> <span class="o">==</span> <span class="s2">&quot;IP_uncertainty&quot;</span><span class="p">:</span>
+                <span class="c1"># Goal is that the sum of </span>
+                <span class="n">ip_problem</span> <span class="o">+=</span> <span class="n">pulp</span><span class="o">.</span><span class="n">lpSum</span><span class="p">([</span><span class="n">viewpointpoint_variables</span><span class="p">[</span><span class="n">i</span><span class="p">]</span> <span class="o">*</span> <span class="nb">sum</span><span class="p">(</span><span class="n">provided_viewpoints</span><span class="p">[</span><span class="n">i</span><span class="p">]</span><span class="o">.</span><span class="n">get_measurable_surface_point_uncertainties</span><span class="p">())</span> <span class="o">/</span> <span class="nb">len</span><span class="p">(</span><span class="n">provided_viewpoints</span><span class="p">[</span><span class="n">i</span><span class="p">]</span><span class="o">.</span><span class="n">get_measurable_surface_point_uncertainties</span><span class="p">())</span> <span class="k">for</span> <span class="n">i</span> <span class="ow">in</span> <span class="n">viewpointpoint_indices</span><span class="p">])</span>
+        
+            
+            <span class="c1"># Add constraints: ViewPointpoint_variable&#39;s elements are either 1 or 0</span>
+            <span class="k">for</span> <span class="n">i</span> <span class="ow">in</span> <span class="n">viewpointpoint_indices</span><span class="p">:</span>
+                <span class="n">ip_problem</span> <span class="o">+=</span> <span class="n">viewpointpoint_variables</span><span class="p">[</span><span class="n">i</span><span class="p">]</span> <span class="o">&lt;=</span> <span class="mi">1</span>
+                <span class="n">ip_problem</span> <span class="o">+=</span> <span class="n">viewpointpoint_variables</span><span class="p">[</span><span class="n">i</span><span class="p">]</span> <span class="o">&gt;=</span> <span class="mi">0</span>
+            
+            <span class="c1"># Add constraints: Every surface point must be covered</span>
+            <span class="k">for</span> <span class="n">surface_point_index</span> <span class="ow">in</span> <span class="n">measurable_surface_point_indices</span><span class="p">:</span>
+                <span class="n">ip_problem</span> <span class="o">+=</span> <span class="n">pulp</span><span class="o">.</span><span class="n">lpSum</span><span class="p">([(</span><span class="n">surface_point_index</span> <span class="ow">in</span> <span class="n">provided_viewpoints</span><span class="p">[</span><span class="n">viewpointpoint_index</span><span class="p">]</span><span class="o">.</span><span class="n">get_measurable_surface_point_indices</span><span class="p">())</span> <span class="o">*</span> <span class="n">viewpointpoint_variables</span><span class="p">[</span><span class="n">viewpointpoint_index</span><span class="p">]</span> <span class="k">for</span> <span class="n">viewpointpoint_index</span> <span class="ow">in</span> <span class="n">viewpointpoint_indices</span><span class="p">])</span> <span class="o">&gt;=</span> <span class="mi">1</span>
+            
+            <span class="nb">print</span><span class="p">(</span><span class="s2">&quot;Constructed integer programming problem. Start solving...&quot;</span><span class="p">)</span>
+            <span class="n">ip_problem</span><span class="o">.</span><span class="n">solve</span><span class="p">()</span>
+            
+            <span class="c1"># Process IP result</span>
+            <span class="k">if</span> <span class="ow">not</span> <span class="n">ip_problem</span><span class="o">.</span><span class="n">status</span> <span class="o">==</span> <span class="n">pulp</span><span class="o">.</span><span class="n">const</span><span class="o">.</span><span class="n">LpSolutionOptimal</span><span class="p">:</span>
+                <span class="k">raise</span> <span class="ne">Exception</span><span class="p">(</span><span class="s2">&quot;Could not find optimal solution.&quot;</span><span class="p">)</span>
+            <span class="nb">print</span><span class="p">(</span><span class="s2">&quot;Found optimal solution consisting of </span><span class="si">{}</span><span class="s2"> viewpointpoints&quot;</span><span class="o">.</span><span class="n">format</span><span class="p">(</span><span class="n">pulp</span><span class="o">.</span><span class="n">value</span><span class="p">(</span><span class="n">ip_problem</span><span class="o">.</span><span class="n">objective</span><span class="p">)))</span>
+            <span class="n">output</span> <span class="o">=</span> <span class="nb">set</span><span class="p">()</span>
+            <span class="k">for</span> <span class="n">solved_viewpointpoint_variable</span> <span class="ow">in</span> <span class="n">ip_problem</span><span class="o">.</span><span class="n">variables</span><span class="p">():</span>
+                <span class="k">if</span> <span class="n">solved_viewpointpoint_variable</span><span class="o">.</span><span class="n">varValue</span> <span class="o">==</span> <span class="mi">1</span><span class="p">:</span>  
+                    <span class="n">output</span><span class="o">.</span><span class="n">add</span><span class="p">(</span><span class="n">provided_viewpoints</span><span class="p">[</span><span class="nb">int</span><span class="p">(</span><span class="n">solved_viewpointpoint_variable</span><span class="o">.</span><span class="n">name</span><span class="o">.</span><span class="n">split</span><span class="p">(</span><span class="s2">&quot;_&quot;</span><span class="p">)[</span><span class="o">-</span><span class="mi">1</span><span class="p">])])</span>
+            <span class="k">return</span> <span class="n">output</span>           </div>
+        
+<div class="viewcode-block" id="TrajectoryManager.connect_viewpoints"><a class="viewcode-back" href="../../module_trajectory_manager.html#agiprobot_measurement.trajectory_manager.TrajectoryManager.connect_viewpoints">[docs]</a>    <span class="k">def</span> <span class="nf">connect_viewpoints</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">unordered_viewpoints</span><span class="p">,</span> <span class="n">min_planning_time</span><span class="o">=</span><span class="mf">0.2</span><span class="p">):</span>
+        <span class="sd">&quot;&quot;&quot;</span>
+<span class="sd">        Connect a set of unordered viewpoints with the current state and in between greedily so that they can be executed as fast as possible.</span>
+<span class="sd">        Until all viewpoints are enqueued, do: From the end-point of the last enqueued trajetory, motion plans are calculated to the start-/end-poses</span>
+<span class="sd">        of all unenqueued viewpoint&#39;s measurement-trajectories and the shortest (in time domain) will be selected. </span>
+
+<span class="sd">        :param unordered_viewpoints: Set of viewpoints to be connected where each has a stored measurement-trajectory </span>
+<span class="sd">        :type unordered_viewpoints: set[viewpoint]</span>
+<span class="sd">        :param min_planning_time: Planning time that is used for connection-path-planning (will be increased automatically if no plan was found at first), defaults to 0.2</span>
+<span class="sd">        :type min_planning_time: float, optional</span>
+<span class="sd">        :return: List of ordered and execution-ready viewpoints</span>
+<span class="sd">        :rtype: list[ViewPoint]</span>
+<span class="sd">        &quot;&quot;&quot;</span>
+        <span class="k">if</span> <span class="nb">len</span><span class="p">(</span><span class="n">unordered_viewpoints</span><span class="p">)</span> <span class="o">==</span> <span class="mi">0</span><span class="p">:</span>
+            <span class="k">return</span>
+        <span class="c1"># Convert to list to make &#39;pop&#39; easier</span>
+        <span class="n">unenqueued_viewpoints</span> <span class="o">=</span> <span class="nb">list</span><span class="p">(</span><span class="n">unordered_viewpoints</span><span class="p">)</span>
+
+        <span class="c1"># Output list = ViewPoints with stored shortest inter-viewpoint-paths</span>
+        <span class="n">enqueud_viewpoints</span> <span class="o">=</span> <span class="p">[]</span>
+        
+        <span class="c1"># Introduce initial robot pose as pseudo &quot;viewpoint&quot;</span>
+        <span class="c1"># (it has a trajectory with the current pose as its only (end-)point)</span>
+        <span class="n">initial_pseudo_viewpoint</span> <span class="o">=</span> <span class="n">ViewPoint</span><span class="p">(</span><span class="n">np</span><span class="o">.</span><span class="n">array</span><span class="p">([</span><span class="mi">1</span><span class="p">,</span><span class="mi">0</span><span class="p">,</span><span class="mi">0</span><span class="p">]),</span> <span class="n">np</span><span class="o">.</span><span class="n">array</span><span class="p">([</span><span class="mi">1</span><span class="p">,</span><span class="mi">0</span><span class="p">,</span><span class="mi">0</span><span class="p">]),</span> <span class="mi">0</span><span class="p">,</span> <span class="mi">0</span><span class="p">)</span>
+        <span class="n">pseudo_trajectory</span> <span class="o">=</span> <span class="n">moveit_msgs</span><span class="o">.</span><span class="n">msg</span><span class="o">.</span><span class="n">RobotTrajectory</span><span class="p">()</span>
+        <span class="n">pseudo_end_point</span> <span class="o">=</span> <span class="n">trajectory_msgs</span><span class="o">.</span><span class="n">msg</span><span class="o">.</span><span class="n">JointTrajectoryPoint</span><span class="p">()</span>
+        <span class="n">pseudo_end_point</span><span class="o">.</span><span class="n">positions</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">group</span><span class="o">.</span><span class="n">get_current_joint_values</span><span class="p">()</span>
+        <span class="n">pseudo_end_point</span><span class="o">.</span><span class="n">time_from_start</span> <span class="o">=</span> <span class="n">rospy</span><span class="o">.</span><span class="n">Duration</span><span class="p">(</span><span class="mf">1e9</span><span class="p">)</span>
+        <span class="n">pseudo_trajectory</span><span class="o">.</span><span class="n">joint_trajectory</span><span class="o">.</span><span class="n">joint_names</span> <span class="o">=</span> <span class="n">unenqueued_viewpoints</span><span class="p">[</span><span class="mi">0</span><span class="p">]</span><span class="o">.</span><span class="n">get_trajectory_for_measurement</span><span class="p">()</span><span class="o">.</span><span class="n">joint_trajectory</span><span class="o">.</span><span class="n">joint_names</span>
+        <span class="n">pseudo_trajectory</span><span class="o">.</span><span class="n">joint_trajectory</span><span class="o">.</span><span class="n">points</span><span class="o">.</span><span class="n">append</span><span class="p">(</span><span class="n">pseudo_end_point</span><span class="p">)</span>
+        <span class="n">initial_pseudo_viewpoint</span><span class="o">.</span><span class="n">set_trajectory_for_measurement</span><span class="p">(</span><span class="n">pseudo_trajectory</span><span class="p">)</span>       
+        <span class="n">enqueud_viewpoints</span><span class="o">.</span><span class="n">append</span><span class="p">(</span><span class="n">initial_pseudo_viewpoint</span><span class="p">)</span>
+
+        <span class="k">while</span> <span class="nb">len</span><span class="p">(</span><span class="n">unenqueued_viewpoints</span><span class="p">)</span> <span class="o">!=</span> <span class="mi">0</span><span class="p">:</span>
+            <span class="c1"># Set start state for planning to the last pose of the previously enqueued trajectory</span>
+            <span class="n">temporary_start_state</span> <span class="o">=</span> <span class="n">moveit_msgs</span><span class="o">.</span><span class="n">msg</span><span class="o">.</span><span class="n">RobotState</span><span class="p">()</span>
+            <span class="n">temporary_start_state</span><span class="o">.</span><span class="n">joint_state</span><span class="o">.</span><span class="n">position</span> <span class="o">=</span> <span class="n">enqueud_viewpoints</span><span class="p">[</span><span class="o">-</span><span class="mi">1</span><span class="p">]</span><span class="o">.</span><span class="n">get_trajectory_for_measurement</span><span class="p">()</span><span class="o">.</span><span class="n">joint_trajectory</span><span class="o">.</span><span class="n">points</span><span class="p">[</span><span class="o">-</span><span class="mi">1</span><span class="p">]</span><span class="o">.</span><span class="n">positions</span>
+            <span class="n">temporary_start_state</span><span class="o">.</span><span class="n">joint_state</span><span class="o">.</span><span class="n">name</span> <span class="o">=</span> <span class="n">enqueud_viewpoints</span><span class="p">[</span><span class="o">-</span><span class="mi">1</span><span class="p">]</span><span class="o">.</span><span class="n">get_trajectory_for_measurement</span><span class="p">()</span><span class="o">.</span><span class="n">joint_trajectory</span><span class="o">.</span><span class="n">joint_names</span>
+            <span class="bp">self</span><span class="o">.</span><span class="n">group</span><span class="o">.</span><span class="n">set_start_state</span><span class="p">(</span><span class="n">temporary_start_state</span><span class="p">)</span>
+            <span class="bp">self</span><span class="o">.</span><span class="n">group</span><span class="o">.</span><span class="n">set_planning_time</span><span class="p">(</span><span class="n">min_planning_time</span><span class="p">)</span>
+            
+            <span class="c1"># For each unenqueued viewpoint: Calculate a path to the start- and end-point of its measurement trajectory and remember the time-shortest</span>
+            <span class="c1"># trajectory by index in the unenqueued-list (as well as the corresponding trajectory and if the path was calculated to the end-point -&gt; reverse_flag)</span>
+            <span class="n">min_index</span> <span class="o">=</span> <span class="kc">None</span>
+            <span class="n">reverse_flag</span> <span class="o">=</span> <span class="kc">False</span>
+            <span class="n">min_plan</span> <span class="o">=</span> <span class="n">pseudo_trajectory</span>
+            <span class="k">for</span> <span class="n">index</span><span class="p">,</span> <span class="n">viewpoint</span> <span class="ow">in</span> <span class="nb">enumerate</span><span class="p">(</span><span class="n">unenqueued_viewpoints</span><span class="p">):</span>
+                <span class="bp">self</span><span class="o">.</span><span class="n">group</span><span class="o">.</span><span class="n">set_joint_value_target</span><span class="p">(</span><span class="n">viewpoint</span><span class="o">.</span><span class="n">get_trajectory_for_measurement</span><span class="p">()</span><span class="o">.</span><span class="n">joint_trajectory</span><span class="o">.</span><span class="n">points</span><span class="p">[</span><span class="mi">0</span><span class="p">]</span><span class="o">.</span><span class="n">positions</span><span class="p">)</span>
+                
+                <span class="n">plan_result</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">group</span><span class="o">.</span><span class="n">plan</span><span class="p">()</span>
+                <span class="k">if</span> <span class="n">plan_result</span><span class="p">[</span><span class="mi">0</span><span class="p">]</span> <span class="ow">and</span> <span class="p">(</span><span class="n">min_plan</span><span class="o">.</span><span class="n">joint_trajectory</span><span class="o">.</span><span class="n">points</span><span class="p">[</span><span class="o">-</span><span class="mi">1</span><span class="p">]</span><span class="o">.</span><span class="n">time_from_start</span> <span class="o">&gt;</span> <span class="n">plan_result</span><span class="p">[</span><span class="mi">1</span><span class="p">]</span><span class="o">.</span><span class="n">joint_trajectory</span><span class="o">.</span><span class="n">points</span><span class="p">[</span><span class="o">-</span><span class="mi">1</span><span class="p">]</span><span class="o">.</span><span class="n">time_from_start</span> <span class="ow">or</span> <span class="n">min_index</span> <span class="ow">is</span> <span class="kc">None</span><span class="p">):</span>
+                    <span class="n">min_plan</span> <span class="o">=</span> <span class="n">plan_result</span><span class="p">[</span><span class="mi">1</span><span class="p">]</span>
+                    <span class="n">min_index</span> <span class="o">=</span> <span class="n">index</span>
+                    <span class="n">reverse_flag</span> <span class="o">=</span> <span class="kc">False</span>
+                
+                <span class="bp">self</span><span class="o">.</span><span class="n">group</span><span class="o">.</span><span class="n">set_joint_value_target</span><span class="p">(</span><span class="n">viewpoint</span><span class="o">.</span><span class="n">get_trajectory_for_measurement</span><span class="p">()</span><span class="o">.</span><span class="n">joint_trajectory</span><span class="o">.</span><span class="n">points</span><span class="p">[</span><span class="o">-</span><span class="mi">1</span><span class="p">]</span><span class="o">.</span><span class="n">positions</span><span class="p">)</span>
+                
+                <span class="n">plan_result</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">group</span><span class="o">.</span><span class="n">plan</span><span class="p">()</span>
+                <span class="k">if</span> <span class="n">plan_result</span><span class="p">[</span><span class="mi">0</span><span class="p">]</span> <span class="ow">and</span> <span class="p">(</span><span class="n">min_plan</span><span class="o">.</span><span class="n">joint_trajectory</span><span class="o">.</span><span class="n">points</span><span class="p">[</span><span class="o">-</span><span class="mi">1</span><span class="p">]</span><span class="o">.</span><span class="n">time_from_start</span> <span class="o">&gt;</span> <span class="n">plan_result</span><span class="p">[</span><span class="mi">1</span><span class="p">]</span><span class="o">.</span><span class="n">joint_trajectory</span><span class="o">.</span><span class="n">points</span><span class="p">[</span><span class="o">-</span><span class="mi">1</span><span class="p">]</span><span class="o">.</span><span class="n">time_from_start</span> <span class="ow">or</span> <span class="n">min_index</span> <span class="ow">is</span> <span class="kc">None</span><span class="p">):</span>
+                    <span class="n">min_plan</span> <span class="o">=</span> <span class="n">plan_result</span><span class="p">[</span><span class="mi">1</span><span class="p">]</span>
+                    <span class="n">min_index</span> <span class="o">=</span> <span class="n">index</span>
+                    <span class="n">reverse_flag</span> <span class="o">=</span> <span class="kc">True</span>
+            <span class="k">if</span> <span class="n">min_index</span> <span class="ow">is</span> <span class="ow">not</span> <span class="kc">None</span><span class="p">:</span>
+                <span class="c1"># Shortest connection-plan found -&gt; Enqueuing (and if necessary reverting)</span>
+                <span class="n">next_viewpoint</span> <span class="o">=</span> <span class="n">unenqueued_viewpoints</span><span class="o">.</span><span class="n">pop</span><span class="p">(</span><span class="n">min_index</span><span class="p">)</span>
+                <span class="k">if</span> <span class="n">reverse_flag</span><span class="p">:</span>
+                    <span class="n">next_viewpoint</span><span class="o">.</span><span class="n">reverse_trajectory_for_measurement</span><span class="p">()</span>   
+                <span class="n">next_viewpoint</span><span class="o">.</span><span class="n">set_trajectory_to_viewpoint</span><span class="p">(</span><span class="n">min_plan</span><span class="p">)</span>
+                <span class="n">enqueud_viewpoints</span><span class="o">.</span><span class="n">append</span><span class="p">(</span><span class="n">next_viewpoint</span><span class="p">)</span>
+                <span class="c1"># Reset planning time</span>
+                <span class="bp">self</span><span class="o">.</span><span class="n">group</span><span class="o">.</span><span class="n">set_planning_time</span><span class="p">(</span><span class="n">min_planning_time</span><span class="p">)</span>
+                <span class="nb">print</span><span class="p">(</span><span class="s2">&quot;Enqueued viewpointpoint-trajectory (</span><span class="si">{}</span><span class="s2"> left)&quot;</span><span class="o">.</span><span class="n">format</span><span class="p">(</span><span class="nb">len</span><span class="p">(</span><span class="n">unenqueued_viewpoints</span><span class="p">)))</span>
+            <span class="k">else</span><span class="p">:</span>
+                <span class="c1"># No solution has been found -&gt; Increase planning time to improve success-chances for the next iteration</span>
+                <span class="bp">self</span><span class="o">.</span><span class="n">group</span><span class="o">.</span><span class="n">set_planning_time</span><span class="p">(</span><span class="n">min_planning_time</span> <span class="o">+</span> <span class="bp">self</span><span class="o">.</span><span class="n">group</span><span class="o">.</span><span class="n">get_planning_time</span><span class="p">())</span>
+        <span class="k">return</span> <span class="n">enqueud_viewpoints</span><span class="p">[</span><span class="mi">1</span><span class="p">:]</span></div>
+
+
+
+<div class="viewcode-block" id="TrajectoryManager.execute"><a class="viewcode-back" href="../../module_trajectory_manager.html#agiprobot_measurement.trajectory_manager.TrajectoryManager.execute">[docs]</a>    <span class="k">def</span> <span class="nf">execute</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">execution_list</span><span class="p">,</span> <span class="n">surface_points</span><span class="o">=</span><span class="kc">None</span><span class="p">):</span>
+        <span class="sd">&quot;&quot;&quot;</span>
+<span class="sd">        Execute a list of RobotTrajectories or ViewPoints via MoveIt. When problems occur during execution,</span>
+<span class="sd">        the robot will be stopped and an exception will be raised. When executing from a list of viewpoints, the currently measured surface_points</span>
+<span class="sd">        are published in &quot;/currently_measured_points&quot; during execution.</span>
+
+<span class="sd">        :param execution_list: List of RobotTrajectories or viewpoints that can be executed consecutively (the next segment&#39;s start point is the last segment&#39;s end point)</span>
+<span class="sd">        :type execution_list: list[moveit_msgs/RobotTrajectory] or list[ViewPoint]</span>
+<span class="sd">        :param surface_points: List of the actual sampled surface points, defaults to None</span>
+<span class="sd">        :type surface_points: list[numpy.array], optional</span>
+<span class="sd">        &quot;&quot;&quot;</span>
+        
+        <span class="c1"># Only create publisher if surface_points are available</span>
+        <span class="k">if</span> <span class="n">surface_points</span> <span class="ow">is</span> <span class="ow">not</span> <span class="kc">None</span><span class="p">:</span>
+            <span class="n">measurement_pub</span> <span class="o">=</span> <span class="n">rospy</span><span class="o">.</span><span class="n">Publisher</span><span class="p">(</span><span class="s2">&quot;/currently_measured_points&quot;</span><span class="p">,</span> <span class="n">sensor_msgs</span><span class="o">.</span><span class="n">msg</span><span class="o">.</span><span class="n">PointCloud</span><span class="p">,</span> <span class="n">queue_size</span><span class="o">=</span><span class="mi">1</span><span class="p">,</span> <span class="n">latch</span><span class="o">=</span><span class="kc">True</span><span class="p">)</span>
+            <span class="n">point_message</span> <span class="o">=</span> <span class="n">sensor_msgs</span><span class="o">.</span><span class="n">msg</span><span class="o">.</span><span class="n">PointCloud</span><span class="p">()</span>
+            <span class="n">point_message</span><span class="o">.</span><span class="n">header</span><span class="o">.</span><span class="n">frame_id</span> <span class="o">=</span> <span class="s2">&quot;world&quot;</span>
+        
+        <span class="c1"># Control stitching: Only active during trajectory-execution (and not when steering between trajectories)</span>
+        <span class="n">rospy</span><span class="o">.</span><span class="n">wait_for_service</span><span class="p">(</span><span class="s2">&quot;/switch_stitch_mode&quot;</span><span class="p">,</span> <span class="mf">5.0</span><span class="p">)</span>
+        <span class="n">stitch_service</span> <span class="o">=</span> <span class="n">rospy</span><span class="o">.</span><span class="n">ServiceProxy</span><span class="p">(</span><span class="s2">&quot;/switch_stitch_mode&quot;</span><span class="p">,</span> <span class="n">SetBool</span><span class="p">)</span>
+        
+        <span class="c1"># Flag for keeping track about what is executed at the moment (when execution_list consists of RobotTrajectories, </span>
+        <span class="c1"># they shifting between steering-to-measurement-segment [False] and measurement-trajectory-segment [True])</span>
+        <span class="n">trajectory_flag</span> <span class="o">=</span> <span class="kc">False</span>
+        
+        <span class="c1"># Consecutively execute segments/ViewPoints with short breaks between every trajectory-execution to enure nothing is moving anymore</span>
+        <span class="k">for</span> <span class="n">i</span><span class="p">,</span> <span class="n">execution_segment</span> <span class="ow">in</span> <span class="nb">enumerate</span><span class="p">(</span><span class="n">execution_list</span><span class="p">):</span>
+            <span class="k">if</span> <span class="nb">isinstance</span><span class="p">(</span><span class="n">execution_segment</span><span class="p">,</span> <span class="n">ViewPoint</span><span class="p">):</span>
+                <span class="c1"># Publish surface points, when given</span>
+                <span class="k">if</span> <span class="n">surface_points</span> <span class="ow">is</span> <span class="ow">not</span> <span class="kc">None</span><span class="p">:</span>
+                    <span class="n">point_message</span><span class="o">.</span><span class="n">points</span> <span class="o">=</span> <span class="p">[]</span>
+                    <span class="k">for</span> <span class="n">point_index</span> <span class="ow">in</span> <span class="n">execution_segment</span><span class="o">.</span><span class="n">get_measurable_surface_point_indices</span><span class="p">():</span>
+                        <span class="n">point_message</span><span class="o">.</span><span class="n">points</span><span class="o">.</span><span class="n">append</span><span class="p">(</span><span class="n">geometry_msgs</span><span class="o">.</span><span class="n">msg</span><span class="o">.</span><span class="n">Point</span><span class="p">(</span><span class="o">*</span><span class="p">(</span><span class="n">surface_points</span><span class="p">[</span><span class="n">point_index</span><span class="p">]</span> <span class="o">/</span> <span class="mi">1000</span><span class="p">)))</span>
+                    <span class="n">measurement_pub</span><span class="o">.</span><span class="n">publish</span><span class="p">(</span><span class="n">point_message</span><span class="p">)</span>
+                
+                <span class="c1"># Firstly, steer to the start point of the measurement-trajectory</span>
+                <span class="n">trajectory</span> <span class="o">=</span> <span class="n">execution_segment</span><span class="o">.</span><span class="n">get_trajectory_to_viewpoint</span><span class="p">()</span>
+                <span class="nb">print</span><span class="p">(</span><span class="s2">&quot;Steering to next measurement-trajectory (time: </span><span class="si">{}</span><span class="s2">s)...&quot;</span><span class="o">.</span><span class="n">format</span><span class="p">(</span><span class="n">trajectory</span><span class="o">.</span><span class="n">joint_trajectory</span><span class="o">.</span><span class="n">points</span><span class="p">[</span><span class="o">-</span><span class="mi">1</span><span class="p">]</span><span class="o">.</span><span class="n">time_from_start</span><span class="o">.</span><span class="n">to_sec</span><span class="p">()))</span>
+                <span class="n">stitch_service</span><span class="o">.</span><span class="n">call</span><span class="p">(</span><span class="n">SetBoolRequest</span><span class="p">(</span><span class="n">data</span><span class="o">=</span><span class="kc">False</span><span class="p">))</span>
+                <span class="k">if</span> <span class="ow">not</span> <span class="bp">self</span><span class="o">.</span><span class="n">group</span><span class="o">.</span><span class="n">execute</span><span class="p">(</span><span class="n">trajectory</span><span class="p">):</span>
+                    <span class="bp">self</span><span class="o">.</span><span class="n">group</span><span class="o">.</span><span class="n">stop</span><span class="p">()</span>
+                    <span class="k">raise</span> <span class="ne">Exception</span><span class="p">(</span><span class="s2">&quot;Failed to steer to trajectory&quot;</span><span class="p">)</span>
+                <span class="n">rospy</span><span class="o">.</span><span class="n">sleep</span><span class="p">(</span><span class="mf">0.1</span><span class="p">)</span>
+
+                <span class="c1"># Secondly, execute the measurement-trajectory</span>
+                <span class="n">trajectory</span> <span class="o">=</span> <span class="n">execution_segment</span><span class="o">.</span><span class="n">get_trajectory_for_measurement</span><span class="p">()</span>
+                <span class="nb">print</span><span class="p">(</span><span class="s2">&quot;Executing measurement-trajectory (time: </span><span class="si">{}</span><span class="s2">s)...&quot;</span><span class="o">.</span><span class="n">format</span><span class="p">(</span><span class="n">trajectory</span><span class="o">.</span><span class="n">joint_trajectory</span><span class="o">.</span><span class="n">points</span><span class="p">[</span><span class="o">-</span><span class="mi">1</span><span class="p">]</span><span class="o">.</span><span class="n">time_from_start</span><span class="o">.</span><span class="n">to_sec</span><span class="p">()))</span>
+                <span class="n">stitch_service</span><span class="o">.</span><span class="n">call</span><span class="p">(</span><span class="n">SetBoolRequest</span><span class="p">(</span><span class="n">data</span><span class="o">=</span><span class="kc">True</span><span class="p">))</span>
+                <span class="k">if</span> <span class="ow">not</span> <span class="bp">self</span><span class="o">.</span><span class="n">group</span><span class="o">.</span><span class="n">execute</span><span class="p">(</span><span class="n">trajectory</span><span class="p">):</span>
+                    <span class="bp">self</span><span class="o">.</span><span class="n">group</span><span class="o">.</span><span class="n">stop</span><span class="p">()</span>
+                    <span class="k">raise</span> <span class="ne">Exception</span><span class="p">(</span><span class="s2">&quot;Failed to execute trajectory&quot;</span><span class="p">)</span>
+                <span class="n">rospy</span><span class="o">.</span><span class="n">sleep</span><span class="p">(</span><span class="mf">0.1</span><span class="p">)</span>
+
+                <span class="nb">print</span><span class="p">(</span><span class="s2">&quot;Executed viewpoint </span><span class="si">{}</span><span class="s2"> of </span><span class="si">{}</span><span class="s2">&quot;</span><span class="o">.</span><span class="n">format</span><span class="p">(</span><span class="n">i</span> <span class="o">+</span> <span class="mi">1</span><span class="p">,</span> <span class="nb">len</span><span class="p">(</span><span class="n">execution_list</span><span class="p">)))</span>
+                
+                
+            <span class="k">if</span> <span class="nb">isinstance</span><span class="p">(</span><span class="n">execution_segment</span><span class="p">,</span> <span class="n">moveit_msgs</span><span class="o">.</span><span class="n">msg</span><span class="o">.</span><span class="n">RobotTrajectory</span><span class="p">):</span>
+                <span class="k">if</span> <span class="n">trajectory_flag</span><span class="p">:</span>
+                    <span class="n">stitch_service</span><span class="o">.</span><span class="n">call</span><span class="p">(</span><span class="n">SetBoolRequest</span><span class="p">(</span><span class="n">data</span><span class="o">=</span><span class="kc">True</span><span class="p">))</span>
+                    <span class="nb">print</span><span class="p">(</span><span class="s2">&quot;Executing measurement-trajectory (time: </span><span class="si">{}</span><span class="s2">s)...&quot;</span><span class="o">.</span><span class="n">format</span><span class="p">(</span><span class="n">execution_segment</span><span class="o">.</span><span class="n">joint_trajectory</span><span class="o">.</span><span class="n">points</span><span class="p">[</span><span class="o">-</span><span class="mi">1</span><span class="p">]</span><span class="o">.</span><span class="n">time_from_start</span><span class="o">.</span><span class="n">to_sec</span><span class="p">()))</span>
+                <span class="k">else</span><span class="p">:</span>
+                    <span class="n">stitch_service</span><span class="o">.</span><span class="n">call</span><span class="p">(</span><span class="n">SetBoolRequest</span><span class="p">(</span><span class="n">data</span><span class="o">=</span><span class="kc">False</span><span class="p">))</span>
+                    <span class="nb">print</span><span class="p">(</span><span class="s2">&quot;Steering to next measurement-trajectory (time: </span><span class="si">{}</span><span class="s2">s)...&quot;</span><span class="o">.</span><span class="n">format</span><span class="p">(</span><span class="n">execution_segment</span><span class="o">.</span><span class="n">joint_trajectory</span><span class="o">.</span><span class="n">points</span><span class="p">[</span><span class="o">-</span><span class="mi">1</span><span class="p">]</span><span class="o">.</span><span class="n">time_from_start</span><span class="o">.</span><span class="n">to_sec</span><span class="p">()))</span>
+                <span class="k">if</span> <span class="ow">not</span> <span class="bp">self</span><span class="o">.</span><span class="n">group</span><span class="o">.</span><span class="n">execute</span><span class="p">(</span><span class="n">execution_segment</span><span class="p">):</span>
+                    <span class="bp">self</span><span class="o">.</span><span class="n">group</span><span class="o">.</span><span class="n">stop</span><span class="p">()</span>
+                    <span class="k">raise</span> <span class="ne">Exception</span><span class="p">(</span><span class="s2">&quot;Failed to execute path segment&quot;</span><span class="p">)</span>
+                <span class="nb">print</span><span class="p">(</span><span class="s2">&quot;Executed segment </span><span class="si">{}</span><span class="s2"> of </span><span class="si">{}</span><span class="s2">&quot;</span><span class="o">.</span><span class="n">format</span><span class="p">(</span><span class="n">i</span> <span class="o">+</span> <span class="mi">1</span><span class="p">,</span> <span class="nb">len</span><span class="p">(</span><span class="n">execution_list</span><span class="p">)))</span>
+                <span class="n">rospy</span><span class="o">.</span><span class="n">sleep</span><span class="p">(</span><span class="mf">0.1</span><span class="p">)</span>
+                <span class="n">trajectory_flag</span> <span class="o">=</span> <span class="ow">not</span> <span class="n">trajectory_flag</span>
+        
+        <span class="c1"># Finally, ensure stitching is disabled     </span>
+        <span class="n">stitch_service</span><span class="o">.</span><span class="n">call</span><span class="p">(</span><span class="n">SetBoolRequest</span><span class="p">(</span><span class="n">data</span><span class="o">=</span><span class="kc">False</span><span class="p">))</span>   </div>
+
+    <span class="k">def</span> <span class="nf">perform_all</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">target_mesh_filename</span><span class="p">,</span> <span class="n">density</span><span class="p">,</span> <span class="n">orientations_around_boresight</span><span class="p">,</span> <span class="n">uncertainty_threshold</span><span class="p">):</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">load_target_mesh</span><span class="p">(</span><span class="n">target_mesh_filename</span><span class="p">,</span> <span class="n">transform</span><span class="o">=</span><span class="n">trimesh</span><span class="o">.</span><span class="n">transformations</span><span class="o">.</span><span class="n">translation_matrix</span><span class="p">(</span><span class="n">OFFSET</span><span class="p">))</span>
+        <span class="c1"># surface_pts, viewpoints  = self.generate_samples_and_viewpoints(density, uncertainty_threshold, orientations_around_boresight)</span>
+        <span class="c1"># scp_viewpoints = self.solve_scp(viewpoints, &quot;greedy&quot;)</span>
+        <span class="c1"># connected_viewpoints = self.connect_viewpoints(scp_viewpoints)</span>
+        <span class="c1">#execution_plan = self.convert_viewpointlist_to_execution_plan(connected_viewpoints)</span>
+        <span class="c1">#self.store_execution_plan(&quot;/home/svenbecker/Bachelorarbeit/test/stored_plans/motor_high_res.yaml&quot;, execution_plan, {&quot;Time of calculation&quot;: &quot;Jetzt&quot;})</span>
+        <span class="c1"># raw_input(&quot;JETZT&quot;)</span>
+        <span class="n">execution_plan</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">load_execution_plan</span><span class="p">(</span><span class="n">os</span><span class="o">.</span><span class="n">path</span><span class="o">.</span><span class="n">join</span><span class="p">(</span><span class="n">rospkg</span><span class="o">.</span><span class="n">RosPack</span><span class="p">()</span><span class="o">.</span><span class="n">get_path</span><span class="p">(</span><span class="s2">&quot;agiprobot_measurement&quot;</span><span class="p">),</span> <span class="s2">&quot;benchmark_results/execution_plan_objectA_wuerfel_rho_001_solver_IP_basic_angels_around_boresight_3.yaml&quot;</span><span class="p">))</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">execute</span><span class="p">(</span><span class="n">execution_plan</span><span class="p">)</span></div>
+        
+<span class="k">if</span> <span class="vm">__name__</span> <span class="o">==</span> <span class="s2">&quot;__main__&quot;</span><span class="p">:</span>
+    <span class="k">def</span> <span class="nf">signal_handler</span><span class="p">(</span><span class="n">signum_a</span><span class="p">,</span> <span class="n">signum_b</span><span class="p">):</span>
+        <span class="n">exit</span><span class="p">()</span>
+    <span class="n">signal</span><span class="o">.</span><span class="n">signal</span><span class="p">(</span><span class="n">signal</span><span class="o">.</span><span class="n">SIGINT</span><span class="p">,</span> <span class="n">signal_handler</span><span class="p">)</span>
+    <span class="n">tm</span> <span class="o">=</span> <span class="n">TrajectoryManager</span><span class="p">()</span>
+    <span class="n">tm</span><span class="o">.</span><span class="n">perform_all</span><span class="p">(</span><span class="n">os</span><span class="o">.</span><span class="n">path</span><span class="o">.</span><span class="n">join</span><span class="p">(</span><span class="n">rospkg</span><span class="o">.</span><span class="n">RosPack</span><span class="p">()</span><span class="o">.</span><span class="n">get_path</span><span class="p">(</span><span class="s2">&quot;agiprobot_measurement&quot;</span><span class="p">),</span> <span class="s2">&quot;benchmark_meshes/objectA_wuerfel.stl&quot;</span><span class="p">),</span> <span class="mf">0.01</span><span class="p">,</span> <span class="mi">3</span><span class="p">,</span> <span class="mf">100e-3</span><span class="p">)</span>
+    <span class="n">rospy</span><span class="o">.</span><span class="n">sleep</span><span class="p">(</span><span class="mi">1</span><span class="p">)</span>
+    <span class="n">rospy</span><span class="o">.</span><span class="n">spin</span><span class="p">()</span>
+    
+</pre></div>
+
+           </div>
+           
+          </div>
+          <footer>
+
+  <hr/>
+
+  <div role="contentinfo">
+    <p>
+        &#169; Copyright 2021, Sven Becker.
+
+    </p>
+  </div>
+    
+    
+    
+    Built with <a href="https://www.sphinx-doc.org/">Sphinx</a> using a
+    
+    <a href="https://github.com/readthedocs/sphinx_rtd_theme">theme</a>
+    
+    provided by <a href="https://readthedocs.org">Read the Docs</a>. 
+
+</footer>
+        </div>
+      </div>
+
+    </section>
+
+  </div>
+  
+
+  <script type="text/javascript">
+      jQuery(function () {
+          SphinxRtdTheme.Navigation.enable(true);
+      });
+  </script>
+
+  
+  
+    
+   
+
+</body>
+</html>

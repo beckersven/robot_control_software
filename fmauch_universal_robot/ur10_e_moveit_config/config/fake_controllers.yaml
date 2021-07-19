@@ -1,5 +1,7 @@
+rate: 10
 controller_list:
   - name: fake_manipulator_controller
+    type: interpolate
     joints:
       - shoulder_pan_joint
       - shoulder_lift_joint
@@ -10,3 +12,6 @@ controller_list:
   - name: fake_endeffector_controller
     joints:
       []
+initial:
+  - group: manipulator
+    pose:  angled

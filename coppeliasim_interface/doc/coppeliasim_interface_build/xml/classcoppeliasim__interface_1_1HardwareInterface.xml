@@ -1,0 +1,776 @@
+<?xml version='1.0' encoding='UTF-8' standalone='no'?>
+<doxygen xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xsi:noNamespaceSchemaLocation="compound.xsd" version="1.8.13">
+  <compounddef id="classcoppeliasim__interface_1_1HardwareInterface" kind="class" language="C++" prot="public">
+    <compoundname>coppeliasim_interface::HardwareInterface</compoundname>
+    <basecompoundref prot="public" virt="non-virtual">RobotHW</basecompoundref>
+    <includes refid="hardware__interface_8h" local="no">hardware_interface.h</includes>
+      <sectiondef kind="private-attrib">
+      <memberdef kind="variable" id="classcoppeliasim__interface_1_1HardwareInterface_1a45c439e4d458905c4ba7bfd00229163d" prot="private" static="no" mutable="no">
+        <type>std::vector&lt; simxInt &gt;</type>
+        <definition>std::vector&lt;simxInt&gt; coppeliasim_interface::HardwareInterface::joint_handles_</definition>
+        <argsstring></argsstring>
+        <name>joint_handles_</name>
+        <briefdescription>
+<para>CoppeliaSim handles for each commanded joint. </para>        </briefdescription>
+        <detaileddescription>
+        </detaileddescription>
+        <inbodydescription>
+        </inbodydescription>
+        <location file="/home/svenbecker/Bachelorarbeit/code/catkin_ws/src/robot_control_software/coppeliasim_interface/include/hardware_interface.h" line="140" column="1" bodyfile="/home/svenbecker/Bachelorarbeit/code/catkin_ws/src/robot_control_software/coppeliasim_interface/include/hardware_interface.h" bodystart="140" bodyend="-1"/>
+      </memberdef>
+      <memberdef kind="variable" id="classcoppeliasim__interface_1_1HardwareInterface_1af28293177115e84248f2873fe447d3c3" prot="private" static="no" mutable="no">
+        <type>std::vector&lt; double &gt;</type>
+        <definition>std::vector&lt;double&gt; coppeliasim_interface::HardwareInterface::joint_velocity_command_</definition>
+        <argsstring></argsstring>
+        <name>joint_velocity_command_</name>
+        <briefdescription>
+<para>Target joint velocity for each commanded joint (only for velocity-control) </para>        </briefdescription>
+        <detaileddescription>
+        </detaileddescription>
+        <inbodydescription>
+        </inbodydescription>
+        <location file="/home/svenbecker/Bachelorarbeit/code/catkin_ws/src/robot_control_software/coppeliasim_interface/include/hardware_interface.h" line="145" column="1" bodyfile="/home/svenbecker/Bachelorarbeit/code/catkin_ws/src/robot_control_software/coppeliasim_interface/include/hardware_interface.h" bodystart="145" bodyend="-1"/>
+      </memberdef>
+      <memberdef kind="variable" id="classcoppeliasim__interface_1_1HardwareInterface_1a569e3225463d6f062c3646a04a9b7ad3" prot="private" static="no" mutable="no">
+        <type>std::vector&lt; double &gt;</type>
+        <definition>std::vector&lt;double&gt; coppeliasim_interface::HardwareInterface::joint_position_command_</definition>
+        <argsstring></argsstring>
+        <name>joint_position_command_</name>
+        <briefdescription>
+<para>Target joint position for each commanded joint (only for position-control) </para>        </briefdescription>
+        <detaileddescription>
+        </detaileddescription>
+        <inbodydescription>
+        </inbodydescription>
+        <location file="/home/svenbecker/Bachelorarbeit/code/catkin_ws/src/robot_control_software/coppeliasim_interface/include/hardware_interface.h" line="150" column="1" bodyfile="/home/svenbecker/Bachelorarbeit/code/catkin_ws/src/robot_control_software/coppeliasim_interface/include/hardware_interface.h" bodystart="150" bodyend="-1"/>
+      </memberdef>
+      <memberdef kind="variable" id="classcoppeliasim__interface_1_1HardwareInterface_1ab5d052ecada55ae02a60b3118c2a503e" prot="private" static="no" mutable="no">
+        <type>std::vector&lt; double &gt;</type>
+        <definition>std::vector&lt;double&gt; coppeliasim_interface::HardwareInterface::joint_positions_</definition>
+        <argsstring></argsstring>
+        <name>joint_positions_</name>
+        <briefdescription>
+<para>Joint position of each commanded joint. </para>        </briefdescription>
+        <detaileddescription>
+        </detaileddescription>
+        <inbodydescription>
+        </inbodydescription>
+        <location file="/home/svenbecker/Bachelorarbeit/code/catkin_ws/src/robot_control_software/coppeliasim_interface/include/hardware_interface.h" line="155" column="1" bodyfile="/home/svenbecker/Bachelorarbeit/code/catkin_ws/src/robot_control_software/coppeliasim_interface/include/hardware_interface.h" bodystart="155" bodyend="-1"/>
+      </memberdef>
+      <memberdef kind="variable" id="classcoppeliasim__interface_1_1HardwareInterface_1a4707518432603367aa9c4a95898faea6" prot="private" static="no" mutable="no">
+        <type>std::vector&lt; double &gt;</type>
+        <definition>std::vector&lt;double&gt; coppeliasim_interface::HardwareInterface::joint_efforts_</definition>
+        <argsstring></argsstring>
+        <name>joint_efforts_</name>
+        <briefdescription>
+<para>Torque of each commanded joint. </para>        </briefdescription>
+        <detaileddescription>
+        </detaileddescription>
+        <inbodydescription>
+        </inbodydescription>
+        <location file="/home/svenbecker/Bachelorarbeit/code/catkin_ws/src/robot_control_software/coppeliasim_interface/include/hardware_interface.h" line="160" column="1" bodyfile="/home/svenbecker/Bachelorarbeit/code/catkin_ws/src/robot_control_software/coppeliasim_interface/include/hardware_interface.h" bodystart="160" bodyend="-1"/>
+      </memberdef>
+      <memberdef kind="variable" id="classcoppeliasim__interface_1_1HardwareInterface_1a96c84799b6435c7837a117688b55248b" prot="private" static="no" mutable="no">
+        <type>std::vector&lt; double &gt;</type>
+        <definition>std::vector&lt;double&gt; coppeliasim_interface::HardwareInterface::joint_velocities_</definition>
+        <argsstring></argsstring>
+        <name>joint_velocities_</name>
+        <briefdescription>
+<para>(Angular) velocities of each commanded joint </para>        </briefdescription>
+        <detaileddescription>
+        </detaileddescription>
+        <inbodydescription>
+        </inbodydescription>
+        <location file="/home/svenbecker/Bachelorarbeit/code/catkin_ws/src/robot_control_software/coppeliasim_interface/include/hardware_interface.h" line="165" column="1" bodyfile="/home/svenbecker/Bachelorarbeit/code/catkin_ws/src/robot_control_software/coppeliasim_interface/include/hardware_interface.h" bodystart="165" bodyend="-1"/>
+      </memberdef>
+      <memberdef kind="variable" id="classcoppeliasim__interface_1_1HardwareInterface_1a53f1b964f80741a270ece8252ba8beaf" prot="private" static="no" mutable="no">
+        <type>std::vector&lt; std::string &gt;</type>
+        <definition>std::vector&lt;std::string&gt; coppeliasim_interface::HardwareInterface::joint_names_</definition>
+        <argsstring></argsstring>
+        <name>joint_names_</name>
+        <briefdescription>
+<para>Name of each commanded joint. </para>        </briefdescription>
+        <detaileddescription>
+        </detaileddescription>
+        <inbodydescription>
+        </inbodydescription>
+        <location file="/home/svenbecker/Bachelorarbeit/code/catkin_ws/src/robot_control_software/coppeliasim_interface/include/hardware_interface.h" line="170" column="1" bodyfile="/home/svenbecker/Bachelorarbeit/code/catkin_ws/src/robot_control_software/coppeliasim_interface/include/hardware_interface.h" bodystart="170" bodyend="-1"/>
+      </memberdef>
+      <memberdef kind="variable" id="classcoppeliasim__interface_1_1HardwareInterface_1a8ad63a42a0427128f8205238c8cedff5" prot="private" static="no" mutable="no">
+        <type>bool</type>
+        <definition>bool coppeliasim_interface::HardwareInterface::position_controller_running_</definition>
+        <argsstring></argsstring>
+        <name>position_controller_running_</name>
+        <briefdescription>
+<para>Flag indicating whether position controller is running. </para>        </briefdescription>
+        <detaileddescription>
+        </detaileddescription>
+        <inbodydescription>
+        </inbodydescription>
+        <location file="/home/svenbecker/Bachelorarbeit/code/catkin_ws/src/robot_control_software/coppeliasim_interface/include/hardware_interface.h" line="179" column="1" bodyfile="/home/svenbecker/Bachelorarbeit/code/catkin_ws/src/robot_control_software/coppeliasim_interface/include/hardware_interface.h" bodystart="179" bodyend="-1"/>
+      </memberdef>
+      <memberdef kind="variable" id="classcoppeliasim__interface_1_1HardwareInterface_1a37c0b737cfbecb97fad9180f9f95d075" prot="private" static="no" mutable="no">
+        <type>bool</type>
+        <definition>bool coppeliasim_interface::HardwareInterface::velocity_controller_running_</definition>
+        <argsstring></argsstring>
+        <name>velocity_controller_running_</name>
+        <briefdescription>
+<para>Flag indicating whether velocity controller is running. </para>        </briefdescription>
+        <detaileddescription>
+        </detaileddescription>
+        <inbodydescription>
+        </inbodydescription>
+        <location file="/home/svenbecker/Bachelorarbeit/code/catkin_ws/src/robot_control_software/coppeliasim_interface/include/hardware_interface.h" line="184" column="1" bodyfile="/home/svenbecker/Bachelorarbeit/code/catkin_ws/src/robot_control_software/coppeliasim_interface/include/hardware_interface.h" bodystart="184" bodyend="-1"/>
+      </memberdef>
+      <memberdef kind="variable" id="classcoppeliasim__interface_1_1HardwareInterface_1a076f615ef8082af2f81ac2bb3e9f20b9" prot="private" static="no" mutable="no">
+        <type>bool</type>
+        <definition>bool coppeliasim_interface::HardwareInterface::controllers_initialized_</definition>
+        <argsstring></argsstring>
+        <name>controllers_initialized_</name>
+        <briefdescription>
+<para>Flag indicating if the controllers have been initialized. </para>        </briefdescription>
+        <detaileddescription>
+        </detaileddescription>
+        <inbodydescription>
+        </inbodydescription>
+        <location file="/home/svenbecker/Bachelorarbeit/code/catkin_ws/src/robot_control_software/coppeliasim_interface/include/hardware_interface.h" line="189" column="1" bodyfile="/home/svenbecker/Bachelorarbeit/code/catkin_ws/src/robot_control_software/coppeliasim_interface/include/hardware_interface.h" bodystart="189" bodyend="-1"/>
+      </memberdef>
+      <memberdef kind="variable" id="classcoppeliasim__interface_1_1HardwareInterface_1ae131d497f26abcb3464329540d9efd93" prot="private" static="no" mutable="no">
+        <type>industrial_robot_status_interface::RobotStatus</type>
+        <definition>industrial_robot_status_interface::RobotStatus coppeliasim_interface::HardwareInterface::robot_status_resource_</definition>
+        <argsstring></argsstring>
+        <name>robot_status_resource_</name>
+        <initializer>{}</initializer>
+        <briefdescription>
+<para>Status handle to imitate a RobotStatus of a real robot (is constant however) </para>        </briefdescription>
+        <detaileddescription>
+        </detaileddescription>
+        <inbodydescription>
+        </inbodydescription>
+        <location file="/home/svenbecker/Bachelorarbeit/code/catkin_ws/src/robot_control_software/coppeliasim_interface/include/hardware_interface.h" line="194" column="1" bodyfile="/home/svenbecker/Bachelorarbeit/code/catkin_ws/src/robot_control_software/coppeliasim_interface/include/hardware_interface.h" bodystart="194" bodyend="-1"/>
+      </memberdef>
+      <memberdef kind="variable" id="classcoppeliasim__interface_1_1HardwareInterface_1aeb48682585945198d6fa4856c05720c2" prot="private" static="no" mutable="no">
+        <type>hardware_interface::JointStateInterface</type>
+        <definition>hardware_interface::JointStateInterface coppeliasim_interface::HardwareInterface::js_interface_</definition>
+        <argsstring></argsstring>
+        <name>js_interface_</name>
+        <briefdescription>
+<para>HW-interface to read out joint positions and publish them similar to a joint state publisher. </para>        </briefdescription>
+        <detaileddescription>
+        </detaileddescription>
+        <inbodydescription>
+        </inbodydescription>
+        <location file="/home/svenbecker/Bachelorarbeit/code/catkin_ws/src/robot_control_software/coppeliasim_interface/include/hardware_interface.h" line="202" column="1" bodyfile="/home/svenbecker/Bachelorarbeit/code/catkin_ws/src/robot_control_software/coppeliasim_interface/include/hardware_interface.h" bodystart="202" bodyend="-1"/>
+      </memberdef>
+      <memberdef kind="variable" id="classcoppeliasim__interface_1_1HardwareInterface_1ac54c4949825c753fc76aea1dda63f5d8" prot="private" static="no" mutable="no">
+        <type>ur_controllers::ScaledPositionJointInterface</type>
+        <definition>ur_controllers::ScaledPositionJointInterface coppeliasim_interface::HardwareInterface::spj_interface_</definition>
+        <argsstring></argsstring>
+        <name>spj_interface_</name>
+        <briefdescription>
+<para>Custom HW-interface for scaled position control. </para>        </briefdescription>
+        <detaileddescription>
+        </detaileddescription>
+        <inbodydescription>
+        </inbodydescription>
+        <location file="/home/svenbecker/Bachelorarbeit/code/catkin_ws/src/robot_control_software/coppeliasim_interface/include/hardware_interface.h" line="207" column="1" bodyfile="/home/svenbecker/Bachelorarbeit/code/catkin_ws/src/robot_control_software/coppeliasim_interface/include/hardware_interface.h" bodystart="207" bodyend="-1"/>
+      </memberdef>
+      <memberdef kind="variable" id="classcoppeliasim__interface_1_1HardwareInterface_1a8b5466ea8bb806dcbf19e561f45e6c4f" prot="private" static="no" mutable="no">
+        <type>hardware_interface::PositionJointInterface</type>
+        <definition>hardware_interface::PositionJointInterface coppeliasim_interface::HardwareInterface::pj_interface_</definition>
+        <argsstring></argsstring>
+        <name>pj_interface_</name>
+        <briefdescription>
+<para>Official HW-interface for joint position control. </para>        </briefdescription>
+        <detaileddescription>
+        </detaileddescription>
+        <inbodydescription>
+        </inbodydescription>
+        <location file="/home/svenbecker/Bachelorarbeit/code/catkin_ws/src/robot_control_software/coppeliasim_interface/include/hardware_interface.h" line="212" column="1" bodyfile="/home/svenbecker/Bachelorarbeit/code/catkin_ws/src/robot_control_software/coppeliasim_interface/include/hardware_interface.h" bodystart="212" bodyend="-1"/>
+      </memberdef>
+      <memberdef kind="variable" id="classcoppeliasim__interface_1_1HardwareInterface_1a6fcd831ef764e0ecda01f7580f5509ef" prot="private" static="no" mutable="no">
+        <type>ur_controllers::SpeedScalingInterface</type>
+        <definition>ur_controllers::SpeedScalingInterface coppeliasim_interface::HardwareInterface::speedsc_interface_</definition>
+        <argsstring></argsstring>
+        <name>speedsc_interface_</name>
+        <briefdescription>
+<para>Custom HW-interface for speed_scaling control. </para>        </briefdescription>
+        <detaileddescription>
+        </detaileddescription>
+        <inbodydescription>
+        </inbodydescription>
+        <location file="/home/svenbecker/Bachelorarbeit/code/catkin_ws/src/robot_control_software/coppeliasim_interface/include/hardware_interface.h" line="217" column="1" bodyfile="/home/svenbecker/Bachelorarbeit/code/catkin_ws/src/robot_control_software/coppeliasim_interface/include/hardware_interface.h" bodystart="217" bodyend="-1"/>
+      </memberdef>
+      <memberdef kind="variable" id="classcoppeliasim__interface_1_1HardwareInterface_1a00e327fb4dd2c6515f9bc81dadbc5bd4" prot="private" static="no" mutable="no">
+        <type>hardware_interface::VelocityJointInterface</type>
+        <definition>hardware_interface::VelocityJointInterface coppeliasim_interface::HardwareInterface::vj_interface_</definition>
+        <argsstring></argsstring>
+        <name>vj_interface_</name>
+        <briefdescription>
+<para>Official HW-interface for joint velocity control. </para>        </briefdescription>
+        <detaileddescription>
+        </detaileddescription>
+        <inbodydescription>
+        </inbodydescription>
+        <location file="/home/svenbecker/Bachelorarbeit/code/catkin_ws/src/robot_control_software/coppeliasim_interface/include/hardware_interface.h" line="222" column="1" bodyfile="/home/svenbecker/Bachelorarbeit/code/catkin_ws/src/robot_control_software/coppeliasim_interface/include/hardware_interface.h" bodystart="222" bodyend="-1"/>
+      </memberdef>
+      <memberdef kind="variable" id="classcoppeliasim__interface_1_1HardwareInterface_1ae50a98edafce6fae4a6823eb5690cf66" prot="private" static="no" mutable="no">
+        <type>ur_controllers::ScaledVelocityJointInterface</type>
+        <definition>ur_controllers::ScaledVelocityJointInterface coppeliasim_interface::HardwareInterface::svj_interface_</definition>
+        <argsstring></argsstring>
+        <name>svj_interface_</name>
+        <briefdescription>
+<para>Custom HW-interface for scaled joint velocity control. </para>        </briefdescription>
+        <detaileddescription>
+        </detaileddescription>
+        <inbodydescription>
+        </inbodydescription>
+        <location file="/home/svenbecker/Bachelorarbeit/code/catkin_ws/src/robot_control_software/coppeliasim_interface/include/hardware_interface.h" line="227" column="1" bodyfile="/home/svenbecker/Bachelorarbeit/code/catkin_ws/src/robot_control_software/coppeliasim_interface/include/hardware_interface.h" bodystart="227" bodyend="-1"/>
+      </memberdef>
+      <memberdef kind="variable" id="classcoppeliasim__interface_1_1HardwareInterface_1a58f174431317603c902373bbadc077d6" prot="private" static="no" mutable="no">
+        <type>hardware_interface::ForceTorqueSensorInterface</type>
+        <definition>hardware_interface::ForceTorqueSensorInterface coppeliasim_interface::HardwareInterface::fts_interface_</definition>
+        <argsstring></argsstring>
+        <name>fts_interface_</name>
+        <briefdescription>
+<para>Official HW-interface for force-torque-sensor handling. </para>        </briefdescription>
+        <detaileddescription>
+        </detaileddescription>
+        <inbodydescription>
+        </inbodydescription>
+        <location file="/home/svenbecker/Bachelorarbeit/code/catkin_ws/src/robot_control_software/coppeliasim_interface/include/hardware_interface.h" line="232" column="1" bodyfile="/home/svenbecker/Bachelorarbeit/code/catkin_ws/src/robot_control_software/coppeliasim_interface/include/hardware_interface.h" bodystart="232" bodyend="-1"/>
+      </memberdef>
+      <memberdef kind="variable" id="classcoppeliasim__interface_1_1HardwareInterface_1ad3aff09f0a2a9b3df1563b2425774abe" prot="private" static="no" mutable="no">
+        <type>industrial_robot_status_interface::IndustrialRobotStatusInterface</type>
+        <definition>industrial_robot_status_interface::IndustrialRobotStatusInterface coppeliasim_interface::HardwareInterface::robot_status_interface_</definition>
+        <argsstring></argsstring>
+        <name>robot_status_interface_</name>
+        <initializer>{}</initializer>
+        <briefdescription>
+<para>Official HW-interface to monitor the status of the robot (gives currently static &apos;demo&apos;-information) </para>        </briefdescription>
+        <detaileddescription>
+        </detaileddescription>
+        <inbodydescription>
+        </inbodydescription>
+        <location file="/home/svenbecker/Bachelorarbeit/code/catkin_ws/src/robot_control_software/coppeliasim_interface/include/hardware_interface.h" line="237" column="1" bodyfile="/home/svenbecker/Bachelorarbeit/code/catkin_ws/src/robot_control_software/coppeliasim_interface/include/hardware_interface.h" bodystart="237" bodyend="-1"/>
+      </memberdef>
+      <memberdef kind="variable" id="classcoppeliasim__interface_1_1HardwareInterface_1ac6c66dd42220e8f93860b9c26c90d3b8" prot="private" static="no" mutable="no">
+        <type>ros::NodeHandle</type>
+        <definition>ros::NodeHandle coppeliasim_interface::HardwareInterface::root_nh</definition>
+        <argsstring></argsstring>
+        <name>root_nh</name>
+        <briefdescription>
+<para>ROS-nodehandle for operations at root-level (names starting with &apos;/...&apos;) </para>        </briefdescription>
+        <detaileddescription>
+        </detaileddescription>
+        <inbodydescription>
+        </inbodydescription>
+        <location file="/home/svenbecker/Bachelorarbeit/code/catkin_ws/src/robot_control_software/coppeliasim_interface/include/hardware_interface.h" line="245" column="1" bodyfile="/home/svenbecker/Bachelorarbeit/code/catkin_ws/src/robot_control_software/coppeliasim_interface/include/hardware_interface.h" bodystart="245" bodyend="-1"/>
+      </memberdef>
+      <memberdef kind="variable" id="classcoppeliasim__interface_1_1HardwareInterface_1a4329f87a0e6cd0f4217f4ae07c1f0847" prot="private" static="no" mutable="no">
+        <type>ros::NodeHandle</type>
+        <definition>ros::NodeHandle coppeliasim_interface::HardwareInterface::robot_nh</definition>
+        <argsstring></argsstring>
+        <name>robot_nh</name>
+        <briefdescription>
+<para>ROS-nodehandle for operations in the hardware-interface-nodes namespace. </para>        </briefdescription>
+        <detaileddescription>
+        </detaileddescription>
+        <inbodydescription>
+        </inbodydescription>
+        <location file="/home/svenbecker/Bachelorarbeit/code/catkin_ws/src/robot_control_software/coppeliasim_interface/include/hardware_interface.h" line="250" column="1" bodyfile="/home/svenbecker/Bachelorarbeit/code/catkin_ws/src/robot_control_software/coppeliasim_interface/include/hardware_interface.h" bodystart="250" bodyend="-1"/>
+      </memberdef>
+      <memberdef kind="variable" id="classcoppeliasim__interface_1_1HardwareInterface_1ae18ef21538a55a7feee4d46cb539f072" prot="private" static="no" mutable="no">
+        <type>simxInt</type>
+        <definition>simxInt coppeliasim_interface::HardwareInterface::client_id_</definition>
+        <argsstring></argsstring>
+        <name>client_id_</name>
+        <briefdescription>
+<para>ID specifying the connection to CoppeliaSim (must be used for every remoteApi-Call) </para>        </briefdescription>
+        <detaileddescription>
+        </detaileddescription>
+        <inbodydescription>
+        </inbodydescription>
+        <location file="/home/svenbecker/Bachelorarbeit/code/catkin_ws/src/robot_control_software/coppeliasim_interface/include/hardware_interface.h" line="255" column="1" bodyfile="/home/svenbecker/Bachelorarbeit/code/catkin_ws/src/robot_control_software/coppeliasim_interface/include/hardware_interface.h" bodystart="255" bodyend="-1"/>
+      </memberdef>
+      <memberdef kind="variable" id="classcoppeliasim__interface_1_1HardwareInterface_1a0eb849b46588929bdb836664794c2d56" prot="private" static="no" mutable="no">
+        <type>RunState</type>
+        <definition>RunState coppeliasim_interface::HardwareInterface::run_state_</definition>
+        <argsstring></argsstring>
+        <name>run_state_</name>
+        <briefdescription>
+<para>Indicator whether the robot is RUNNING (speed_scaling_combined_=1), in PAUSED (speed_scaling_combined_=0) state or RAMPingUP from PAUSED to RUNNING. </para>        </briefdescription>
+        <detaileddescription>
+        </detaileddescription>
+        <inbodydescription>
+        </inbodydescription>
+        <location file="/home/svenbecker/Bachelorarbeit/code/catkin_ws/src/robot_control_software/coppeliasim_interface/include/hardware_interface.h" line="263" column="1" bodyfile="/home/svenbecker/Bachelorarbeit/code/catkin_ws/src/robot_control_software/coppeliasim_interface/include/hardware_interface.h" bodystart="263" bodyend="-1"/>
+      </memberdef>
+      <memberdef kind="variable" id="classcoppeliasim__interface_1_1HardwareInterface_1a800b19982d3e807701eeb4db63d171e3" prot="private" static="no" mutable="no">
+        <type>double</type>
+        <definition>double coppeliasim_interface::HardwareInterface::pausing_ramp_up_increment_</definition>
+        <argsstring></argsstring>
+        <name>pausing_ramp_up_increment_</name>
+        <briefdescription>
+<para>combined_speed_scaling-increment per readout until combined_speed_scaling is equal to speed_scaling_ (= target) </para>        </briefdescription>
+        <detaileddescription>
+        </detaileddescription>
+        <inbodydescription>
+        </inbodydescription>
+        <location file="/home/svenbecker/Bachelorarbeit/code/catkin_ws/src/robot_control_software/coppeliasim_interface/include/hardware_interface.h" line="268" column="1" bodyfile="/home/svenbecker/Bachelorarbeit/code/catkin_ws/src/robot_control_software/coppeliasim_interface/include/hardware_interface.h" bodystart="268" bodyend="-1"/>
+      </memberdef>
+      <memberdef kind="variable" id="classcoppeliasim__interface_1_1HardwareInterface_1ac2bf380605ce6bdb1720fb23ff3b76ab" prot="private" static="no" mutable="no">
+        <type>double</type>
+        <definition>double coppeliasim_interface::HardwareInterface::speed_scaling_</definition>
+        <argsstring></argsstring>
+        <name>speed_scaling_</name>
+        <briefdescription>
+<para>target speed_scaling for operation of the scaled controllers </para>        </briefdescription>
+        <detaileddescription>
+        </detaileddescription>
+        <inbodydescription>
+        </inbodydescription>
+        <location file="/home/svenbecker/Bachelorarbeit/code/catkin_ws/src/robot_control_software/coppeliasim_interface/include/hardware_interface.h" line="273" column="1" bodyfile="/home/svenbecker/Bachelorarbeit/code/catkin_ws/src/robot_control_software/coppeliasim_interface/include/hardware_interface.h" bodystart="273" bodyend="-1"/>
+      </memberdef>
+      <memberdef kind="variable" id="classcoppeliasim__interface_1_1HardwareInterface_1a1af99d1c9677669d03b3fa73d34d6ef8" prot="private" static="no" mutable="no">
+        <type>double</type>
+        <definition>double coppeliasim_interface::HardwareInterface::speed_scaling_combined_</definition>
+        <argsstring></argsstring>
+        <name>speed_scaling_combined_</name>
+        <briefdescription>
+<para>actual speed_scaling used by the scaled controllers </para>        </briefdescription>
+        <detaileddescription>
+        </detaileddescription>
+        <inbodydescription>
+        </inbodydescription>
+        <location file="/home/svenbecker/Bachelorarbeit/code/catkin_ws/src/robot_control_software/coppeliasim_interface/include/hardware_interface.h" line="278" column="1" bodyfile="/home/svenbecker/Bachelorarbeit/code/catkin_ws/src/robot_control_software/coppeliasim_interface/include/hardware_interface.h" bodystart="278" bodyend="-1"/>
+      </memberdef>
+      <memberdef kind="variable" id="classcoppeliasim__interface_1_1HardwareInterface_1aa5c1de8535764107d00d928494481bdb" prot="private" static="no" mutable="no">
+        <type>ros::ServiceServer</type>
+        <definition>ros::ServiceServer coppeliasim_interface::HardwareInterface::pause_button_srv_</definition>
+        <argsstring></argsstring>
+        <name>pause_button_srv_</name>
+        <briefdescription>
+<para>Service to pause the robot&apos;s movement or to restart movement from a paused state. </para>        </briefdescription>
+        <detaileddescription>
+        </detaileddescription>
+        <inbodydescription>
+        </inbodydescription>
+        <location file="/home/svenbecker/Bachelorarbeit/code/catkin_ws/src/robot_control_software/coppeliasim_interface/include/hardware_interface.h" line="286" column="1" bodyfile="/home/svenbecker/Bachelorarbeit/code/catkin_ws/src/robot_control_software/coppeliasim_interface/include/hardware_interface.h" bodystart="286" bodyend="-1"/>
+      </memberdef>
+      <memberdef kind="variable" id="classcoppeliasim__interface_1_1HardwareInterface_1a013833998b70d3ad448505f5aa20283b" prot="private" static="no" mutable="no">
+        <type>ros::ServiceServer</type>
+        <definition>ros::ServiceServer coppeliasim_interface::HardwareInterface::set_speed_slider_srv_</definition>
+        <argsstring></argsstring>
+        <name>set_speed_slider_srv_</name>
+        <briefdescription>
+<para>Service to set the speed slider (lets the robot&apos;s joints move at a fraction of their velocity) </para>        </briefdescription>
+        <detaileddescription>
+        </detaileddescription>
+        <inbodydescription>
+        </inbodydescription>
+        <location file="/home/svenbecker/Bachelorarbeit/code/catkin_ws/src/robot_control_software/coppeliasim_interface/include/hardware_interface.h" line="291" column="1" bodyfile="/home/svenbecker/Bachelorarbeit/code/catkin_ws/src/robot_control_software/coppeliasim_interface/include/hardware_interface.h" bodystart="291" bodyend="-1"/>
+      </memberdef>
+      <memberdef kind="variable" id="classcoppeliasim__interface_1_1HardwareInterface_1a4aef464f532e3ec3e8184af19713bcff" prot="private" static="no" mutable="no">
+        <type>ros::ServiceServer</type>
+        <definition>ros::ServiceServer coppeliasim_interface::HardwareInterface::tare_sensor_srv_</definition>
+        <argsstring></argsstring>
+        <name>tare_sensor_srv_</name>
+        <briefdescription>
+<para>Service to tare the Force-Torque-Sensor in the TCP (advertised, but fullfills no purpose) </para>        </briefdescription>
+        <detaileddescription>
+        </detaileddescription>
+        <inbodydescription>
+        </inbodydescription>
+        <location file="/home/svenbecker/Bachelorarbeit/code/catkin_ws/src/robot_control_software/coppeliasim_interface/include/hardware_interface.h" line="296" column="1" bodyfile="/home/svenbecker/Bachelorarbeit/code/catkin_ws/src/robot_control_software/coppeliasim_interface/include/hardware_interface.h" bodystart="296" bodyend="-1"/>
+      </memberdef>
+      </sectiondef>
+      <sectiondef kind="public-func">
+      <memberdef kind="function" id="classcoppeliasim__interface_1_1HardwareInterface_1a731c52969b54a2cdda78a494bcd878ee" prot="public" static="no" const="no" explicit="no" inline="no" virt="non-virtual">
+        <type></type>
+        <definition>coppeliasim_interface::HardwareInterface::HardwareInterface</definition>
+        <argsstring>()</argsstring>
+        <name>HardwareInterface</name>
+        <briefdescription>
+<para>Construct a new Hardware Interface object and initialize all class members that do not require a ROS- or CoppeliaSim-connection. </para>        </briefdescription>
+        <detaileddescription>
+        </detaileddescription>
+        <inbodydescription>
+        </inbodydescription>
+        <location file="/home/svenbecker/Bachelorarbeit/code/catkin_ws/src/robot_control_software/coppeliasim_interface/include/hardware_interface.h" line="52" column="1" bodyfile="/home/svenbecker/Bachelorarbeit/code/catkin_ws/src/robot_control_software/coppeliasim_interface/src/hardware_interface.cpp" bodystart="6" bodyend="28"/>
+      </memberdef>
+      <memberdef kind="function" id="classcoppeliasim__interface_1_1HardwareInterface_1a61047459c300ddd92e0b2d82e3b7c2e2" prot="public" static="no" const="no" explicit="no" inline="no" virt="virtual">
+        <type></type>
+        <definition>coppeliasim_interface::HardwareInterface::~HardwareInterface</definition>
+        <argsstring>()</argsstring>
+        <name>~HardwareInterface</name>
+        <briefdescription>
+<para>Destroy the Hardware Interface object and handle disconnection from CoppeliaSim. </para>        </briefdescription>
+        <detaileddescription>
+        </detaileddescription>
+        <inbodydescription>
+        </inbodydescription>
+        <location file="/home/svenbecker/Bachelorarbeit/code/catkin_ws/src/robot_control_software/coppeliasim_interface/include/hardware_interface.h" line="57" column="1" bodyfile="/home/svenbecker/Bachelorarbeit/code/catkin_ws/src/robot_control_software/coppeliasim_interface/src/hardware_interface.cpp" bodystart="29" bodyend="35"/>
+      </memberdef>
+      <memberdef kind="function" id="classcoppeliasim__interface_1_1HardwareInterface_1ada54343beeb383c43951877e3d49cf8e" prot="public" static="no" const="no" explicit="no" inline="no" virt="virtual">
+        <type>bool</type>
+        <definition>bool coppeliasim_interface::HardwareInterface::init</definition>
+        <argsstring>(ros::NodeHandle &amp;root_nh, ros::NodeHandle &amp;robot_nh) override</argsstring>
+        <name>init</name>
+        <param>
+          <type>ros::NodeHandle &amp;</type>
+          <declname>root_nh</declname>
+        </param>
+        <param>
+          <type>ros::NodeHandle &amp;</type>
+          <declname>robot_nh</declname>
+        </param>
+        <briefdescription>
+<para>Connects program to CoppeliaSim and obtains the required handles. Reads in the required ROS-parameters and initializes all interfaces that are implemented in the real hardware-interface. </para>        </briefdescription>
+        <detaileddescription>
+<para><parameterlist kind="param"><parameteritem>
+<parameternamelist>
+<parametername>root_nh</parametername>
+</parameternamelist>
+<parameterdescription>
+<para>ROS-nodehandle for operations at root-level (names starting with &apos;/...&apos;) </para></parameterdescription>
+</parameteritem>
+<parameteritem>
+<parameternamelist>
+<parametername>robot_nh</parametername>
+</parameternamelist>
+<parameterdescription>
+<para>ROS-nodehandle for operations in the hardware-interface-nodes namespace </para></parameterdescription>
+</parameteritem>
+</parameterlist>
+<simplesect kind="return"><para>Whether connection to CoppeliaSim was successful and the hardware-interfaces could be set-up work with CoppeliaSim-Joints </para></simplesect>
+</para>        </detaileddescription>
+        <inbodydescription>
+        </inbodydescription>
+        <location file="/home/svenbecker/Bachelorarbeit/code/catkin_ws/src/robot_control_software/coppeliasim_interface/include/hardware_interface.h" line="66" column="1" bodyfile="/home/svenbecker/Bachelorarbeit/code/catkin_ws/src/robot_control_software/coppeliasim_interface/src/hardware_interface.cpp" bodystart="37" bodyend="120"/>
+      </memberdef>
+      <memberdef kind="function" id="classcoppeliasim__interface_1_1HardwareInterface_1abc05d9a9e8761462b2161a33f55203cc" prot="public" static="no" const="no" explicit="no" inline="no" virt="virtual">
+        <type>void</type>
+        <definition>void coppeliasim_interface::HardwareInterface::read</definition>
+        <argsstring>(const ros::Time &amp;, const ros::Duration &amp;) override</argsstring>
+        <name>read</name>
+        <param>
+          <type>const ros::Time &amp;</type>
+          <defname>time</defname>
+        </param>
+        <param>
+          <type>const ros::Duration &amp;</type>
+          <defname>period</defname>
+        </param>
+        <briefdescription>
+<para>Gets the joint-data (position, velocity, torque) from CoppeliaSim in a blocking way. </para>        </briefdescription>
+        <detaileddescription>
+<para><parameterlist kind="param"><parameteritem>
+<parameternamelist>
+<parametername>time</parametername>
+</parameternamelist>
+<parameterdescription>
+<para>Required by ROS-HardwareInterface specification (fullfills nothing here) </para></parameterdescription>
+</parameteritem>
+<parameteritem>
+<parameternamelist>
+<parametername>period</parametername>
+</parameternamelist>
+<parameterdescription>
+<para>Required by ROS-HardwareInterface (fullfills nothing here) </para></parameterdescription>
+</parameteritem>
+</parameterlist>
+</para>        </detaileddescription>
+        <inbodydescription>
+        </inbodydescription>
+        <location file="/home/svenbecker/Bachelorarbeit/code/catkin_ws/src/robot_control_software/coppeliasim_interface/include/hardware_interface.h" line="73" column="1" bodyfile="/home/svenbecker/Bachelorarbeit/code/catkin_ws/src/robot_control_software/coppeliasim_interface/src/hardware_interface.cpp" bodystart="147" bodyend="187"/>
+      </memberdef>
+      <memberdef kind="function" id="classcoppeliasim__interface_1_1HardwareInterface_1a2a116645fc33233e4b9b1a37a9165674" prot="public" static="no" const="no" explicit="no" inline="no" virt="virtual">
+        <type>void</type>
+        <definition>void coppeliasim_interface::HardwareInterface::write</definition>
+        <argsstring>(const ros::Time &amp;, const ros::Duration &amp;) override</argsstring>
+        <name>write</name>
+        <param>
+          <type>const ros::Time &amp;</type>
+          <defname>time</defname>
+        </param>
+        <param>
+          <type>const ros::Duration &amp;</type>
+          <defname>period</defname>
+        </param>
+        <briefdescription>
+<para>Set the joint-target-values (velocities or positions, depending on active controller) in CoppeliaSim in a blocking way. </para>        </briefdescription>
+        <detaileddescription>
+        </detaileddescription>
+        <inbodydescription>
+        </inbodydescription>
+        <location file="/home/svenbecker/Bachelorarbeit/code/catkin_ws/src/robot_control_software/coppeliasim_interface/include/hardware_interface.h" line="78" column="1" bodyfile="/home/svenbecker/Bachelorarbeit/code/catkin_ws/src/robot_control_software/coppeliasim_interface/src/hardware_interface.cpp" bodystart="191" bodyend="207"/>
+      </memberdef>
+      <memberdef kind="function" id="classcoppeliasim__interface_1_1HardwareInterface_1a5b7c2e8dcf2fa17ba6bde7ea001d59e3" prot="public" static="no" const="no" explicit="no" inline="no" virt="virtual">
+        <type>bool</type>
+        <definition>bool coppeliasim_interface::HardwareInterface::prepareSwitch</definition>
+        <argsstring>(const std::list&lt; hardware_interface::ControllerInfo &gt; &amp;start_list, const std::list&lt; hardware_interface::ControllerInfo &gt; &amp;stop_list) override</argsstring>
+        <name>prepareSwitch</name>
+        <param>
+          <type>const std::list&lt; hardware_interface::ControllerInfo &gt; &amp;</type>
+          <declname>start_list</declname>
+        </param>
+        <param>
+          <type>const std::list&lt; hardware_interface::ControllerInfo &gt; &amp;</type>
+          <declname>stop_list</declname>
+        </param>
+        <briefdescription>
+        </briefdescription>
+        <detaileddescription>
+        </detaileddescription>
+        <inbodydescription>
+        </inbodydescription>
+        <location file="/home/svenbecker/Bachelorarbeit/code/catkin_ws/src/robot_control_software/coppeliasim_interface/include/hardware_interface.h" line="80" column="1" bodyfile="/home/svenbecker/Bachelorarbeit/code/catkin_ws/src/robot_control_software/coppeliasim_interface/src/hardware_interface.cpp" bodystart="122" bodyend="143"/>
+      </memberdef>
+      <memberdef kind="function" id="classcoppeliasim__interface_1_1HardwareInterface_1aae36a63c5125172387cfcbf21f9a1c24" prot="public" static="no" const="no" explicit="no" inline="no" virt="virtual">
+        <type>void</type>
+        <definition>void coppeliasim_interface::HardwareInterface::doSwitch</definition>
+        <argsstring>(const std::list&lt; hardware_interface::ControllerInfo &gt; &amp;start_list, const std::list&lt; hardware_interface::ControllerInfo &gt; &amp;stop_list) override</argsstring>
+        <name>doSwitch</name>
+        <param>
+          <type>const std::list&lt; hardware_interface::ControllerInfo &gt; &amp;</type>
+          <declname>start_list</declname>
+        </param>
+        <param>
+          <type>const std::list&lt; hardware_interface::ControllerInfo &gt; &amp;</type>
+          <declname>stop_list</declname>
+        </param>
+        <briefdescription>
+<para>Tries to turn on or off provided controllers. The provided controllers must be applicable with this <ref refid="classcoppeliasim__interface_1_1HardwareInterface" kindref="compound">HardwareInterface</ref>, otherwise they do not trigger any changes. </para>        </briefdescription>
+        <detaileddescription>
+<para><parameterlist kind="param"><parameteritem>
+<parameternamelist>
+<parametername>start_list</parametername>
+</parameternamelist>
+<parameterdescription>
+<para>Controllers to start </para></parameterdescription>
+</parameteritem>
+<parameteritem>
+<parameternamelist>
+<parametername>stop_list</parametername>
+</parameternamelist>
+<parameterdescription>
+<para>Controllers to stop </para></parameterdescription>
+</parameteritem>
+</parameterlist>
+</para>        </detaileddescription>
+        <inbodydescription>
+        </inbodydescription>
+        <location file="/home/svenbecker/Bachelorarbeit/code/catkin_ws/src/robot_control_software/coppeliasim_interface/include/hardware_interface.h" line="89" column="1" bodyfile="/home/svenbecker/Bachelorarbeit/code/catkin_ws/src/robot_control_software/coppeliasim_interface/src/hardware_interface.cpp" bodystart="226" bodyend="289"/>
+      </memberdef>
+      <memberdef kind="function" id="classcoppeliasim__interface_1_1HardwareInterface_1af3204245bbf1e9e317d5d0a57b3c86c2" prot="public" static="no" const="no" explicit="no" inline="no" virt="non-virtual">
+        <type>bool</type>
+        <definition>bool coppeliasim_interface::HardwareInterface::zeroFTSensor</definition>
+        <argsstring>(std_srvs::TriggerRequest &amp;req, std_srvs::TriggerResponse &amp;res)</argsstring>
+        <name>zeroFTSensor</name>
+        <param>
+          <type>std_srvs::TriggerRequest &amp;</type>
+          <declname>req</declname>
+        </param>
+        <param>
+          <type>std_srvs::TriggerResponse &amp;</type>
+          <declname>res</declname>
+        </param>
+        <briefdescription>
+<para>Should normally tare the force-torque-sensor but is not implemented for performance reasons (service response gets delivered, but is always &apos;success == false&apos;) </para>        </briefdescription>
+        <detaileddescription>
+<para><parameterlist kind="param"><parameteritem>
+<parameternamelist>
+<parametername>req</parametername>
+</parameternamelist>
+<parameterdescription>
+<para>(contains no information) </para></parameterdescription>
+</parameteritem>
+<parameteritem>
+<parameternamelist>
+<parametername>res</parametername>
+</parameternamelist>
+<parameterdescription>
+<para>Trigger-Response (currently always &apos;success=false&apos; with a corresponding message as this is not implemented) </para></parameterdescription>
+</parameteritem>
+</parameterlist>
+<simplesect kind="return"><para>always &apos;true&apos; </para></simplesect>
+</para>        </detaileddescription>
+        <inbodydescription>
+        </inbodydescription>
+        <location file="/home/svenbecker/Bachelorarbeit/code/catkin_ws/src/robot_control_software/coppeliasim_interface/include/hardware_interface.h" line="102" column="1" bodyfile="/home/svenbecker/Bachelorarbeit/code/catkin_ws/src/robot_control_software/coppeliasim_interface/src/hardware_interface.cpp" bodystart="291" bodyend="297"/>
+      </memberdef>
+      <memberdef kind="function" id="classcoppeliasim__interface_1_1HardwareInterface_1a0fb3b4bf382fc390db4d8c40036a683b" prot="public" static="no" const="no" explicit="no" inline="no" virt="non-virtual">
+        <type>bool</type>
+        <definition>bool coppeliasim_interface::HardwareInterface::setSpeedSlider</definition>
+        <argsstring>(ur_msgs::SetSpeedSliderFractionRequest &amp;req, ur_msgs::SetSpeedSliderFractionResponse &amp;res)</argsstring>
+        <name>setSpeedSlider</name>
+        <param>
+          <type>ur_msgs::SetSpeedSliderFractionRequest &amp;</type>
+          <declname>req</declname>
+        </param>
+        <param>
+          <type>ur_msgs::SetSpeedSliderFractionResponse &amp;</type>
+          <declname>res</declname>
+        </param>
+        <briefdescription>
+<para>Sets the speed-scaling as requested. </para>        </briefdescription>
+        <detaileddescription>
+<para><parameterlist kind="param"><parameteritem>
+<parameternamelist>
+<parametername>req</parametername>
+</parameternamelist>
+<parameterdescription>
+<para>Request with target value of the speed slider </para></parameterdescription>
+</parameteritem>
+<parameteritem>
+<parameternamelist>
+<parametername>res</parametername>
+</parameternamelist>
+<parameterdescription>
+<para>Response with information about whether the speed slider could be set (i.e. target lies in the interval [0.01,1]) </para></parameterdescription>
+</parameteritem>
+</parameterlist>
+<simplesect kind="return"><para>always &apos;true&apos; </para></simplesect>
+</para>        </detaileddescription>
+        <inbodydescription>
+        </inbodydescription>
+        <location file="/home/svenbecker/Bachelorarbeit/code/catkin_ws/src/robot_control_software/coppeliasim_interface/include/hardware_interface.h" line="111" column="1" bodyfile="/home/svenbecker/Bachelorarbeit/code/catkin_ws/src/robot_control_software/coppeliasim_interface/src/hardware_interface.cpp" bodystart="299" bodyend="313"/>
+      </memberdef>
+      <memberdef kind="function" id="classcoppeliasim__interface_1_1HardwareInterface_1a00cc87162beaecdf82c1510ae84b2d95" prot="public" static="no" const="no" explicit="no" inline="no" virt="non-virtual">
+        <type>bool</type>
+        <definition>bool coppeliasim_interface::HardwareInterface::setPause</definition>
+        <argsstring>(std_srvs::SetBoolRequest &amp;req, std_srvs::SetBoolResponse &amp;res)</argsstring>
+        <name>setPause</name>
+        <param>
+          <type>std_srvs::SetBoolRequest &amp;</type>
+          <declname>req</declname>
+        </param>
+        <param>
+          <type>std_srvs::SetBoolResponse &amp;</type>
+          <declname>res</declname>
+        </param>
+        <briefdescription>
+<para>Controls if the robots running state (RUNNING = normal, PAUSED = halted, RAMPUP = Accelerating from PAUSED to RUNNING) </para>        </briefdescription>
+        <detaileddescription>
+<para><parameterlist kind="param"><parameteritem>
+<parameternamelist>
+<parametername>req</parametername>
+</parameternamelist>
+<parameterdescription>
+<para>Contains boolean flag about which run-state should be entered </para></parameterdescription>
+</parameteritem>
+<parameteritem>
+<parameternamelist>
+<parametername>res</parametername>
+</parameternamelist>
+<parameterdescription>
+<para>If the desired state could be set (false, if in RAMPUP or if the desired state is already set) with an descriptive message </para></parameterdescription>
+</parameteritem>
+</parameterlist>
+<simplesect kind="return"><para>always &apos;true&apos; </para></simplesect>
+</para>        </detaileddescription>
+        <inbodydescription>
+        </inbodydescription>
+        <location file="/home/svenbecker/Bachelorarbeit/code/catkin_ws/src/robot_control_software/coppeliasim_interface/include/hardware_interface.h" line="121" column="1" bodyfile="/home/svenbecker/Bachelorarbeit/code/catkin_ws/src/robot_control_software/coppeliasim_interface/src/hardware_interface.cpp" bodystart="315" bodyend="329"/>
+      </memberdef>
+      </sectiondef>
+      <sectiondef kind="protected-func">
+      <memberdef kind="function" id="classcoppeliasim__interface_1_1HardwareInterface_1af95c41749882b5d60ba02695c6b51407" prot="protected" static="no" const="no" explicit="no" inline="no" virt="non-virtual">
+        <type>bool</type>
+        <definition>bool coppeliasim_interface::HardwareInterface::checkControllerClaims</definition>
+        <argsstring>(const std::set&lt; std::string &gt; &amp;claimed_resources)</argsstring>
+        <name>checkControllerClaims</name>
+        <param>
+          <type>const std::set&lt; std::string &gt; &amp;</type>
+          <declname>claimed_resources</declname>
+        </param>
+        <briefdescription>
+<para>Check if the <ref refid="classcoppeliasim__interface_1_1HardwareInterface" kindref="compound">HardwareInterface</ref> can command the joined named in claimed_resources. </para>        </briefdescription>
+        <detaileddescription>
+<para><parameterlist kind="param"><parameteritem>
+<parameternamelist>
+<parametername>claimed_resources</parametername>
+</parameternamelist>
+<parameterdescription>
+<para>Joint-names to check </para></parameterdescription>
+</parameteritem>
+</parameterlist>
+<simplesect kind="return"><para>If this <ref refid="classcoppeliasim__interface_1_1HardwareInterface" kindref="compound">HardwareInterface</ref> has command over the provided named joints </para></simplesect>
+</para>        </detaileddescription>
+        <inbodydescription>
+        </inbodydescription>
+        <location file="/home/svenbecker/Bachelorarbeit/code/catkin_ws/src/robot_control_software/coppeliasim_interface/include/hardware_interface.h" line="130" column="1" bodyfile="/home/svenbecker/Bachelorarbeit/code/catkin_ws/src/robot_control_software/coppeliasim_interface/src/hardware_interface.cpp" bodystart="210" bodyend="224"/>
+      </memberdef>
+      </sectiondef>
+    <briefdescription>
+<para>Hardware-Interface for the UR10e-model in CoppeliaSim that behaves just like the driver for the real robot. </para>    </briefdescription>
+    <detaileddescription>
+    </detaileddescription>
+    <inheritancegraph>
+      <node id="0">
+        <label>coppeliasim_interface::HardwareInterface</label>
+        <link refid="classcoppeliasim__interface_1_1HardwareInterface"/>
+        <childnode refid="1" relation="public-inheritance">
+        </childnode>
+      </node>
+      <node id="1">
+        <label>hardware_interface::RobotHW</label>
+      </node>
+    </inheritancegraph>
+    <collaborationgraph>
+      <node id="2">
+        <label>coppeliasim_interface::HardwareInterface</label>
+        <link refid="classcoppeliasim__interface_1_1HardwareInterface"/>
+        <childnode refid="3" relation="public-inheritance">
+        </childnode>
+      </node>
+      <node id="3">
+        <label>hardware_interface::RobotHW</label>
+      </node>
+    </collaborationgraph>
+    <location file="/home/svenbecker/Bachelorarbeit/code/catkin_ws/src/robot_control_software/coppeliasim_interface/include/hardware_interface.h" line="46" column="1" bodyfile="/home/svenbecker/Bachelorarbeit/code/catkin_ws/src/robot_control_software/coppeliasim_interface/include/hardware_interface.h" bodystart="46" bodyend="298"/>
+    <listofallmembers>
+      <member refid="classcoppeliasim__interface_1_1HardwareInterface_1af95c41749882b5d60ba02695c6b51407" prot="protected" virt="non-virtual"><scope>coppeliasim_interface::HardwareInterface</scope><name>checkControllerClaims</name></member>
+      <member refid="classcoppeliasim__interface_1_1HardwareInterface_1ae18ef21538a55a7feee4d46cb539f072" prot="private" virt="non-virtual"><scope>coppeliasim_interface::HardwareInterface</scope><name>client_id_</name></member>
+      <member refid="classcoppeliasim__interface_1_1HardwareInterface_1a076f615ef8082af2f81ac2bb3e9f20b9" prot="private" virt="non-virtual"><scope>coppeliasim_interface::HardwareInterface</scope><name>controllers_initialized_</name></member>
+      <member refid="classcoppeliasim__interface_1_1HardwareInterface_1aae36a63c5125172387cfcbf21f9a1c24" prot="public" virt="virtual"><scope>coppeliasim_interface::HardwareInterface</scope><name>doSwitch</name></member>
+      <member refid="classcoppeliasim__interface_1_1HardwareInterface_1a58f174431317603c902373bbadc077d6" prot="private" virt="non-virtual"><scope>coppeliasim_interface::HardwareInterface</scope><name>fts_interface_</name></member>
+      <member refid="classcoppeliasim__interface_1_1HardwareInterface_1a731c52969b54a2cdda78a494bcd878ee" prot="public" virt="non-virtual"><scope>coppeliasim_interface::HardwareInterface</scope><name>HardwareInterface</name></member>
+      <member refid="classcoppeliasim__interface_1_1HardwareInterface_1ada54343beeb383c43951877e3d49cf8e" prot="public" virt="virtual"><scope>coppeliasim_interface::HardwareInterface</scope><name>init</name></member>
+      <member refid="classcoppeliasim__interface_1_1HardwareInterface_1a4707518432603367aa9c4a95898faea6" prot="private" virt="non-virtual"><scope>coppeliasim_interface::HardwareInterface</scope><name>joint_efforts_</name></member>
+      <member refid="classcoppeliasim__interface_1_1HardwareInterface_1a45c439e4d458905c4ba7bfd00229163d" prot="private" virt="non-virtual"><scope>coppeliasim_interface::HardwareInterface</scope><name>joint_handles_</name></member>
+      <member refid="classcoppeliasim__interface_1_1HardwareInterface_1a53f1b964f80741a270ece8252ba8beaf" prot="private" virt="non-virtual"><scope>coppeliasim_interface::HardwareInterface</scope><name>joint_names_</name></member>
+      <member refid="classcoppeliasim__interface_1_1HardwareInterface_1a569e3225463d6f062c3646a04a9b7ad3" prot="private" virt="non-virtual"><scope>coppeliasim_interface::HardwareInterface</scope><name>joint_position_command_</name></member>
+      <member refid="classcoppeliasim__interface_1_1HardwareInterface_1ab5d052ecada55ae02a60b3118c2a503e" prot="private" virt="non-virtual"><scope>coppeliasim_interface::HardwareInterface</scope><name>joint_positions_</name></member>
+      <member refid="classcoppeliasim__interface_1_1HardwareInterface_1a96c84799b6435c7837a117688b55248b" prot="private" virt="non-virtual"><scope>coppeliasim_interface::HardwareInterface</scope><name>joint_velocities_</name></member>
+      <member refid="classcoppeliasim__interface_1_1HardwareInterface_1af28293177115e84248f2873fe447d3c3" prot="private" virt="non-virtual"><scope>coppeliasim_interface::HardwareInterface</scope><name>joint_velocity_command_</name></member>
+      <member refid="classcoppeliasim__interface_1_1HardwareInterface_1aeb48682585945198d6fa4856c05720c2" prot="private" virt="non-virtual"><scope>coppeliasim_interface::HardwareInterface</scope><name>js_interface_</name></member>
+      <member refid="classcoppeliasim__interface_1_1HardwareInterface_1aa5c1de8535764107d00d928494481bdb" prot="private" virt="non-virtual"><scope>coppeliasim_interface::HardwareInterface</scope><name>pause_button_srv_</name></member>
+      <member refid="classcoppeliasim__interface_1_1HardwareInterface_1a800b19982d3e807701eeb4db63d171e3" prot="private" virt="non-virtual"><scope>coppeliasim_interface::HardwareInterface</scope><name>pausing_ramp_up_increment_</name></member>
+      <member refid="classcoppeliasim__interface_1_1HardwareInterface_1a8b5466ea8bb806dcbf19e561f45e6c4f" prot="private" virt="non-virtual"><scope>coppeliasim_interface::HardwareInterface</scope><name>pj_interface_</name></member>
+      <member refid="classcoppeliasim__interface_1_1HardwareInterface_1a8ad63a42a0427128f8205238c8cedff5" prot="private" virt="non-virtual"><scope>coppeliasim_interface::HardwareInterface</scope><name>position_controller_running_</name></member>
+      <member refid="classcoppeliasim__interface_1_1HardwareInterface_1a5b7c2e8dcf2fa17ba6bde7ea001d59e3" prot="public" virt="virtual"><scope>coppeliasim_interface::HardwareInterface</scope><name>prepareSwitch</name></member>
+      <member refid="classcoppeliasim__interface_1_1HardwareInterface_1abc05d9a9e8761462b2161a33f55203cc" prot="public" virt="virtual"><scope>coppeliasim_interface::HardwareInterface</scope><name>read</name></member>
+      <member refid="classcoppeliasim__interface_1_1HardwareInterface_1a4329f87a0e6cd0f4217f4ae07c1f0847" prot="private" virt="non-virtual"><scope>coppeliasim_interface::HardwareInterface</scope><name>robot_nh</name></member>
+      <member refid="classcoppeliasim__interface_1_1HardwareInterface_1ad3aff09f0a2a9b3df1563b2425774abe" prot="private" virt="non-virtual"><scope>coppeliasim_interface::HardwareInterface</scope><name>robot_status_interface_</name></member>
+      <member refid="classcoppeliasim__interface_1_1HardwareInterface_1ae131d497f26abcb3464329540d9efd93" prot="private" virt="non-virtual"><scope>coppeliasim_interface::HardwareInterface</scope><name>robot_status_resource_</name></member>
+      <member refid="classcoppeliasim__interface_1_1HardwareInterface_1ac6c66dd42220e8f93860b9c26c90d3b8" prot="private" virt="non-virtual"><scope>coppeliasim_interface::HardwareInterface</scope><name>root_nh</name></member>
+      <member refid="classcoppeliasim__interface_1_1HardwareInterface_1a0eb849b46588929bdb836664794c2d56" prot="private" virt="non-virtual"><scope>coppeliasim_interface::HardwareInterface</scope><name>run_state_</name></member>
+      <member refid="classcoppeliasim__interface_1_1HardwareInterface_1a013833998b70d3ad448505f5aa20283b" prot="private" virt="non-virtual"><scope>coppeliasim_interface::HardwareInterface</scope><name>set_speed_slider_srv_</name></member>
+      <member refid="classcoppeliasim__interface_1_1HardwareInterface_1a00cc87162beaecdf82c1510ae84b2d95" prot="public" virt="non-virtual"><scope>coppeliasim_interface::HardwareInterface</scope><name>setPause</name></member>
+      <member refid="classcoppeliasim__interface_1_1HardwareInterface_1a0fb3b4bf382fc390db4d8c40036a683b" prot="public" virt="non-virtual"><scope>coppeliasim_interface::HardwareInterface</scope><name>setSpeedSlider</name></member>
+      <member refid="classcoppeliasim__interface_1_1HardwareInterface_1ac2bf380605ce6bdb1720fb23ff3b76ab" prot="private" virt="non-virtual"><scope>coppeliasim_interface::HardwareInterface</scope><name>speed_scaling_</name></member>
+      <member refid="classcoppeliasim__interface_1_1HardwareInterface_1a1af99d1c9677669d03b3fa73d34d6ef8" prot="private" virt="non-virtual"><scope>coppeliasim_interface::HardwareInterface</scope><name>speed_scaling_combined_</name></member>
+      <member refid="classcoppeliasim__interface_1_1HardwareInterface_1a6fcd831ef764e0ecda01f7580f5509ef" prot="private" virt="non-virtual"><scope>coppeliasim_interface::HardwareInterface</scope><name>speedsc_interface_</name></member>
+      <member refid="classcoppeliasim__interface_1_1HardwareInterface_1ac54c4949825c753fc76aea1dda63f5d8" prot="private" virt="non-virtual"><scope>coppeliasim_interface::HardwareInterface</scope><name>spj_interface_</name></member>
+      <member refid="classcoppeliasim__interface_1_1HardwareInterface_1ae50a98edafce6fae4a6823eb5690cf66" prot="private" virt="non-virtual"><scope>coppeliasim_interface::HardwareInterface</scope><name>svj_interface_</name></member>
+      <member refid="classcoppeliasim__interface_1_1HardwareInterface_1a4aef464f532e3ec3e8184af19713bcff" prot="private" virt="non-virtual"><scope>coppeliasim_interface::HardwareInterface</scope><name>tare_sensor_srv_</name></member>
+      <member refid="classcoppeliasim__interface_1_1HardwareInterface_1a37c0b737cfbecb97fad9180f9f95d075" prot="private" virt="non-virtual"><scope>coppeliasim_interface::HardwareInterface</scope><name>velocity_controller_running_</name></member>
+      <member refid="classcoppeliasim__interface_1_1HardwareInterface_1a00e327fb4dd2c6515f9bc81dadbc5bd4" prot="private" virt="non-virtual"><scope>coppeliasim_interface::HardwareInterface</scope><name>vj_interface_</name></member>
+      <member refid="classcoppeliasim__interface_1_1HardwareInterface_1a2a116645fc33233e4b9b1a37a9165674" prot="public" virt="virtual"><scope>coppeliasim_interface::HardwareInterface</scope><name>write</name></member>
+      <member refid="classcoppeliasim__interface_1_1HardwareInterface_1af3204245bbf1e9e317d5d0a57b3c86c2" prot="public" virt="non-virtual"><scope>coppeliasim_interface::HardwareInterface</scope><name>zeroFTSensor</name></member>
+      <member refid="classcoppeliasim__interface_1_1HardwareInterface_1a61047459c300ddd92e0b2d82e3b7c2e2" prot="public" virt="virtual"><scope>coppeliasim_interface::HardwareInterface</scope><name>~HardwareInterface</name></member>
+    </listofallmembers>
+  </compounddef>
+</doxygen>

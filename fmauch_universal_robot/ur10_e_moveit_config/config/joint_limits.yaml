@@ -4,36 +4,43 @@
 joint_limits:
   shoulder_pan_joint:
     has_velocity_limits: true
-    max_velocity: 3.14
+    max_velocity: 1.8 # Is roughly same as in UR10e data-sheet
     has_acceleration_limits: true
-    max_acceleration: 3.14
-    max_position: 2.3      # comment for simulation
-    min_position: -0.3     # comment for simulation
+    max_acceleration: 1.0
+    max_position: 6.283      # comment for simulation
+    min_position: -6.283     # comment for simulation
   shoulder_lift_joint:
     has_velocity_limits: true
-    max_velocity: 3.14
+    max_velocity: 1.8 # Is roughly same as in UR10e data-sheet
     has_acceleration_limits: true
-    max_acceleration: 3.14
-    max_position: -1.30    # comment for simulation
-    min_position: -2.80    # comment for simulation
+    max_acceleration: 1.0
+    max_position: 0.52    # comment for simulation
+    min_position: -3.14    # comment for simulation
   elbow_joint:
     has_velocity_limits: true
     max_velocity: 3.14
     has_acceleration_limits: true
-    max_acceleration: 3.14
-    max_position: -0.3     # comment for simulation
+    max_acceleration: 1.0
+    max_position: 0.1     # comment for simulation
+    min_position: -2.9
   wrist_1_joint:
     has_velocity_limits: true
-    max_velocity: 6.28
+    max_velocity: 3.14
     has_acceleration_limits: true
     max_acceleration: 3.14
+    max_position: 6.283      # comment for simulation
+    min_position: -6.283     # comment for simulation
   wrist_2_joint:
     has_velocity_limits: true
-    max_velocity: 6.28
+    max_velocity: 3.14
     has_acceleration_limits: true
     max_acceleration: 3.14
+    max_position: 6.283     # comment for simulation
+    min_position: -6.283      # comment for simulation
   wrist_3_joint:
     has_velocity_limits: true
-    max_velocity: 6.28
+    max_velocity: 3.14
     has_acceleration_limits: true
     max_acceleration: 3.14
+    max_position: 6.283      # comment for simulation
+    min_position: -6.283    # comment for simulation

@@ -1,0 +1,377 @@
+
+
+<!DOCTYPE html>
+<html class="writer-html4" lang="en" >
+<head>
+  <meta charset="utf-8" />
+  
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  
+  <title>HardwareInterface C++-class &mdash; CoppeliaSim Interface 1.0 documentation</title>
+  
+
+  
+  <link rel="stylesheet" href="_static/css/theme.css" type="text/css" />
+  <link rel="stylesheet" href="_static/pygments.css" type="text/css" />
+
+  
+  
+
+  
+  
+
+  
+
+  
+  <!--[if lt IE 9]>
+    <script src="_static/js/html5shiv.min.js"></script>
+  <![endif]-->
+  
+    
+      <script type="text/javascript">
+          var DOCUMENTATION_OPTIONS = {
+              URL_ROOT:'./',
+              VERSION:'1.0',
+              LANGUAGE:'None',
+              COLLAPSE_INDEX:false,
+              FILE_SUFFIX:'.html',
+              HAS_SOURCE:  true,
+              SOURCELINK_SUFFIX: '.txt'
+          };
+      </script>
+        <script type="text/javascript" src="_static/jquery.js"></script>
+        <script type="text/javascript" src="_static/underscore.js"></script>
+        <script type="text/javascript" src="_static/doctools.js"></script>
+        <script type="text/javascript" src="https://cdnjs.cloudflare.com/ajax/libs/mathjax/2.7.1/MathJax.js?config=TeX-AMS-MML_HTMLorMML"></script>
+    
+    <script type="text/javascript" src="_static/js/theme.js"></script>
+
+    
+    <link rel="index" title="Index" href="genindex.html" />
+    <link rel="search" title="Search" href="search.html" />
+    <link rel="next" title="point_cloud_manager Python-module" href="point_cloud_manager.html" />
+    <link rel="prev" title="Usage Guide" href="Usage_Guide.html" /> 
+</head>
+
+<body class="wy-body-for-nav">
+
+   
+  <div class="wy-grid-for-nav">
+    
+    <nav data-toggle="wy-nav-shift" class="wy-nav-side">
+      <div class="wy-side-scroll">
+        <div class="wy-side-nav-search" >
+          
+
+          
+            <a href="index.html" class="icon icon-home"> CoppeliaSim Interface
+          
+
+          
+          </a>
+
+          
+            
+            
+              <div class="version">
+                1.0
+              </div>
+            
+          
+
+          
+<div role="search">
+  <form id="rtd-search-form" class="wy-form" action="search.html" method="get">
+    <input type="text" name="q" placeholder="Search docs" />
+    <input type="hidden" name="check_keywords" value="yes" />
+    <input type="hidden" name="area" value="default" />
+  </form>
+</div>
+
+          
+        </div>
+
+        
+        <div class="wy-menu wy-menu-vertical" data-spy="affix" role="navigation" aria-label="main navigation">
+          
+            
+            
+              
+            
+            
+              <p class="caption"><span class="caption-text">Explanation</span></p>
+<ul>
+<li class="toctree-l1"><a class="reference internal" href="Overview.html">Overview</a></li>
+<li class="toctree-l1"><a class="reference internal" href="Usage_Guide.html">Usage Guide</a></li>
+</ul>
+<p class="caption"><span class="caption-text">Components</span></p>
+<ul class="current">
+<li class="toctree-l1 current"><a class="current reference internal" href="#">HardwareInterface C++-class</a></li>
+<li class="toctree-l1"><a class="reference internal" href="point_cloud_manager.html">point_cloud_manager Python-module</a></li>
+<li class="toctree-l1"><a class="reference internal" href="SimulationSynchronizer.html">SimulationSynchronizer C++-class</a></li>
+</ul>
+
+            
+          
+        </div>
+        
+      </div>
+    </nav>
+
+    <section data-toggle="wy-nav-shift" class="wy-nav-content-wrap">
+
+      
+      <nav class="wy-nav-top" aria-label="top navigation">
+        
+          <i data-toggle="wy-nav-top" class="fa fa-bars"></i>
+          <a href="index.html">CoppeliaSim Interface</a>
+        
+      </nav>
+
+
+      <div class="wy-nav-content">
+        
+        <div class="rst-content">
+        
+          
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+<div role="navigation" aria-label="breadcrumbs navigation">
+
+  <ul class="wy-breadcrumbs">
+    
+      <li><a href="index.html" class="icon icon-home"></a> &raquo;</li>
+        
+      <li>HardwareInterface C++-class</li>
+    
+    
+      <li class="wy-breadcrumbs-aside">
+        
+          
+            <a href="_sources/HardwareInterface.rst.txt" rel="nofollow"> View page source</a>
+          
+        
+      </li>
+    
+  </ul>
+
+  
+  <hr/>
+</div>
+          <div role="main" class="document" itemscope="itemscope" itemtype="http://schema.org/Article">
+           <div itemprop="articleBody">
+            
+  <div class="section" id="hardwareinterface-c-class">
+<span id="hardware-interface"></span><h1>HardwareInterface C++-class<a class="headerlink" href="#hardwareinterface-c-class" title="Permalink to this headline">¶</a></h1>
+<p>This class is heavily inspired by the driver for the UR10e-robot maintained by <a class="reference external" href="https://github.com/UniversalRobots/Universal_Robots_ROS_Driver">Felix Exner at Forschungszentrum Informatik</a>. The idea is
+to use the hardware abstraction layer (HAL) provided by this class interchangeably with the real HAL sow that from ROS’s point of view, there is no
+difference. ros_control can use the very same controllers as in reality but instead of sending/receiving signals over ethernet,
+this class redirects this information stream towards the simulation - It acts just as a railway switch.</p>
+<dl class="class">
+<dt id="_CPPv2N21coppeliasim_interface17HardwareInterfaceE">
+<span id="coppeliasim_interface::HardwareInterface"></span><span class="target" id="project0classcoppeliasim__interface_1_1HardwareInterface"></span><em class="property">class </em></dt>
+<dd><p>Hardware-Interface for the UR10e-model in CoppeliaSim that behaves just like the driver for the real robot. </p>
+<div class="breathe-sectiondef docutils container">
+<p class="breathe-sectiondef-title rubric">Public Functions</p>
+<dl class="function">
+<dt id="_CPPv2N21coppeliasim_interface17HardwareInterface17HardwareInterfaceEv">
+<span id="coppeliasim_interface::HardwareInterface::HardwareInterface"></span><span class="target" id="project0classcoppeliasim__interface_1_1HardwareInterface_1a731c52969b54a2cdda78a494bcd878ee"></span><code class="descclassname">coppeliasim_interface::HardwareInterface::</code><code class="descname">HardwareInterface</code><span class="sig-paren">(</span><span class="sig-paren">)</span><a class="headerlink" href="#_CPPv2N21coppeliasim_interface17HardwareInterface17HardwareInterfaceEv" title="Permalink to this definition">¶</a><br /></dt>
+<dd><p>Construct a new Hardware Interface object and initialize all class members that do not require a ROS- or CoppeliaSim-connection. </p>
+</dd></dl>
+
+<dl class="function">
+<dt id="_CPPv2N21coppeliasim_interface17HardwareInterfaceD0Ev">
+<span id="coppeliasim_interface::HardwareInterface::~HardwareInterface"></span>virtual <span class="target" id="project0classcoppeliasim__interface_1_1HardwareInterface_1a61047459c300ddd92e0b2d82e3b7c2e2"></span><code class="descclassname">coppeliasim_interface::HardwareInterface::</code><code class="descname">~HardwareInterface</code><span class="sig-paren">(</span><span class="sig-paren">)</span><a class="headerlink" href="#_CPPv2N21coppeliasim_interface17HardwareInterfaceD0Ev" title="Permalink to this definition">¶</a><br /></dt>
+<dd><p>Destroy the Hardware Interface object and handle disconnection from CoppeliaSim. </p>
+</dd></dl>
+
+<dl class="function">
+<dt id="_CPPv2N21coppeliasim_interface17HardwareInterface4initERN3ros10NodeHandleERN3ros10NodeHandleE">
+<span id="coppeliasim_interface::HardwareInterface::init__ros::NodeHandleR.ros::NodeHandleR"></span>virtual <span class="target" id="project0classcoppeliasim__interface_1_1HardwareInterface_1ada54343beeb383c43951877e3d49cf8e"></span>bool <code class="descclassname">coppeliasim_interface::HardwareInterface::</code><code class="descname">init</code><span class="sig-paren">(</span>ros::NodeHandle &amp;<em>root_nh</em>, ros::NodeHandle &amp;<em>robot_nh</em><span class="sig-paren">)</span><a class="headerlink" href="#_CPPv2N21coppeliasim_interface17HardwareInterface4initERN3ros10NodeHandleERN3ros10NodeHandleE" title="Permalink to this definition">¶</a><br /></dt>
+<dd><p>Connects program to CoppeliaSim and obtains the required handles. Reads in the required ROS-parameters and initializes all interfaces that are implemented in the real hardware-interface. </p>
+<p><dl class="docutils">
+<dt><strong>Return</strong></dt>
+<dd>Whether connection to CoppeliaSim was successful and the hardware-interfaces could be set-up work with CoppeliaSim-Joints </dd>
+<dt><strong>Parameters</strong></dt>
+<dd><ul class="breatheparameterlist first last">
+<li><code class="first docutils literal"><span class="pre">root_nh</span></code> - <p>ROS-nodehandle for operations at root-level (names starting with ‘/…’) </p>
+</li>
+<li><code class="first docutils literal"><span class="pre">robot_nh</span></code> - <p>ROS-nodehandle for operations in the hardware-interface-nodes namespace </p>
+</li>
+</ul>
+</dd>
+</dl>
+</p>
+</dd></dl>
+
+<dl class="function">
+<dt id="_CPPv2N21coppeliasim_interface17HardwareInterface4readERKN3ros4TimeERKN3ros8DurationE">
+<span id="coppeliasim_interface::HardwareInterface::read__ros::TimeCR.ros::DurationCR"></span>virtual <span class="target" id="project0classcoppeliasim__interface_1_1HardwareInterface_1abc05d9a9e8761462b2161a33f55203cc"></span>void <code class="descclassname">coppeliasim_interface::HardwareInterface::</code><code class="descname">read</code><span class="sig-paren">(</span><em class="property">const</em> ros::Time &amp;<em>time</em>, <em class="property">const</em> ros::Duration &amp;<em>period</em><span class="sig-paren">)</span><a class="headerlink" href="#_CPPv2N21coppeliasim_interface17HardwareInterface4readERKN3ros4TimeERKN3ros8DurationE" title="Permalink to this definition">¶</a><br /></dt>
+<dd><p>Gets the joint-data (position, velocity, torque) from CoppeliaSim in a blocking way. </p>
+<p><dl class="docutils">
+<dt><strong>Parameters</strong></dt>
+<dd><ul class="breatheparameterlist first last">
+<li><code class="first docutils literal"><span class="pre">time</span></code> - <p>Required by ROS-HardwareInterface specification (fullfills nothing here) </p>
+</li>
+<li><code class="first docutils literal"><span class="pre">period</span></code> - <p>Required by ROS-HardwareInterface (fullfills nothing here) </p>
+</li>
+</ul>
+</dd>
+</dl>
+</p>
+</dd></dl>
+
+<dl class="function">
+<dt id="_CPPv2N21coppeliasim_interface17HardwareInterface5writeERKN3ros4TimeERKN3ros8DurationE">
+<span id="coppeliasim_interface::HardwareInterface::write__ros::TimeCR.ros::DurationCR"></span>virtual <span class="target" id="project0classcoppeliasim__interface_1_1HardwareInterface_1a2a116645fc33233e4b9b1a37a9165674"></span>void <code class="descclassname">coppeliasim_interface::HardwareInterface::</code><code class="descname">write</code><span class="sig-paren">(</span><em class="property">const</em> ros::Time &amp;<em>time</em>, <em class="property">const</em> ros::Duration &amp;<em>period</em><span class="sig-paren">)</span><a class="headerlink" href="#_CPPv2N21coppeliasim_interface17HardwareInterface5writeERKN3ros4TimeERKN3ros8DurationE" title="Permalink to this definition">¶</a><br /></dt>
+<dd><p>Set the joint-target-values (velocities or positions, depending on active controller) in CoppeliaSim in a blocking way. </p>
+</dd></dl>
+
+<dl class="function">
+<dt id="_CPPv2N21coppeliasim_interface17HardwareInterface13prepareSwitchERKNSt4listIN18hardware_interface14ControllerInfoEEERKNSt4listIN18hardware_interface14ControllerInfoEEE">
+<span id="coppeliasim_interface::HardwareInterface::prepareSwitch__std::list:hardware_interface::ControllerInfo:CR.std::list:hardware_interface::ControllerInfo:CR"></span>virtual <span class="target" id="project0classcoppeliasim__interface_1_1HardwareInterface_1a5b7c2e8dcf2fa17ba6bde7ea001d59e3"></span>bool <code class="descclassname">coppeliasim_interface::HardwareInterface::</code><code class="descname">prepareSwitch</code><span class="sig-paren">(</span><em class="property">const</em> std::list&lt;hardware_interface::ControllerInfo&gt; &amp;<em>start_list</em>, <em class="property">const</em> std::list&lt;hardware_interface::ControllerInfo&gt; &amp;<em>stop_list</em><span class="sig-paren">)</span><a class="headerlink" href="#_CPPv2N21coppeliasim_interface17HardwareInterface13prepareSwitchERKNSt4listIN18hardware_interface14ControllerInfoEEERKNSt4listIN18hardware_interface14ControllerInfoEEE" title="Permalink to this definition">¶</a><br /></dt>
+<dd></dd></dl>
+
+<dl class="function">
+<dt id="_CPPv2N21coppeliasim_interface17HardwareInterface8doSwitchERKNSt4listIN18hardware_interface14ControllerInfoEEERKNSt4listIN18hardware_interface14ControllerInfoEEE">
+<span id="coppeliasim_interface::HardwareInterface::doSwitch__std::list:hardware_interface::ControllerInfo:CR.std::list:hardware_interface::ControllerInfo:CR"></span>virtual <span class="target" id="project0classcoppeliasim__interface_1_1HardwareInterface_1aae36a63c5125172387cfcbf21f9a1c24"></span>void <code class="descclassname">coppeliasim_interface::HardwareInterface::</code><code class="descname">doSwitch</code><span class="sig-paren">(</span><em class="property">const</em> std::list&lt;hardware_interface::ControllerInfo&gt; &amp;<em>start_list</em>, <em class="property">const</em> std::list&lt;hardware_interface::ControllerInfo&gt; &amp;<em>stop_list</em><span class="sig-paren">)</span><a class="headerlink" href="#_CPPv2N21coppeliasim_interface17HardwareInterface8doSwitchERKNSt4listIN18hardware_interface14ControllerInfoEEERKNSt4listIN18hardware_interface14ControllerInfoEEE" title="Permalink to this definition">¶</a><br /></dt>
+<dd><p>Tries to turn on or off provided controllers. The provided controllers must be applicable with this <a class="reference internal" href="#project0classcoppeliasim__interface_1_1HardwareInterface"><span class="std std-ref">HardwareInterface</span></a>, otherwise they do not trigger any changes. </p>
+<p><dl class="docutils">
+<dt><strong>Parameters</strong></dt>
+<dd><ul class="breatheparameterlist first last">
+<li><code class="first docutils literal"><span class="pre">start_list</span></code> - <p>Controllers to start </p>
+</li>
+<li><code class="first docutils literal"><span class="pre">stop_list</span></code> - <p>Controllers to stop </p>
+</li>
+</ul>
+</dd>
+</dl>
+</p>
+</dd></dl>
+
+<dl class="function">
+<dt id="_CPPv2N21coppeliasim_interface17HardwareInterface12zeroFTSensorERN8std_srvs14TriggerRequestERN8std_srvs15TriggerResponseE">
+<span id="coppeliasim_interface::HardwareInterface::zeroFTSensor__std_srvs::TriggerRequestR.std_srvs::TriggerResponseR"></span><span class="target" id="project0classcoppeliasim__interface_1_1HardwareInterface_1af3204245bbf1e9e317d5d0a57b3c86c2"></span>bool <code class="descclassname">coppeliasim_interface::HardwareInterface::</code><code class="descname">zeroFTSensor</code><span class="sig-paren">(</span>std_srvs::TriggerRequest &amp;<em>req</em>, std_srvs::TriggerResponse &amp;<em>res</em><span class="sig-paren">)</span><a class="headerlink" href="#_CPPv2N21coppeliasim_interface17HardwareInterface12zeroFTSensorERN8std_srvs14TriggerRequestERN8std_srvs15TriggerResponseE" title="Permalink to this definition">¶</a><br /></dt>
+<dd><p>Should normally tare the force-torque-sensor but is not implemented for performance reasons (service response gets delivered, but is always ‘success == false’) </p>
+<p><dl class="docutils">
+<dt><strong>Return</strong></dt>
+<dd>always ‘true’ </dd>
+<dt><strong>Parameters</strong></dt>
+<dd><ul class="breatheparameterlist first last">
+<li><code class="first docutils literal"><span class="pre">req</span></code> - <p>(contains no information) </p>
+</li>
+<li><code class="first docutils literal"><span class="pre">res</span></code> - <p>Trigger-Response (currently always ‘success=false’ with a corresponding message as this is not implemented) </p>
+</li>
+</ul>
+</dd>
+</dl>
+</p>
+</dd></dl>
+
+<dl class="function">
+<dt id="_CPPv2N21coppeliasim_interface17HardwareInterface14setSpeedSliderERN7ur_msgs29SetSpeedSliderFractionRequestERN7ur_msgs30SetSpeedSliderFractionResponseE">
+<span id="coppeliasim_interface::HardwareInterface::setSpeedSlider__ur_msgs::SetSpeedSliderFractionRequestR.ur_msgs::SetSpeedSliderFractionResponseR"></span><span class="target" id="project0classcoppeliasim__interface_1_1HardwareInterface_1a0fb3b4bf382fc390db4d8c40036a683b"></span>bool <code class="descclassname">coppeliasim_interface::HardwareInterface::</code><code class="descname">setSpeedSlider</code><span class="sig-paren">(</span>ur_msgs::SetSpeedSliderFractionRequest &amp;<em>req</em>, ur_msgs::SetSpeedSliderFractionResponse &amp;<em>res</em><span class="sig-paren">)</span><a class="headerlink" href="#_CPPv2N21coppeliasim_interface17HardwareInterface14setSpeedSliderERN7ur_msgs29SetSpeedSliderFractionRequestERN7ur_msgs30SetSpeedSliderFractionResponseE" title="Permalink to this definition">¶</a><br /></dt>
+<dd><p>Sets the speed-scaling as requested. </p>
+<p><dl class="docutils">
+<dt><strong>Return</strong></dt>
+<dd>always ‘true’ </dd>
+<dt><strong>Parameters</strong></dt>
+<dd><ul class="breatheparameterlist first last">
+<li><code class="first docutils literal"><span class="pre">req</span></code> - <p>Request with target value of the speed slider </p>
+</li>
+<li><code class="first docutils literal"><span class="pre">res</span></code> - <p>Response with information about whether the speed slider could be set (i.e. target lies in the interval [0.01,1]) </p>
+</li>
+</ul>
+</dd>
+</dl>
+</p>
+</dd></dl>
+
+<dl class="function">
+<dt id="_CPPv2N21coppeliasim_interface17HardwareInterface8setPauseERN8std_srvs14SetBoolRequestERN8std_srvs15SetBoolResponseE">
+<span id="coppeliasim_interface::HardwareInterface::setPause__std_srvs::SetBoolRequestR.std_srvs::SetBoolResponseR"></span><span class="target" id="project0classcoppeliasim__interface_1_1HardwareInterface_1a00cc87162beaecdf82c1510ae84b2d95"></span>bool <code class="descclassname">coppeliasim_interface::HardwareInterface::</code><code class="descname">setPause</code><span class="sig-paren">(</span>std_srvs::SetBoolRequest &amp;<em>req</em>, std_srvs::SetBoolResponse &amp;<em>res</em><span class="sig-paren">)</span><a class="headerlink" href="#_CPPv2N21coppeliasim_interface17HardwareInterface8setPauseERN8std_srvs14SetBoolRequestERN8std_srvs15SetBoolResponseE" title="Permalink to this definition">¶</a><br /></dt>
+<dd><p>Controls if the robots running state (RUNNING = normal, PAUSED = halted, RAMPUP = Accelerating from PAUSED to RUNNING) </p>
+<p><dl class="docutils">
+<dt><strong>Return</strong></dt>
+<dd>always ‘true’ </dd>
+<dt><strong>Parameters</strong></dt>
+<dd><ul class="breatheparameterlist first last">
+<li><code class="first docutils literal"><span class="pre">req</span></code> - <p>Contains boolean flag about which run-state should be entered </p>
+</li>
+<li><code class="first docutils literal"><span class="pre">res</span></code> - <p>If the desired state could be set (false, if in RAMPUP or if the desired state is already set) with an descriptive message </p>
+</li>
+</ul>
+</dd>
+</dl>
+</p>
+</dd></dl>
+
+</div>
+</dd></dl>
+
+</div>
+
+
+           </div>
+           
+          </div>
+          <footer>
+    <div class="rst-footer-buttons" role="navigation" aria-label="footer navigation">
+        <a href="point_cloud_manager.html" class="btn btn-neutral float-right" title="point_cloud_manager Python-module" accesskey="n" rel="next">Next <span class="fa fa-arrow-circle-right" aria-hidden="true"></span></a>
+        <a href="Usage_Guide.html" class="btn btn-neutral float-left" title="Usage Guide" accesskey="p" rel="prev"><span class="fa fa-arrow-circle-left" aria-hidden="true"></span> Previous</a>
+    </div>
+
+  <hr/>
+
+  <div role="contentinfo">
+    <p>
+        &#169; Copyright 2021, Sven Becker.
+
+    </p>
+  </div>
+    
+    
+    
+    Built with <a href="https://www.sphinx-doc.org/">Sphinx</a> using a
+    
+    <a href="https://github.com/readthedocs/sphinx_rtd_theme">theme</a>
+    
+    provided by <a href="https://readthedocs.org">Read the Docs</a>. 
+
+</footer>
+        </div>
+      </div>
+
+    </section>
+
+  </div>
+  
+
+  <script type="text/javascript">
+      jQuery(function () {
+          SphinxRtdTheme.Navigation.enable(true);
+      });
+  </script>
+
+  
+  
+    
+   
+
+</body>
+</html>
